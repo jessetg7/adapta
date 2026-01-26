@@ -1,0 +1,523 @@
+{
+  "id": "cardiology-intake-v1",
+  "name": "Cardiology Intake Form",
+  "description": "Comprehensive cardiac assessment and patient history form",
+  "category": "Cardiology",
+  "version": "1.0.0",
+  "author": "System Admin",
+  "icon": "favorite",
+  "color": "#e53935",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-20T14:45:00Z",
+  "settings": {
+    "allowDraft": true,
+    "requireSignature": true,
+    "autoSaveInterval": 30,
+    "showProgressBar": true
+  },
+  "sections": [
+    {
+      "id": "section-patient-info",
+      "title": "Patient Information",
+      "description": "Basic patient demographics and contact details",
+      "order": 1,
+      "collapsible": true,
+      "defaultExpanded": true,
+      "fields": [
+        {
+          "id": "field-patient-name",
+          "type": "text",
+          "label": "Patient Full Name",
+          "placeholder": "Enter patient's full name",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z\\s]+$"
+          },
+          "helpText": "Enter the patient's legal name as per ID",
+          "order": 1
+        },
+        {
+          "id": "field-patient-age",
+          "type": "number",
+          "label": "Age",
+          "placeholder": "Years",
+          "required": true,
+          "validation": {
+            "min": 0,
+            "max": 150
+          },
+          "order": 2
+        },
+        {
+          "id": "field-patient-gender",
+          "type": "dropdown",
+          "label": "Gender",
+          "required": true,
+          "options": [
+            { "value": "male", "label": "Male" },
+            { "value": "female", "label": "Female" },
+            { "value": "other", "label": "Other" }
+          ],
+          "order": 3
+        },
+        {
+          "id": "field-patient-contact",
+          "type": "text",
+          "label": "Contact Number",
+          "placeholder": "+1 (xxx) xxx-xxxx",
+          "required": true,
+          "validation": {
+            "pattern": "^[+]?[0-9\\s\\-\\(\\)]+$"
+          },
+          "order": 4
+        },
+        {
+          "id": "field-emergency-contact",
+          "type": "text",
+          "label": "Emergency Contact",
+          "placeholder": "Name and phone number",
+          "required": true,
+          "order": 5
+        }
+      ]
+    },
+    {
+      "id": "section-cardiac-history",
+      "title": "Cardiac History",
+      "description": "Previous cardiac conditions and treatments",
+      "order": 2,
+      "collapsible": true,
+      "defaultExpanded": true,
+      "fields": [
+        {
+          "id": "field-previous-cardiac",
+          "type": "dropdown",
+          "label": "Previous Cardiac Conditions",
+          "required": true,
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "hypertension", "label": "Hypertension" },
+            { "value": "arrhythmia", "label": "Arrhythmia" },
+            { "value": "heart-attack", "label": "Previous Heart Attack" },
+            { "value": "heart-failure", "label": "Heart Failure" },
+            { "value": "valve-disease", "label": "Valve Disease" },
+            { "value": "other", "label": "Other" }
+          ],
+          "order": 1
+        },
+        {
+          "id": "field-cardiac-other-details",
+          "type": "textarea",
+          "label": "Please specify other condition",
+          "placeholder": "Describe the cardiac condition...",
+          "required": false,
+          "conditionalVisibility": {
+            "dependsOn": "field-previous-cardiac",
+            "condition": "equals",
+            "value": "other"
+          },
+          "order": 2
+        },
+        {
+          "id": "field-previous-surgery",
+          "type": "checkbox",
+          "label": "Previous Cardiac Surgery",
+          "checkboxLabel": "Patient has had previous cardiac surgery",
+          "defaultValue": false,
+          "order": 3
+        },
+        {
+          "id": "field-surgery-details",
+          "type": "textarea",
+          "label": "Surgery Details",
+          "placeholder": "Describe the surgery, date, and hospital...",
+          "required": true,
+          "conditionalVisibility": {
+            "dependsOn": "field-previous-surgery",
+            "condition": "equals",
+            "value": true
+          },
+          "order": 4
+        },
+        {
+          "id": "field-family-history",
+          "type": "checkbox",
+          "label": "Family History of Heart Disease",
+          "checkboxLabel": "Family member(s) have/had heart disease",
+          "defaultValue": false,
+          "order": 5
+        }
+      ]
+    },
+    {
+      "id": "section-current-symptoms",
+      "title": "Current Symptoms",
+      "description": "Present cardiac symptoms and complaints",
+      "order": 3,
+      "collapsible": true,
+      "defaultExpanded": true,
+      "fields": [
+        {
+          "id": "field-chest-pain",
+          "type": "dropdown",
+          "label": "Chest Pain",
+          "required": true,
+          "options": [
+            { "value": "none", "label": "No chest pain" },
+            { "value": "mild", "label": "Mild - Occasional discomfort" },
+            { "value": "moderate", "label": "Moderate - Regular discomfort" },
+            { "value": "severe", "label": "Severe - Constant/Intense pain" }
+          ],
+          "order": 1
+        },
+        {
+          "id": "field-pain-location",
+          "type": "text",
+          "label": "Pain Location",
+          "placeholder": "Describe where the pain is located",
+          "conditionalVisibility": {
+            "dependsOn": "field-chest-pain",
+            "condition": "notEquals",
+            "value": "none"
+          },
+          "order": 2
+        },
+        {
+          "id": "field-shortness-breath",
+          "type": "dropdown",
+          "label": "Shortness of Breath",
+          "required": true,
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "exertion", "label": "During exertion only" },
+            { "value": "mild-activity", "label": "During mild activity" },
+            { "value": "rest", "label": "Even at rest" }
+          ],
+          "order": 3
+        },
+        {
+          "id": "field-palpitations",
+          "type": "checkbox",
+          "label": "Palpitations",
+          "checkboxLabel": "Experiencing heart palpitations",
+          "defaultValue": false,
+          "order": 4
+        },
+        {
+          "id": "field-dizziness",
+          "type": "checkbox",
+          "label": "Dizziness/Fainting",
+          "checkboxLabel": "Experiencing dizziness or fainting spells",
+          "defaultValue": false,
+          "order": 5
+        },
+        {
+          "id": "field-swelling",
+          "type": "checkbox",
+          "label": "Leg Swelling",
+          "checkboxLabel": "Experiencing swelling in legs/ankles",
+          "defaultValue": false,
+          "order": 6
+        }
+      ]
+    },
+    {
+      "id": "section-vitals",
+      "title": "Vital Signs",
+      "description": "Current vital measurements",
+      "order": 4,
+      "collapsible": true,
+      "defaultExpanded": true,
+      "fields": [
+        {
+          "id": "field-blood-pressure-systolic",
+          "type": "number",
+          "label": "Systolic BP (mmHg)",
+          "placeholder": "120",
+          "required": true,
+          "validation": {
+            "min": 60,
+            "max": 250
+          },
+          "order": 1
+        },
+        {
+          "id": "field-blood-pressure-diastolic",
+          "type": "number",
+          "label": "Diastolic BP (mmHg)",
+          "placeholder": "80",
+          "required": true,
+          "validation": {
+            "min": 40,
+            "max": 150
+          },
+          "order": 2
+        },
+        {
+          "id": "field-heart-rate",
+          "type": "number",
+          "label": "Heart Rate (BPM)",
+          "placeholder": "72",
+          "required": true,
+          "validation": {
+            "min": 30,
+            "max": 250
+          },
+          "order": 3
+        },
+        {
+          "id": "field-oxygen-saturation",
+          "type": "number",
+          "label": "Oxygen Saturation (%)",
+          "placeholder": "98",
+          "required": true,
+          "validation": {
+            "min": 50,
+            "max": 100
+          },
+          "order": 4
+        },
+        {
+          "id": "field-temperature",
+          "type": "number",
+          "label": "Temperature (°F)",
+          "placeholder": "98.6",
+          "required": false,
+          "validation": {
+            "min": 95,
+            "max": 108
+          },
+          "order": 5
+        }
+      ]
+    },
+    {
+      "id": "section-medications",
+      "title": "Current Medications",
+      "description": "List of current medications",
+      "order": 5,
+      "collapsible": true,
+      "defaultExpanded": false,
+      "fields": [
+        {
+          "id": "field-on-medication",
+          "type": "checkbox",
+          "label": "Currently on Medications",
+          "checkboxLabel": "Patient is currently taking medications",
+          "defaultValue": false,
+          "order": 1
+        },
+        {
+          "id": "field-medication-list",
+          "type": "textarea",
+          "label": "Medication List",
+          "placeholder": "List all current medications with dosages...",
+          "required": true,
+          "conditionalVisibility": {
+            "dependsOn": "field-on-medication",
+            "condition": "equals",
+            "value": true
+          },
+          "order": 2
+        },
+        {
+          "id": "field-blood-thinners",
+          "type": "checkbox",
+          "label": "Blood Thinners",
+          "checkboxLabel": "Taking blood thinning medications (Aspirin, Warfarin, etc.)",
+          "defaultValue": false,
+          "order": 3
+        },
+        {
+          "id": "field-allergies",
+          "type": "textarea",
+          "label": "Known Drug Allergies",
+          "placeholder": "List any known drug allergies...",
+          "required": false,
+          "order": 4
+        }
+      ]
+    },
+    {
+      "id": "section-lifestyle",
+      "title": "Lifestyle Factors",
+      "description": "Lifestyle and risk factors",
+      "order": 6,
+      "collapsible": true,
+      "defaultExpanded": false,
+      "fields": [
+        {
+          "id": "field-smoking",
+          "type": "dropdown",
+          "label": "Smoking Status",
+          "required": true,
+          "options": [
+            { "value": "never", "label": "Never smoked" },
+            { "value": "former", "label": "Former smoker" },
+            { "value": "current", "label": "Current smoker" }
+          ],
+          "order": 1
+        },
+        {
+          "id": "field-smoking-years",
+          "type": "number",
+          "label": "Years of Smoking",
+          "placeholder": "Number of years",
+          "conditionalVisibility": {
+            "dependsOn": "field-smoking",
+            "condition": "in",
+            "value": ["former", "current"]
+          },
+          "order": 2
+        },
+        {
+          "id": "field-alcohol",
+          "type": "dropdown",
+          "label": "Alcohol Consumption",
+          "required": true,
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "occasional", "label": "Occasional (Social drinking)" },
+            { "value": "moderate", "label": "Moderate (Few times a week)" },
+            { "value": "heavy", "label": "Heavy (Daily)" }
+          ],
+          "order": 3
+        },
+        {
+          "id": "field-exercise",
+          "type": "dropdown",
+          "label": "Exercise Frequency",
+          "required": true,
+          "options": [
+            { "value": "none", "label": "Sedentary (No exercise)" },
+            { "value": "light", "label": "Light (1-2 times/week)" },
+            { "value": "moderate", "label": "Moderate (3-4 times/week)" },
+            { "value": "active", "label": "Active (5+ times/week)" }
+          ],
+          "order": 4
+        },
+        {
+          "id": "field-diabetes",
+          "type": "checkbox",
+          "label": "Diabetes",
+          "checkboxLabel": "Patient has diabetes",
+          "defaultValue": false,
+          "order": 5
+        }
+      ]
+    },
+    {
+      "id": "section-assessment",
+      "title": "Clinical Assessment",
+      "description": "Physician's assessment and notes",
+      "order": 7,
+      "collapsible": true,
+      "defaultExpanded": true,
+      "roleAccess": ["Doctor", "Admin"],
+      "fields": [
+        {
+          "id": "field-risk-level",
+          "type": "dropdown",
+          "label": "Cardiac Risk Level",
+          "required": true,
+          "options": [
+            { "value": "low", "label": "Low Risk" },
+            { "value": "moderate", "label": "Moderate Risk" },
+            { "value": "high", "label": "High Risk" },
+            { "value": "critical", "label": "Critical" }
+          ],
+          "order": 1
+        },
+        {
+          "id": "field-recommended-tests",
+          "type": "multiselect",
+          "label": "Recommended Tests",
+          "options": [
+            { "value": "ecg", "label": "ECG/EKG" },
+            { "value": "echo", "label": "Echocardiogram" },
+            { "value": "stress-test", "label": "Stress Test" },
+            { "value": "holter", "label": "Holter Monitor" },
+            { "value": "angiogram", "label": "Angiogram" },
+            { "value": "blood-work", "label": "Cardiac Blood Work" }
+          ],
+          "order": 2
+        },
+        {
+          "id": "field-clinical-notes",
+          "type": "textarea",
+          "label": "Clinical Notes",
+          "placeholder": "Enter clinical observations and notes...",
+          "required": false,
+          "validation": {
+            "maxLength": 2000
+          },
+          "order": 3
+        },
+        {
+          "id": "field-follow-up-date",
+          "type": "date",
+          "label": "Follow-up Date",
+          "required": false,
+          "order": 4
+        },
+        {
+          "id": "field-urgent-referral",
+          "type": "checkbox",
+          "label": "Urgent Referral Required",
+          "checkboxLabel": "Mark for urgent specialist referral",
+          "defaultValue": false,
+          "order": 5
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule-high-risk-alert",
+      "name": "High Risk Alert",
+      "description": "Alert when patient shows high-risk indicators",
+      "enabled": true,
+      "conditions": {
+        "logic": "OR",
+        "items": [
+          { "field": "field-chest-pain", "operator": "equals", "value": "severe" },
+          { "field": "field-shortness-breath", "operator": "equals", "value": "rest" },
+          { "field": "field-blood-pressure-systolic", "operator": "greaterThan", "value": 180 }
+        ]
+      },
+      "actions": [
+        { "type": "setFieldValue", "field": "field-risk-level", "value": "high" },
+        { "type": "showAlert", "message": "High-risk indicators detected. Immediate attention required.", "severity": "error" }
+      ]
+    },
+    {
+      "id": "rule-critical-bp",
+      "name": "Critical Blood Pressure",
+      "description": "Escalate workflow when BP is critical",
+      "enabled": true,
+      "conditions": {
+        "logic": "AND",
+        "items": [
+          { "field": "field-blood-pressure-systolic", "operator": "greaterThan", "value": 200 },
+          { "field": "field-blood-pressure-diastolic", "operator": "greaterThan", "value": 120 }
+        ]
+      },
+      "actions": [
+        { "type": "setFieldValue", "field": "field-risk-level", "value": "critical" },
+        { "type": "setFieldValue", "field": "field-urgent-referral", "value": true },
+        { "type": "triggerWorkflow", "workflowId": "emergency-escalation" }
+      ]
+    }
+  ],
+  "workflow": {
+    "id": "cardiology-intake-workflow",
+    "steps": [
+      { "id": "step-1", "name": "Patient Registration", "assignedRole": "Staff", "status": "pending" },
+      { "id": "step-2", "name": "Nurse Assessment", "assignedRole": "Nurse", "status": "pending" },
+      { "id": "step-3", "name": "Doctor Review", "assignedRole": "Doctor", "status": "pending" },
+      { "id": "step-4", "name": "Treatment Plan", "assignedRole": "Doctor", "status": "pending" }
+    ]
+  }
+}

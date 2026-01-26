@@ -1,0 +1,470 @@
+{
+  "blocks": [
+    {
+      "id": "address-block",
+      "name": "Full Address",
+      "description": "Complete US address fields with validation",
+      "category": "Common",
+      "icon": "LocationOn",
+      "fields": [
+        {
+          "id": "street-address",
+          "type": "text",
+          "label": "Street Address",
+          "required": true,
+          "placeholder": "123 Main Street"
+        },
+        {
+          "id": "street-address-2",
+          "type": "text",
+          "label": "Apt/Suite/Unit",
+          "required": false,
+          "placeholder": "Apartment 4B"
+        },
+        {
+          "id": "city",
+          "type": "text",
+          "label": "City",
+          "required": true
+        },
+        {
+          "id": "state",
+          "type": "dropdown",
+          "label": "State",
+          "required": true,
+          "options": ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"]
+        },
+        {
+          "id": "zip-code",
+          "type": "text",
+          "label": "ZIP Code",
+          "required": true,
+          "placeholder": "12345"
+        }
+      ]
+    },
+    {
+      "id": "emergency-contact",
+      "name": "Emergency Contact",
+      "description": "Emergency contact information with relationship",
+      "category": "Common",
+      "icon": "ContactPhone",
+      "fields": [
+        {
+          "id": "emergency-name",
+          "type": "text",
+          "label": "Contact Full Name",
+          "required": true
+        },
+        {
+          "id": "emergency-relationship",
+          "type": "dropdown",
+          "label": "Relationship to Patient",
+          "required": true,
+          "options": ["Spouse", "Parent", "Child", "Sibling", "Grandparent", "Friend", "Legal Guardian", "Power of Attorney", "Other"]
+        },
+        {
+          "id": "emergency-phone",
+          "type": "phone",
+          "label": "Phone Number",
+          "required": true,
+          "placeholder": "(555) 123-4567"
+        },
+        {
+          "id": "emergency-alt-phone",
+          "type": "phone",
+          "label": "Alternate Phone",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "vital-signs",
+      "name": "Vital Signs",
+      "description": "Complete vital signs measurement fields",
+      "category": "Clinical",
+      "icon": "MonitorHeart",
+      "fields": [
+        {
+          "id": "bp-systolic",
+          "type": "number",
+          "label": "Systolic BP (mmHg)",
+          "required": true,
+          "placeholder": "120"
+        },
+        {
+          "id": "bp-diastolic",
+          "type": "number",
+          "label": "Diastolic BP (mmHg)",
+          "required": true,
+          "placeholder": "80"
+        },
+        {
+          "id": "heart-rate",
+          "type": "number",
+          "label": "Heart Rate (BPM)",
+          "required": true,
+          "placeholder": "72"
+        },
+        {
+          "id": "respiratory-rate",
+          "type": "number",
+          "label": "Respiratory Rate",
+          "required": true,
+          "placeholder": "16"
+        },
+        {
+          "id": "temperature",
+          "type": "number",
+          "label": "Temperature (°F)",
+          "required": true,
+          "placeholder": "98.6"
+        },
+        {
+          "id": "oxygen-saturation",
+          "type": "number",
+          "label": "SpO2 (%)",
+          "required": true,
+          "placeholder": "98"
+        },
+        {
+          "id": "pain-level",
+          "type": "dropdown",
+          "label": "Pain Level (0-10)",
+          "required": false,
+          "options": ["0 - No Pain", "1", "2", "3", "4", "5 - Moderate", "6", "7", "8", "9", "10 - Worst Pain"]
+        }
+      ]
+    },
+    {
+      "id": "insurance-info",
+      "name": "Insurance Information",
+      "description": "Health insurance details and policy information",
+      "category": "Administrative",
+      "icon": "HealthAndSafety",
+      "fields": [
+        {
+          "id": "insurance-provider",
+          "type": "dropdown",
+          "label": "Insurance Provider",
+          "required": true,
+          "options": ["Aetna", "Anthem", "Blue Cross Blue Shield", "Cigna", "Humana", "Kaiser Permanente", "UnitedHealthcare", "Medicare", "Medicaid", "Tricare", "Self-Pay", "Other"]
+        },
+        {
+          "id": "policy-number",
+          "type": "text",
+          "label": "Policy/Member ID",
+          "required": true
+        },
+        {
+          "id": "group-number",
+          "type": "text",
+          "label": "Group Number",
+          "required": false
+        },
+        {
+          "id": "subscriber-name",
+          "type": "text",
+          "label": "Subscriber Name",
+          "required": true
+        },
+        {
+          "id": "subscriber-relationship",
+          "type": "dropdown",
+          "label": "Relationship to Subscriber",
+          "required": true,
+          "options": ["Self", "Spouse", "Child", "Other Dependent"]
+        },
+        {
+          "id": "subscriber-dob",
+          "type": "date",
+          "label": "Subscriber Date of Birth",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "demographics",
+      "name": "Patient Demographics",
+      "description": "Basic patient demographic information",
+      "category": "Common",
+      "icon": "Person",
+      "fields": [
+        {
+          "id": "first-name",
+          "type": "text",
+          "label": "First Name",
+          "required": true
+        },
+        {
+          "id": "middle-name",
+          "type": "text",
+          "label": "Middle Name",
+          "required": false
+        },
+        {
+          "id": "last-name",
+          "type": "text",
+          "label": "Last Name",
+          "required": true
+        },
+        {
+          "id": "dob",
+          "type": "date",
+          "label": "Date of Birth",
+          "required": true
+        },
+        {
+          "id": "gender",
+          "type": "dropdown",
+          "label": "Gender",
+          "required": true,
+          "options": ["Male", "Female", "Non-binary", "Other", "Prefer not to say"]
+        },
+        {
+          "id": "ssn",
+          "type": "text",
+          "label": "Social Security Number",
+          "required": false,
+          "placeholder": "XXX-XX-XXXX"
+        },
+        {
+          "id": "marital-status",
+          "type": "dropdown",
+          "label": "Marital Status",
+          "required": false,
+          "options": ["Single", "Married", "Divorced", "Widowed", "Separated", "Domestic Partnership"]
+        }
+      ]
+    },
+    {
+      "id": "allergy-info",
+      "name": "Allergy Information",
+      "description": "Document patient allergies and reactions",
+      "category": "Clinical",
+      "icon": "Warning",
+      "fields": [
+        {
+          "id": "has-allergies",
+          "type": "dropdown",
+          "label": "Any Known Allergies?",
+          "required": true,
+          "options": ["Yes", "No", "Unknown"]
+        },
+        {
+          "id": "drug-allergies",
+          "type": "textarea",
+          "label": "Medication Allergies",
+          "required": false,
+          "placeholder": "List medications and reactions"
+        },
+        {
+          "id": "food-allergies",
+          "type": "textarea",
+          "label": "Food Allergies",
+          "required": false
+        },
+        {
+          "id": "environmental-allergies",
+          "type": "textarea",
+          "label": "Environmental Allergies",
+          "required": false,
+          "placeholder": "Latex, pollen, dust, etc."
+        },
+        {
+          "id": "allergy-severity",
+          "type": "dropdown",
+          "label": "Most Severe Reaction",
+          "required": false,
+          "options": ["Mild (rash, itching)", "Moderate (swelling, hives)", "Severe (difficulty breathing)", "Anaphylaxis"]
+        }
+      ]
+    },
+    {
+      "id": "medication-list",
+      "name": "Current Medications",
+      "description": "List of current medications and supplements",
+      "category": "Clinical",
+      "icon": "Medication",
+      "fields": [
+        {
+          "id": "takes-medications",
+          "type": "dropdown",
+          "label": "Currently Taking Medications?",
+          "required": true,
+          "options": ["Yes", "No"]
+        },
+        {
+          "id": "prescription-meds",
+          "type": "textarea",
+          "label": "Prescription Medications",
+          "required": false,
+          "placeholder": "List name, dose, and frequency"
+        },
+        {
+          "id": "otc-meds",
+          "type": "textarea",
+          "label": "Over-the-Counter Medications",
+          "required": false
+        },
+        {
+          "id": "supplements",
+          "type": "textarea",
+          "label": "Vitamins/Supplements",
+          "required": false
+        },
+        {
+          "id": "herbal-remedies",
+          "type": "textarea",
+          "label": "Herbal Remedies",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "social-history",
+      "name": "Social History",
+      "description": "Patient social and lifestyle information",
+      "category": "Clinical",
+      "icon": "Groups",
+      "fields": [
+        {
+          "id": "tobacco-use",
+          "type": "dropdown",
+          "label": "Tobacco Use",
+          "required": true,
+          "options": ["Never", "Former", "Current - daily", "Current - occasional"]
+        },
+        {
+          "id": "alcohol-use",
+          "type": "dropdown",
+          "label": "Alcohol Use",
+          "required": true,
+          "options": ["None", "Social/Occasional", "Moderate (1-2 drinks/day)", "Heavy (3+ drinks/day)"]
+        },
+        {
+          "id": "illicit-drugs",
+          "type": "dropdown",
+          "label": "Illicit Drug Use",
+          "required": true,
+          "options": ["Never", "Former", "Current"]
+        },
+        {
+          "id": "exercise-frequency",
+          "type": "dropdown",
+          "label": "Exercise Frequency",
+          "required": false,
+          "options": ["None", "1-2 times/week", "3-4 times/week", "5+ times/week"]
+        },
+        {
+          "id": "occupation",
+          "type": "text",
+          "label": "Occupation",
+          "required": false
+        },
+        {
+          "id": "living-situation",
+          "type": "dropdown",
+          "label": "Living Situation",
+          "required": false,
+          "options": ["Lives alone", "With spouse/partner", "With family", "Assisted living", "Nursing facility", "Homeless"]
+        }
+      ]
+    },
+    {
+      "id": "provider-signature",
+      "name": "Provider Signature Block",
+      "description": "Provider authentication and signature fields",
+      "category": "Administrative",
+      "icon": "Draw",
+      "fields": [
+        {
+          "id": "provider-name",
+          "type": "text",
+          "label": "Provider Name",
+          "required": true
+        },
+        {
+          "id": "provider-credentials",
+          "type": "text",
+          "label": "Credentials (MD, DO, NP, PA)",
+          "required": true
+        },
+        {
+          "id": "provider-npi",
+          "type": "text",
+          "label": "NPI Number",
+          "required": true
+        },
+        {
+          "id": "signature-date",
+          "type": "date",
+          "label": "Date",
+          "required": true
+        },
+        {
+          "id": "signature-time",
+          "type": "text",
+          "label": "Time",
+          "required": false,
+          "placeholder": "HH:MM AM/PM"
+        }
+      ]
+    },
+    {
+      "id": "pain-assessment",
+      "name": "Pain Assessment",
+      "description": "Comprehensive pain evaluation fields",
+      "category": "Clinical",
+      "icon": "Healing",
+      "fields": [
+        {
+          "id": "pain-present",
+          "type": "dropdown",
+          "label": "Is Pain Present?",
+          "required": true,
+          "options": ["Yes", "No"]
+        },
+        {
+          "id": "pain-level",
+          "type": "dropdown",
+          "label": "Pain Level (0-10)",
+          "required": false,
+          "options": ["0 - No Pain", "1", "2", "3", "4", "5 - Moderate", "6", "7", "8", "9", "10 - Worst Imaginable"]
+        },
+        {
+          "id": "pain-location",
+          "type": "text",
+          "label": "Pain Location",
+          "required": false
+        },
+        {
+          "id": "pain-quality",
+          "type": "dropdown",
+          "label": "Pain Quality",
+          "required": false,
+          "options": ["Sharp", "Dull", "Aching", "Throbbing", "Burning", "Stabbing", "Cramping", "Shooting", "Pressure"]
+        },
+        {
+          "id": "pain-duration",
+          "type": "dropdown",
+          "label": "Pain Duration",
+          "required": false,
+          "options": ["Constant", "Intermittent", "Only with movement", "Only at rest"]
+        },
+        {
+          "id": "pain-aggravating",
+          "type": "textarea",
+          "label": "What Makes Pain Worse?",
+          "required": false
+        },
+        {
+          "id": "pain-relieving",
+          "type": "textarea",
+          "label": "What Helps Relieve Pain?",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

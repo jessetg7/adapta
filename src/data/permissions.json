@@ -1,0 +1,94 @@
+{
+  "permissions": [
+    {
+      "id": "dashboard",
+      "name": "View Dashboard",
+      "category": "General"
+    },
+    {
+      "id": "form_builder",
+      "name": "Access Form Builder",
+      "category": "Forms"
+    },
+    {
+      "id": "templates",
+      "name": "View Templates",
+      "category": "Forms"
+    },
+    {
+      "id": "create_forms",
+      "name": "Create Forms",
+      "category": "Forms"
+    },
+    {
+      "id": "edit_forms",
+      "name": "Edit Forms",
+      "category": "Forms"
+    },
+    {
+      "id": "delete_forms",
+      "name": "Delete Forms",
+      "category": "Forms"
+    },
+    {
+      "id": "rule_engine",
+      "name": "Access Rule Engine",
+      "category": "Logic"
+    },
+    {
+      "id": "workflows",
+      "name": "Access Workflows",
+      "category": "Workflow"
+    },
+    {
+      "id": "create_workflows",
+      "name": "Create Workflows",
+      "category": "Workflow"
+    },
+    {
+      "id": "edit_workflows",
+      "name": "Edit Workflows",
+      "category": "Workflow"
+    },
+    {
+      "id": "delete_workflows",
+      "name": "Delete Workflows",
+      "category": "Workflow"
+    },
+    {
+      "id": "audit_logs",
+      "name": "View Audit Logs",
+      "category": "Admin"
+    },
+    {
+      "id": "admin",
+      "name": "Admin Panel Access",
+      "category": "Admin"
+    },
+    {
+      "id": "manage_roles",
+      "name": "Manage Roles",
+      "category": "Admin"
+    },
+    {
+      "id": "manage_users",
+      "name": "Manage Users",
+      "category": "Admin"
+    },
+    {
+      "id": "view_patient_data",
+      "name": "View Patient Data",
+      "category": "Clinical"
+    },
+    {
+      "id": "view_all_data",
+      "name": "View All Data",
+      "category": "Clinical"
+    },
+    {
+      "id": "submit_forms",
+      "name": "Submit Forms",
+      "category": "Forms"
+    }
+  ]
+}

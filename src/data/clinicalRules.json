@@ -1,0 +1,254 @@
+{
+  "rules": [
+    {
+      "id": "rule-emergency-trigger-spo2",
+      "name": "Critical SpO2 Alert",
+      "description": "Activate emergency mode when oxygen saturation drops below 90%",
+      "category": "emergency",
+      "priority": 1,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "oxygenSaturation",
+          "operator": "lessThan",
+          "value": 90
+        }
+      ],
+      "actions": [
+        {
+          "type": "activateEmergencyMode",
+          "params": { "reason": "Critical: SpO2 < 90%" }
+        },
+        {
+          "type": "showAlert",
+          "params": { "severity": "critical", "message": "HYPOXIA DETECTED" }
+        },
+        {
+          "type": "suggestMedication",
+          "params": { "medicationId": "med-oxygen" }
+        }
+      ]
+    },
+    {
+      "id": "rule-emergency-trigger-bp",
+      "name": "Critical Hypotension Alert",
+      "description": "Activate emergency mode when systolic BP drops below 90",
+      "category": "emergency",
+      "priority": 1,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "systolicBP",
+          "operator": "lessThan",
+          "value": 90
+        }
+      ],
+      "actions": [
+        {
+          "type": "activateEmergencyMode",
+          "params": { "reason": "Critical: Systolic BP < 90" }
+        },
+        {
+          "type": "showAlert",
+          "params": { "severity": "critical", "message": "HYPOTENSION DETECTED" }
+        },
+        {
+          "type": "suggestMedication",
+          "params": { "medicationId": "med-saline" }
+        }
+      ]
+    },
+    {
+      "id": "rule-allergy-penicillin-block",
+      "name": "Penicillin Allergy Block",
+      "description": "Block all penicillin-class antibiotics if patient has penicillin allergy",
+      "category": "safety",
+      "priority": 1,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "allergies",
+          "operator": "contains",
+          "value": "Penicillin"
+        }
+      ],
+      "actions": [
+        {
+          "type": "blockMedicationGroup",
+          "params": { "allergyGroup": "Penicillin" }
+        },
+        {
+          "type": "showWarning",
+          "params": { "message": "Patient has Penicillin allergy - Beta-lactam antibiotics blocked" }
+        }
+      ]
+    },
+    {
+      "id": "rule-pediatric-mode",
+      "name": "Enable Pediatric Mode",
+      "description": "Enable pediatric dosing when patient age is under 12",
+      "category": "dosing",
+      "priority": 2,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "age",
+          "operator": "lessThan",
+          "value": 12
+        }
+      ],
+      "actions": [
+        {
+          "type": "enablePediatricDosing",
+          "params": {}
+        },
+        {
+          "type": "requireField",
+          "params": { "fieldId": "weight" }
+        }
+      ]
+    },
+    {
+      "id": "rule-geriatric-mode",
+      "name": "Enable Geriatric Mode",
+      "description": "Enable geriatric considerations when patient age is 65+",
+      "category": "dosing",
+      "priority": 2,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "age",
+          "operator": "greaterThanOrEqual",
+          "value": 65
+        }
+      ],
+      "actions": [
+        {
+          "type": "enableGeriatricMode",
+          "params": {}
+        },
+        {
+          "type": "showWarning",
+          "params": { "message": "Geriatric patient - consider dose adjustments" }
+        }
+      ]
+    },
+    {
+      "id": "rule-cardiac-emergency",
+      "name": "Cardiac Emergency Protocol",
+      "description": "Suggest cardiac medications when chest pain with cardiac markers",
+      "category": "protocol",
+      "priority": 1,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "chiefComplaint",
+          "operator": "contains",
+          "value": "chest pain"
+        },
+        {
+          "field": "troponin",
+          "operator": "greaterThan",
+          "value": 0.04
+        }
+      ],
+      "conditionLogic": "AND",
+      "actions": [
+        {
+          "type": "activateProtocol",
+          "params": { "protocolId": "acs-protocol" }
+        },
+        {
+          "type": "suggestMedication",
+          "params": { "medicationId": "med-aspirin" }
+        },
+        {
+          "type": "suggestMedication",
+          "params": { "medicationId": "med-nitroglycerin" }
+        }
+      ]
+    },
+    {
+      "id": "rule-opioid-naloxone",
+      "name": "Opioid Reversal Ready",
+      "description": "Ensure Naloxone is available when administering opioids",
+      "category": "safety",
+      "priority": 2,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "currentMedications",
+          "operator": "containsCategory",
+          "value": "analgesic"
+        }
+      ],
+      "actions": [
+        {
+          "type": "showReminder",
+          "params": { "message": "Ensure Naloxone is available at bedside" }
+        }
+      ]
+    },
+    {
+      "id": "rule-bradycardia-atropine",
+      "name": "Bradycardia Protocol",
+      "description": "Suggest Atropine for symptomatic bradycardia",
+      "category": "protocol",
+      "priority": 1,
+      "enabled": true,
+      "conditions": [
+        {
+          "field": "heartRate",
+          "operator": "lessThan",
+          "value": 50
+        },
+        {
+          "field": "symptomatic",
+          "operator": "equals",
+          "value": true
+        }
+      ],
+      "conditionLogic": "AND",
+      "actions": [
+        {
+          "type": "suggestMedication",
+          "params": { "medicationId": "med-atropine" }
+        },
+        {
+          "type": "showAlert",
+          "params": { "severity": "warning", "message": "Symptomatic Bradycardia - Consider Atropine" }
+        }
+      ]
+    }
+  ],
+  "operators": {
+    "equals": "is equal to",
+    "notEquals": "is not equal to",
+    "greaterThan": "is greater than",
+    "lessThan": "is less than",
+    "greaterThanOrEqual": "is greater than or equal to",
+    "lessThanOrEqual": "is less than or equal to",
+    "contains": "contains",
+    "notContains": "does not contain",
+    "in": "is one of",
+    "notIn": "is not one of",
+    "isEmpty": "is empty",
+    "isNotEmpty": "is not empty"
+  },
+  "actionTypes": {
+    "activateEmergencyMode": "Activate Emergency Mode",
+    "deactivateEmergencyMode": "Deactivate Emergency Mode",
+    "showAlert": "Show Alert",
+    "showWarning": "Show Warning",
+    "showReminder": "Show Reminder",
+    "suggestMedication": "Suggest Medication",
+    "blockMedication": "Block Medication",
+    "blockMedicationGroup": "Block Medication Group",
+    "enablePediatricDosing": "Enable Pediatric Dosing",
+    "enableGeriatricMode": "Enable Geriatric Mode",
+    "requireField": "Make Field Required",
+    "hideSection": "Hide Section",
+    "showSection": "Show Section",
+    "activateProtocol": "Activate Clinical Protocol"
+  }
+}

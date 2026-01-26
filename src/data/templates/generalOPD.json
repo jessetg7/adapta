@@ -1,0 +1,344 @@
+{
+  "id": "general-opd-v2",
+  "name": "General OPD Registration",
+  "description": "Standard OPD registration with Emergency Mode support",
+  "category": "General",
+  "version": "2.0.0",
+  "supportsEmergencyMode": true,
+  "sections": [
+    {
+      "id": "section-vitals",
+      "title": "Vital Signs",
+      "description": "Critical vital measurements - ALWAYS shown first in emergency",
+      "order": 1,
+      "priority": 1,
+      "collapsible": false,
+      "defaultExpanded": true,
+      "emergencyOrder": 1,
+      "fields": [
+        {
+          "id": "field-bp-systolic",
+          "type": "number",
+          "label": "BP Systolic (mmHg)",
+          "placeholder": "120",
+          "required": true,
+          "priority": 1,
+          "validation": { "min": 60, "max": 250 }
+        },
+        {
+          "id": "field-bp-diastolic",
+          "type": "number",
+          "label": "BP Diastolic (mmHg)",
+          "placeholder": "80",
+          "required": true,
+          "priority": 1,
+          "validation": { "min": 40, "max": 150 }
+        },
+        {
+          "id": "field-pulse",
+          "type": "number",
+          "label": "Pulse (bpm)",
+          "placeholder": "72",
+          "required": true,
+          "priority": 1
+        },
+        {
+          "id": "field-temperature",
+          "type": "number",
+          "label": "Temperature (°F)",
+          "placeholder": "98.6",
+          "required": true,
+          "priority": 1
+        },
+        {
+          "id": "field-spo2",
+          "type": "number",
+          "label": "SpO2 (%)",
+          "placeholder": "98",
+          "required": true,
+          "priority": 1,
+          "validation": { "min": 50, "max": 100 }
+        },
+        {
+          "id": "field-weight",
+          "type": "number",
+          "label": "Weight (kg)",
+          "required": false,
+          "priority": 2,
+          "deferrable": true
+        },
+        {
+          "id": "field-height",
+          "type": "number",
+          "label": "Height (cm)",
+          "required": false,
+          "priority": 3,
+          "deferrable": true
+        }
+      ]
+    },
+    {
+      "id": "section-chief-complaint",
+      "title": "Chief Complaint",
+      "description": "Primary reason for visit - Critical",
+      "order": 2,
+      "priority": 1,
+      "emergencyOrder": 2,
+      "fields": [
+        {
+          "id": "field-chief-complaint",
+          "type": "textarea",
+          "label": "Chief Complaint",
+          "placeholder": "Describe the main reason for visit...",
+          "required": true,
+          "priority": 1,
+          "fullWidth": true
+        },
+        {
+          "id": "field-symptom-duration",
+          "type": "text",
+          "label": "Duration",
+          "placeholder": "e.g., 3 days, 2 weeks",
+          "required": true,
+          "priority": 1
+        },
+        {
+          "id": "field-severity",
+          "type": "dropdown",
+          "label": "Severity",
+          "required": true,
+          "priority": 1,
+          "options": [
+            { "value": "mild", "label": "Mild" },
+            { "value": "moderate", "label": "Moderate" },
+            { "value": "severe", "label": "Severe" },
+            { "value": "critical", "label": "Critical" }
+          ]
+        },
+        {
+          "id": "field-is-emergency",
+          "type": "checkbox",
+          "label": "Emergency",
+          "checkboxLabel": "This is an emergency requiring immediate attention",
+          "priority": 1,
+          "emergencyOnly": false
+        }
+      ]
+    },
+    {
+      "id": "section-patient-id",
+      "title": "Patient Identification",
+      "description": "Quick patient identification for emergency",
+      "order": 3,
+      "priority": 1,
+      "emergencyOrder": 3,
+      "fields": [
+        {
+          "id": "field-patient-name",
+          "type": "text",
+          "label": "Patient Name",
+          "placeholder": "Full name or identifier",
+          "required": true,
+          "priority": 1
+        },
+        {
+          "id": "field-age-approx",
+          "type": "text",
+          "label": "Age (approx)",
+          "placeholder": "e.g., ~45 years",
+          "required": true,
+          "priority": 1,
+          "helpText": "Approximate age is acceptable in emergency"
+        },
+        {
+          "id": "field-gender",
+          "type": "dropdown",
+          "label": "Gender",
+          "required": true,
+          "priority": 1,
+          "options": [
+            { "value": "male", "label": "Male" },
+            { "value": "female", "label": "Female" },
+            { "value": "other", "label": "Other" }
+          ]
+        },
+        {
+          "id": "field-known-allergies-quick",
+          "type": "text",
+          "label": "Known Allergies (if any)",
+          "placeholder": "NKDA or list allergies",
+          "required": false,
+          "priority": 1,
+          "helpText": "NKDA = No Known Drug Allergies"
+        }
+      ]
+    },
+    {
+      "id": "section-registration-details",
+      "title": "Registration Details",
+      "description": "Full registration information",
+      "order": 4,
+      "priority": 2,
+      "hideInEmergency": false,
+      "deferrable": true,
+      "fields": [
+        {
+          "id": "field-registration-type",
+          "type": "dropdown",
+          "label": "Registration Type",
+          "required": true,
+          "priority": 2,
+          "deferrable": true,
+          "options": [
+            { "value": "new", "label": "New Patient" },
+            { "value": "returning", "label": "Returning Patient" },
+            { "value": "referral", "label": "Referral" }
+          ]
+        },
+        {
+          "id": "field-patient-id",
+          "type": "text",
+          "label": "Patient ID / MRN",
+          "placeholder": "Will be auto-generated if new",
+          "required": false,
+          "priority": 2,
+          "deferrable": true
+        },
+        {
+          "id": "field-dob",
+          "type": "date",
+          "label": "Date of Birth",
+          "required": false,
+          "priority": 3,
+          "deferrable": true
+        },
+        {
+          "id": "field-phone",
+          "type": "text",
+          "label": "Phone Number",
+          "placeholder": "+1 (xxx) xxx-xxxx",
+          "required": false,
+          "priority": 2,
+          "deferrable": true
+        },
+        {
+          "id": "field-address",
+          "type": "textarea",
+          "label": "Address",
+          "required": false,
+          "priority": 3,
+          "deferrable": true
+        }
+      ]
+    },
+    {
+      "id": "section-medical-history",
+      "title": "Medical History",
+      "description": "Past medical history - can be deferred",
+      "order": 5,
+      "priority": 3,
+      "deferrable": true,
+      "fields": [
+        {
+          "id": "field-existing-conditions",
+          "type": "multiselect",
+          "label": "Existing Medical Conditions",
+          "priority": 2,
+          "deferrable": true,
+          "options": [
+            { "value": "diabetes", "label": "Diabetes" },
+            { "value": "hypertension", "label": "Hypertension" },
+            { "value": "heart-disease", "label": "Heart Disease" },
+            { "value": "asthma", "label": "Asthma" },
+            { "value": "none", "label": "None" }
+          ]
+        },
+        {
+          "id": "field-current-medications",
+          "type": "textarea",
+          "label": "Current Medications",
+          "priority": 2,
+          "deferrable": true
+        },
+        {
+          "id": "field-surgical-history",
+          "type": "textarea",
+          "label": "Surgical History",
+          "priority": 3,
+          "deferrable": true
+        }
+      ]
+    },
+    {
+      "id": "section-insurance",
+      "title": "Insurance Information",
+      "description": "Billing and insurance - defer in emergency",
+      "order": 6,
+      "priority": 3,
+      "hideInEmergency": true,
+      "deferrable": true,
+      "fields": [
+        {
+          "id": "field-has-insurance",
+          "type": "checkbox",
+          "label": "Has Insurance",
+          "priority": 3,
+          "deferrable": true
+        },
+        {
+          "id": "field-insurance-provider",
+          "type": "text",
+          "label": "Insurance Provider",
+          "priority": 3,
+          "deferrable": true
+        },
+        {
+          "id": "field-policy-number",
+          "type": "text",
+          "label": "Policy Number",
+          "priority": 3,
+          "deferrable": true
+        }
+      ]
+    },
+    {
+      "id": "section-triage",
+      "title": "Triage Assessment",
+      "description": "Triage level assignment",
+      "order": 7,
+      "priority": 1,
+      "emergencyOrder": 4,
+      "roleAccess": ["Nurse", "Doctor", "Admin"],
+      "fields": [
+        {
+          "id": "field-triage-level",
+          "type": "dropdown",
+          "label": "Triage Level",
+          "required": true,
+          "priority": 1,
+          "options": [
+            { "value": "1", "label": "Level 1 - Resuscitation (Immediate)" },
+            { "value": "2", "label": "Level 2 - Emergency (15 min)" },
+            { "value": "3", "label": "Level 3 - Urgent (30 min)" },
+            { "value": "4", "label": "Level 4 - Less Urgent (60 min)" },
+            { "value": "5", "label": "Level 5 - Non-Urgent (120 min)" }
+          ]
+        },
+        {
+          "id": "field-triage-notes",
+          "type": "textarea",
+          "label": "Triage Notes",
+          "priority": 2,
+          "deferrable": true
+        }
+      ]
+    }
+  ],
+  "emergencyConfig": {
+    "autoDeferSections": ["section-insurance", "section-medical-history"],
+    "requiredSections": ["section-vitals", "section-chief-complaint", "section-patient-id"],
+    "showTimer": true,
+    "quickSaveInterval": 30,
+    "maxDeferrablePercentage": 60
+  }
+}

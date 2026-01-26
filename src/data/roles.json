@@ -1,0 +1,67 @@
+{
+  "roles": [
+    {
+      "id": "admin",
+      "name": "Administrator",
+      "description": "Full system access",
+      "color": "#ef4444",
+      "permissions": [
+        "dashboard",
+        "form_builder",
+        "templates",
+        "rule_engine",
+        "workflows",
+        "audit_logs",
+        "admin",
+        "create_forms",
+        "edit_forms",
+        "delete_forms",
+        "create_workflows",
+        "edit_workflows",
+        "delete_workflows",
+        "manage_roles",
+        "manage_users",
+        "view_all_data"
+      ]
+    },
+    {
+      "id": "doctor",
+      "name": "Doctor",
+      "description": "Clinical staff with form access",
+      "color": "#2563eb",
+      "permissions": [
+        "dashboard",
+        "form_builder",
+        "templates",
+        "workflows",
+        "create_forms",
+        "edit_forms",
+        "view_patient_data"
+      ]
+    },
+    {
+      "id": "nurse",
+      "name": "Nurse",
+      "description": "Nursing staff with limited access",
+      "color": "#10b981",
+      "permissions": [
+        "dashboard",
+        "templates",
+        "workflows",
+        "view_patient_data",
+        "submit_forms"
+      ]
+    },
+    {
+      "id": "staff",
+      "name": "Staff",
+      "description": "Administrative staff",
+      "color": "#7c3aed",
+      "permissions": [
+        "dashboard",
+        "templates",
+        "submit_forms"
+      ]
+    }
+  ]
+}
