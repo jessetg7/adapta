@@ -133,106 +133,138 @@ const PropertyPanel = ({
   if (selectedField) {
     const fieldTypeConfig = FIELD_TYPES[selectedField.type];
 
+    // Helper to auto-generate name from label
+    const handleLabelChange = (newLabel) => {
+      // Create a slug from the label (e.g. "Blood Pressure" -> "blood_pressure")
+      const slug = newLabel.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
+      const updates = { label: newLabel };
+      // Only auto-update name if it looks like it was auto-generated (or empty)
+      // Check if current name matches the old label slug or is default "field_..."
+      const currentName = selectedField.name || '';
+      const oldLabelSlug = (selectedField.label || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
+      if (!currentName || currentName.startsWith('field_') || currentName === oldLabelSlug) {
+        updates.name = slug;
+      }
+
+      onUpdateField(updates);
+    };
+
     return (
       <Box sx={{ p: 2 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-          Field Properties
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Edit Field
+          </Typography>
+          <Chip
+            label={fieldTypeConfig?.label || selectedField.type}
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
+        </Box>
 
-        <Chip
-          label={fieldTypeConfig?.label || selectedField.type}
-          size="small"
-          color="primary"
+        <TextField
+          fullWidth
+          label="Question Label"
+          value={selectedField.label || ''}
+          onChange={(e) => handleLabelChange(e.target.value)}
           sx={{ mb: 2 }}
+          size="small"
+          autoFocus
+          helperText="The question displayed to the user"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={selectedField.required ?? false}
+              onChange={(e) => onUpdateField({ required: e.target.checked })}
+            />
+          }
+          label="Required Answer"
+          sx={{ mb: 2, display: 'block' }}
         />
 
         <Tabs
           value={tab}
           onChange={(e, newValue) => setTab(newValue)}
           sx={{ mb: 1, borderBottom: 1, borderColor: 'divider' }}
+          variant="fullWidth"
         >
-          <Tab label="General" />
-          <Tab label="Validation" />
+          <Tab label="Options" />
           <Tab label="Rules" />
         </Tabs>
 
-        {/* General Tab */}
+        {/* General/Options Tab */}
         <TabPanel value={tab} index={0}>
-          <TextField
-            fullWidth
-            label="Label"
-            value={selectedField.label || ''}
-            onChange={(e) => onUpdateField({ label: e.target.value })}
-            sx={{ mb: 2 }}
-            size="small"
-          />
-
-          <TextField
-            fullWidth
-            label="Field Name (ID)"
-            value={selectedField.name || ''}
-            onChange={(e) => onUpdateField({ name: e.target.value })}
-            sx={{ mb: 2 }}
-            size="small"
-            helperText="Unique identifier for data binding"
-          />
-
-          <TextField
-            fullWidth
-            label="Description / Help Text"
-            value={selectedField.description || ''}
-            onChange={(e) => onUpdateField({ description: e.target.value })}
-            multiline
-            rows={2}
-            sx={{ mb: 2 }}
-            size="small"
-          />
-
-          <FormControl fullWidth sx={{ mb: 2 }} size="small">
-            <InputLabel>Width</InputLabel>
-            <Select
-              value={selectedField.width || 'full'}
-              label="Width"
-              onChange={(e) => onUpdateField({ width: e.target.value })}
-            >
-              {WIDTH_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={selectedField.required ?? false}
-                onChange={(e) => onUpdateField({ required: e.target.checked })}
-              />
-            }
-            label="Required"
-          />
-
-          {/* Field-specific options */}
-          <Divider sx={{ my: 2 }} />
+          {/* Field Specific Configs (Placeholder, Min/Max, Options) */}
           <FieldSpecificOptions
             field={selectedField}
             onUpdate={onUpdateField}
           />
+
+          <Box sx={{ mt: 2 }}>
+            <Accordion variant="outlined" sx={{ bgcolor: 'transparent' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="body2" color="text.secondary">Advanced Settings</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <TextField
+                  fullWidth
+                  label="System ID (Auto-generated)"
+                  value={selectedField.name || ''}
+                  onChange={(e) => onUpdateField({ name: e.target.value })}
+                  sx={{ mb: 2 }}
+                  size="small"
+                  helperText="Unique database identifier"
+                />
+
+                <TextField
+                  fullWidth
+                  label="Description / Help Text"
+                  value={selectedField.description || ''}
+                  onChange={(e) => onUpdateField({ description: e.target.value })}
+                  multiline
+                  rows={2}
+                  sx={{ mb: 2 }}
+                  size="small"
+                />
+
+                <FormControl fullWidth sx={{ mb: 2 }} size="small">
+                  <InputLabel>Field Width</InputLabel>
+                  <Select
+                    value={selectedField.width || 'full'}
+                    label="Field Width"
+                    onChange={(e) => onUpdateField({ width: e.target.value })}
+                  >
+                    {WIDTH_OPTIONS.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
         </TabPanel>
 
-        {/* Validation Tab */}
+        {/* Rules/Validation Tab */}
         <TabPanel value={tab} index={1}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+            Validation
+          </Typography>
           <ValidationEditor
             field={selectedField}
             onUpdate={onUpdateField}
           />
-        </TabPanel>
 
-        {/* Rules Tab */}
-        <TabPanel value={tab} index={2}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Visibility Rules
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+            Visibility Logic
           </Typography>
           <VisibilityRulesEditor
             rules={selectedField.visibilityRules || []}
@@ -264,15 +296,17 @@ const FieldSpecificOptions = ({ field, onUpdate }) => {
         <>
           <TextField
             fullWidth
-            label="Placeholder"
+            label="Example Text (shown inside box)"
+            placeholder="e.g. Enter patient name here"
             value={field.config?.placeholder || ''}
             onChange={(e) => updateConfig('placeholder', e.target.value)}
             sx={{ mb: 2 }}
             size="small"
+            helperText="Gray text that disappears when they start typing"
           />
           <TextField
             fullWidth
-            label="Max Length"
+            label="Maximum Characters Allowed"
             type="number"
             value={field.config?.maxLength || ''}
             onChange={(e) => updateConfig('maxLength', e.target.value ? Number(e.target.value) : null)}
@@ -282,7 +316,7 @@ const FieldSpecificOptions = ({ field, onUpdate }) => {
           {field.type === 'textarea' && (
             <TextField
               fullWidth
-              label="Rows"
+              label="Height (number of lines)"
               type="number"
               value={field.config?.rows || 4}
               onChange={(e) => updateConfig('rows', Number(e.target.value))}
@@ -297,7 +331,7 @@ const FieldSpecificOptions = ({ field, onUpdate }) => {
         <>
           <TextField
             fullWidth
-            label="Minimum Value"
+            label="Minimum Allowed Value"
             type="number"
             value={field.config?.min ?? ''}
             onChange={(e) => updateConfig('min', e.target.value ? Number(e.target.value) : null)}
@@ -306,7 +340,7 @@ const FieldSpecificOptions = ({ field, onUpdate }) => {
           />
           <TextField
             fullWidth
-            label="Maximum Value"
+            label="Maximum Allowed Value"
             type="number"
             value={field.config?.max ?? ''}
             onChange={(e) => updateConfig('max', e.target.value ? Number(e.target.value) : null)}
@@ -315,19 +349,23 @@ const FieldSpecificOptions = ({ field, onUpdate }) => {
           />
           <TextField
             fullWidth
-            label="Step"
+            label="Step Amount"
+            placeholder="1"
             type="number"
             value={field.config?.step || 1}
             onChange={(e) => updateConfig('step', Number(e.target.value))}
             sx={{ mb: 2 }}
             size="small"
+            helperText="Increments when using up/down arrows (e.g. 0.1 or 1)"
           />
           <TextField
             fullWidth
-            label="Unit"
+            label="Unit Label"
+            placeholder="e.g. kg, ml, mg"
             value={field.config?.unit || ''}
             onChange={(e) => updateConfig('unit', e.target.value)}
             size="small"
+            helperText="Displayed next to the number"
           />
         </>
       );
@@ -371,7 +409,7 @@ const OptionsEditor = ({ options, onChange }) => {
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
         Options
       </Typography>
-      
+
       {options.map((option, index) => (
         <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
           <TextField
@@ -393,7 +431,7 @@ const OptionsEditor = ({ options, onChange }) => {
           </IconButton>
         </Box>
       ))}
-      
+
       <Button
         startIcon={<AddIcon />}
         onClick={addOption}
@@ -453,7 +491,7 @@ const ValidationEditor = ({ field, onUpdate }) => {
                 <MenuItem value="phone">Phone</MenuItem>
               </Select>
             </FormControl>
-            
+
             {['min', 'max', 'minLength', 'maxLength'].includes(rule.type) && (
               <TextField
                 size="small"
@@ -464,7 +502,7 @@ const ValidationEditor = ({ field, onUpdate }) => {
                 sx={{ width: 100 }}
               />
             )}
-            
+
             {rule.type === 'pattern' && (
               <TextField
                 size="small"
@@ -474,12 +512,12 @@ const ValidationEditor = ({ field, onUpdate }) => {
                 sx={{ flexGrow: 1 }}
               />
             )}
-            
+
             <IconButton size="small" onClick={() => deleteValidation(index)} color="error">
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Box>
-          
+
           <TextField
             fullWidth
             size="small"
@@ -489,7 +527,7 @@ const ValidationEditor = ({ field, onUpdate }) => {
           />
         </Paper>
       ))}
-      
+
       <Button
         startIcon={<AddIcon />}
         onClick={addValidation}

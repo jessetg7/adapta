@@ -45,6 +45,11 @@ export const permissionConfig = {
         'patients.view',
         'patients.create',
         'patients.edit',
+        'templates.create',
+        'templates.edit',
+        'templates.delete',
+        'forms.create',
+        'forms.edit',
       ],
     },
     nurse: {

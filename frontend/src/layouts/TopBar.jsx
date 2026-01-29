@@ -21,11 +21,12 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 
 // Ensure this path is correct in your project
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from '../components/shared/ThemeToggle';
 
 // Removed unused 'sidebarOpen' prop to prevent linting warnings
 const TopBar = ({ onToggleSidebar }) => {
   // Safety check: Default to empty object if context is undefined
-  const { user, logout } = useAuth() || {}; 
+  const { user, logout } = useAuth() || {};
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuOpen = (event) => {
@@ -47,14 +48,14 @@ const TopBar = ({ onToggleSidebar }) => {
     <AppBar
       // Changed to static because it sits inside a flex column in MainLayout
       // Sticky is also fine, but static prevents z-index issues with the sidebar
-      position="static" 
+      position="static"
       elevation={0}
       sx={{
-        bgcolor: 'white',
+        bgcolor: 'background.paper',
         color: 'text.primary',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        zIndex: (theme) => theme.zIndex.drawer + 1, 
+        zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
       <Toolbar>
@@ -79,14 +80,17 @@ const TopBar = ({ onToggleSidebar }) => {
           </Badge>
         </IconButton>
 
+        {/* Theme Toggle */}
+        <ThemeToggle />
+
         {/* User Menu */}
-        <IconButton 
-          onClick={handleMenuOpen} 
+        <IconButton
+          onClick={handleMenuOpen}
           sx={{ ml: 1 }}
           aria-controls="account-menu"
           aria-haspopup="true"
         >
-          <Avatar 
+          <Avatar
             sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}
             alt={user?.name || 'User'}
             src={user?.avatarUrl} // Added src support if your user object has it
@@ -106,7 +110,7 @@ const TopBar = ({ onToggleSidebar }) => {
           PaperProps={{
             elevation: 0,
             sx: {
-              width: 220, 
+              width: 220,
               mt: 1.5,
               overflow: 'visible',
               filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',

@@ -40,6 +40,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 
 import useTemplateStore from '../core/store/useTemplateStore';
 import { TEMPLATE_TYPES, TEMPLATE_CATEGORIES } from '../core/registry/fieldConfigs';
+import StarterTemplatesGallery from '../components/TemplateGallery/StarterTemplatesGallery';
 
 const TemplateManager = () => {
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ const TemplateManager = () => {
   const [templateToDelete, setTemplateToDelete] = useState(null);
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
+  const [starterGalleryOpen, setStarterGalleryOpen] = useState(false);
 
   // Filter templates
   const filteredTemplates = useMemo(() => {
@@ -156,6 +158,14 @@ const TemplateManager = () => {
           <Button color="inherit" component="label" startIcon={<UploadIcon />}>
             Import
             <input type="file" hidden accept=".json" onChange={handleImport} />
+          </Button>
+          <Button
+            color="inherit"
+            startIcon={<ArticleIcon />}
+            onClick={() => setStarterGalleryOpen(true)}
+            sx={{ ml: 1 }}
+          >
+            Browse Starter Templates
           </Button>
           <Button
             variant="contained"
@@ -340,6 +350,28 @@ const TemplateManager = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Starter Templates Gallery */}
+      <StarterTemplatesGallery
+        open={starterGalleryOpen}
+        onClose={() => setStarterGalleryOpen(false)}
+        onSelectTemplate={(template) => {
+          // Clone the template to avoid reference issues
+          const newTemplate = JSON.parse(JSON.stringify(template));
+          // Generate new ID to avoid conflicts
+          newTemplate.id = `${template.id}-${Date.now()}`;
+          newTemplate.isStarter = false; // Mark as user's copy
+          newTemplate.metadata.createdAt = new Date().toISOString();
+          newTemplate.metadata.updatedAt = new Date().toISOString();
+
+          // Add to store
+          const { addTemplate } = useTemplateStore.getState();
+          addTemplate(newTemplate);
+
+          // Show success message (you can add a snackbar here)
+          console.log(`✅ Added template: ${template.name}`);
+        }}
+      />
     </Box>
   );
 };

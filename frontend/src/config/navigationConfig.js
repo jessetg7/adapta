@@ -16,18 +16,18 @@ export const navigationConfig = {
       permission: 'consultation.view',
     },
     {
+      id: 'create-prescription',
+      label: 'Prescription',
+      icon: 'MedicationIcon',
+      path: '/prescription/create',
+      permission: 'prescriptions.create',
+    },
+    {
       id: 'form-builder',
       label: 'Form Builder',
       icon: 'BuildIcon',
       path: '/form-builder',
       permission: 'forms.create',
-    },
-    {
-      id: 'prescription-builder',
-      label: 'Prescription Builder',
-      icon: 'MedicationIcon',
-      path: '/prescription-builder',
-      permission: 'prescriptions.create',
     },
     {
       id: 'templates',

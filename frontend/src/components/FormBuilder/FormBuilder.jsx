@@ -126,11 +126,11 @@ const SortableField = ({
       >
         <DragIndicatorIcon fontSize="small" />
       </IconButton>
-      
+
       <Box sx={{ mr: 1, color: 'primary.main', display: 'flex', alignItems: 'center' }}>
         <TextFieldsIcon fontSize="small" />
       </Box>
-      
+
       <Box sx={{ flexGrow: 1, minWidth: 0 }}>
         <Typography variant="body2" fontWeight={500} noWrap>
           {field.label || 'Untitled Field'}
@@ -140,7 +140,7 @@ const SortableField = ({
           {field.required && ' • Required'}
         </Typography>
       </Box>
-      
+
       <Tooltip title="Duplicate">
         <IconButton
           size="small"
@@ -152,7 +152,7 @@ const SortableField = ({
           <ContentCopyIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      
+
       <Tooltip title="Delete">
         <IconButton
           size="small"
@@ -231,17 +231,17 @@ const SortableSection = ({
         >
           <DragIndicatorIcon />
         </IconButton>
-        
+
         <Typography variant="subtitle1" sx={{ flexGrow: 1, fontWeight: 600 }}>
           {section.title || 'Untitled Section'}
         </Typography>
-        
+
         <Chip
           label={`${section.fields?.length || 0} fields`}
           size="small"
           sx={{ mr: 1 }}
         />
-        
+
         <IconButton
           size="small"
           onClick={(e) => {
@@ -251,7 +251,7 @@ const SortableSection = ({
         >
           {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
         </IconButton>
-        
+
         <IconButton
           size="small"
           color="error"
@@ -268,7 +268,7 @@ const SortableSection = ({
       {!collapsed && (
         <Box sx={{ p: 2, minHeight: 80, bgcolor: 'background.default' }}>
           {children}
-          
+
           {/* Add Field Button */}
           <Button
             startIcon={<AddIcon />}
@@ -427,6 +427,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
 
     setSelectedSectionId(newSection.id);
     setSelectedFieldId(null);
+    setActiveTab(0);
   }, [template.sections]);
 
   const handleUpdateSection = useCallback((sectionId, updates) => {
@@ -463,7 +464,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
   const handleAddField = useCallback((sectionId, fieldType = 'text') => {
     const fieldConfig = FIELD_TYPES[fieldType]?.defaultConfig || {};
     const section = template.sections.find((s) => s.id === sectionId);
-    
+
     const newField = {
       ...fieldConfig,
       id: uuidv4(),
@@ -483,6 +484,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
 
     setSelectedSectionId(sectionId);
     setSelectedFieldId(newField.id);
+    setActiveTab(0);
   }, [template.sections]);
 
   const handleUpdateField = useCallback((sectionId, fieldId, updates) => {
@@ -491,11 +493,11 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
       sections: prev.sections.map((s) =>
         s.id === sectionId
           ? {
-              ...s,
-              fields: s.fields.map((f) =>
-                f.id === fieldId ? { ...f, ...updates } : f
-              ),
-            }
+            ...s,
+            fields: s.fields.map((f) =>
+              f.id === fieldId ? { ...f, ...updates } : f
+            ),
+          }
           : s
       ),
     }));
@@ -519,7 +521,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
   const handleDuplicateField = useCallback((sectionId, fieldId) => {
     const section = template.sections.find((s) => s.id === sectionId);
     const field = section?.fields?.find((f) => f.id === fieldId);
-    
+
     if (!field) return;
 
     const newField = {
@@ -589,10 +591,10 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
           ...prev,
           sections: prev.sections.map((s) => {
             if (s.id !== activeSectionId) return s;
-            
+
             const oldIndex = s.fields.findIndex((f) => f.id === active.id);
             const newIndex = s.fields.findIndex((f) => f.id === over.id);
-            
+
             return {
               ...s,
               fields: arrayMove(s.fields, oldIndex, newIndex),
@@ -662,7 +664,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Form Builder
           </Typography>
-          
+
           <TextField
             size="small"
             value={template.name}
@@ -670,19 +672,19 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
             placeholder="Template Name"
             sx={{ mr: 2, width: 250 }}
           />
-          
+
           <Tooltip title="Template Settings">
             <IconButton onClick={() => setShowSettings(true)}>
               <SettingsIcon />
             </IconButton>
           </Tooltip>
-          
+
           <Tooltip title="Preview">
             <IconButton onClick={() => setShowPreview(true)}>
               <PreviewIcon />
             </IconButton>
           </Tooltip>
-          
+
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
@@ -691,7 +693,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
           >
             Save
           </Button>
-          
+
           {onClose && (
             <IconButton onClick={onClose} sx={{ ml: 1 }}>
               <CloseIcon />
@@ -741,6 +743,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                   onSelect={() => {
                     setSelectedSectionId(section.id);
                     setSelectedFieldId(null);
+                    setActiveTab(0);
                   }}
                   onDelete={() => handleDeleteSection(section.id)}
                   onToggleCollapse={() => toggleSectionCollapse(section.id)}
@@ -760,6 +763,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                           onSelect={() => {
                             setSelectedSectionId(section.id);
                             setSelectedFieldId(field.id);
+                            setActiveTab(0);
                           }}
                           onDelete={() => handleDeleteField(section.id, field.id)}
                           onDuplicate={() => handleDuplicateField(section.id, field.id)}
@@ -826,25 +830,68 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
           )}
         </Box>
 
-        {/* Right Panel - Properties */}
+        {/* Right Panel - Properties & Preview */}
         <Paper
           sx={{
-            width: 320,
+            width: 360, // Widened slightly for better preview
             flexShrink: 0,
             borderRadius: 0,
-            overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            borderLeft: 1,
+            borderColor: 'divider',
           }}
         >
-          <PropertyPanel
-            selectedSection={selectedSection}
-            selectedField={selectedField}
-            onUpdateSection={(updates) =>
-              handleUpdateSection(selectedSectionId, updates)
-            }
-            onUpdateField={(updates) =>
-              handleUpdateField(selectedSectionId, selectedFieldId, updates)
-            }
-          />
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Tabs
+              value={activeTab}
+              onChange={(e, v) => setActiveTab(v)}
+              variant="fullWidth"
+              textColor="primary"
+              indicatorColor="primary"
+            >
+              <Tab icon={<SettingsIcon fontSize="small" />} iconPosition="start" label="Properties" />
+              <Tab icon={<PreviewIcon fontSize="small" />} iconPosition="start" label="Live Preview" />
+            </Tabs>
+          </Box>
+
+          <Box sx={{ flexGrow: 1, overflow: 'auto', bgcolor: 'background.paper' }}>
+            {activeTab === 0 ? (
+              <PropertyPanel
+                selectedSection={selectedSection}
+                selectedField={selectedField}
+                onUpdateSection={(updates) =>
+                  handleUpdateSection(selectedSectionId, updates)
+                }
+                onUpdateField={(updates) =>
+                  handleUpdateField(selectedSectionId, selectedFieldId, updates)
+                }
+              />
+            ) : (
+              <Box sx={{ p: 2 }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: 'grey.50',
+                    borderRadius: 2,
+                    border: '1px dashed',
+                    borderColor: 'divider',
+                    minHeight: '100%'
+                  }}
+                >
+                  <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 2, textAlign: 'center' }}>
+                    Mobile Preview
+                  </Typography>
+                  <FormRenderer
+                    template={template}
+                    readOnly={false}
+                    showSubmit={true}
+                    showSave={false}
+                  />
+                </Box>
+              </Box>
+            )}
+          </Box>
         </Paper>
       </Box>
 
@@ -895,7 +942,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                 onChange={(e) => updateTemplateLocal({ name: e.target.value })}
               />
             </Grid>
-            
+
             <Grid item xs={6}>
               <FormControl fullWidth>
                 <InputLabel>Type</InputLabel>
@@ -912,7 +959,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={6}>
               <FormControl fullWidth>
                 <InputLabel>Category</InputLabel>
@@ -929,7 +976,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={6}>
               <FormControl fullWidth>
                 <InputLabel>Gender Specific</InputLabel>
@@ -946,7 +993,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={6}>
               <FormControl fullWidth>
                 <InputLabel>Visit Type</InputLabel>
@@ -963,7 +1010,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -1000,7 +1047,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </Box >
   );
 };
 

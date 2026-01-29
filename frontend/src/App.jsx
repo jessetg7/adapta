@@ -1,13 +1,12 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-// Contexts & Theme
-import theme from './theme';
+// Contexts
+import { ThemeProvider } from './context/ThemeContext';
 import { AdaptaProvider } from './context/AdaptaContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -25,6 +24,7 @@ import PatientConsultation from './pages/PatientConsultation';
 import TemplateManager from './pages/TemplateManager';
 import RuleManager from './pages/RuleManager';
 import WorkflowManager from './pages/WorkflowManager';
+import CreatePrescriptionPage from './pages/CreatePrescriptionPage';
 
 // 1. Create a Layout Wrapper to handle the Outlet
 // This allows MainLayout to stay mounted while child routes change
@@ -38,10 +38,15 @@ const AppLayout = () => {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <BrowserRouter>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <AuthProvider>
             <AdaptaProvider>
               <Routes>
@@ -54,7 +59,7 @@ function App() {
                    We wrap the AppLayout in a ProtectedRoute. 
                    This ensures the entire layout is only visible if logged in.
                 */}
-                <Route 
+                <Route
                   element={
                     <ProtectedRoute>
                       <AppLayout />
@@ -110,6 +115,15 @@ function App() {
                     element={
                       <ProtectedRoute requiredPermission="prescriptions.create">
                         <PrescriptionBuilderPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/prescription/create"
+                    element={
+                      <ProtectedRoute requiredPermission="prescriptions.create">
+                        <CreatePrescriptionPage />
                       </ProtectedRoute>
                     }
                   />

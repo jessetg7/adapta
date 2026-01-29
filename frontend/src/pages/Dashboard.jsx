@@ -40,6 +40,11 @@ import usePatientStore from '../core/store/usePatientStore';
 import useRuleStore from '../core/store/useRuleStore';
 import useWorkflowStore from '../core/store/useWorkflowStore';
 
+// New Components
+import AnimatedStatCard from '../components/shared/AnimatedStatCard';
+import ActivityFeed from '../components/shared/ActivityFeed';
+import PatientTrendsChart from '../components/shared/PatientTrendsChart';
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { templates } = useTemplateStore();
@@ -111,7 +116,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* App Bar */}
       <AppBar position="static" elevation={1}>
         <Toolbar>
@@ -130,7 +135,16 @@ const Dashboard = () => {
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
         {/* Welcome Section */}
-        <Paper sx={{ p: 3, mb: 4, background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
+        <Paper
+          sx={{
+            p: 3,
+            mb: 4,
+            background: (theme) => theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)'
+              : 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+            color: 'white'
+          }}
+        >
           <Grid container alignItems="center" spacing={3}>
             <Grid item xs={12} md={8}>
               <Typography variant="h4" fontWeight={700} gutterBottom>
@@ -154,30 +168,38 @@ const Dashboard = () => {
           </Grid>
         </Paper>
 
-        {/* Stats Cards */}
+        {/* Animated Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {[
-            { label: 'Templates', value: stats.templates, icon: <ArticleIcon />, color: '#1976d2' },
-            { label: 'Patients', value: stats.patients, icon: <PeopleIcon />, color: '#2e7d32' },
-            { label: 'Prescriptions', value: stats.prescriptions, icon: <MedicationIcon />, color: '#9c27b0' },
-            { label: 'Rules', value: stats.rules, icon: <RuleIcon />, color: '#d32f2f' },
-            { label: 'Workflows', value: stats.workflows, icon: <AccountTreeIcon />, color: '#0288d1' },
-            { label: 'Visits', value: stats.visits, icon: <EventIcon />, color: '#ed6c02' },
+            { label: 'Total Patients', value: stats.patients, icon: <PeopleIcon />, color: '#2e7d32', trend: 'up', trendValue: 12 },
+            { label: 'Consultations', value: stats.visits, icon: <EventIcon />, color: '#1976d2', trend: 'up', trendValue: 8 },
+            { label: 'Prescriptions', value: stats.prescriptions, icon: <MedicationIcon />, color: '#9c27b0', trend: 'up', trendValue: 15 },
+            { label: 'Templates', value: stats.templates, icon: <ArticleIcon />, color: '#ed6c02', trend: null },
           ].map((stat) => (
-            <Grid item xs={6} sm={4} md={2} key={stat.label}>
-              <Paper sx={{ p: 2, textAlign: 'center' }}>
-                <Avatar sx={{ bgcolor: stat.color, mx: 'auto', mb: 1 }}>
-                  {stat.icon}
-                </Avatar>
-                <Typography variant="h4" fontWeight={700}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {stat.label}
-                </Typography>
-              </Paper>
+            <Grid item xs={12} sm={6} md={3} key={stat.label}>
+              <AnimatedStatCard
+                label={stat.label}
+                value={stat.value}
+                icon={stat.icon}
+                color={stat.color}
+                trend={stat.trend}
+                trendValue={stat.trendValue}
+              />
             </Grid>
           ))}
+        </Grid>
+
+        {/* Charts and Activity Feed */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {/* Patient Trends Chart */}
+          <Grid item xs={12} lg={8}>
+            <PatientTrendsChart />
+          </Grid>
+
+          {/* Activity Feed */}
+          <Grid item xs={12} lg={4}>
+            <ActivityFeed />
+          </Grid>
         </Grid>
 
         <Grid container spacing={3}>
@@ -271,7 +293,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* LCNC Features Banner */}
-        <Paper sx={{ p: 3, mt: 4, bgcolor: 'grey.50' }}>
+        <Paper sx={{ p: 3, mt: 4, bgcolor: 'background.paper' }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>
             🚀 True Low-Code / No-Code Features
           </Typography>
