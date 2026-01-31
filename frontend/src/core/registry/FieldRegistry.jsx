@@ -493,7 +493,7 @@ export const MedicationGridRenderer = ({ field, value: medications = [], onChang
     { id: 'name', header: 'Medicine', type: 'text', width: '30%' },
     { id: 'dose', header: 'Dose', type: 'text', width: '15%' },
     { id: 'route', header: 'Route', type: 'dropdown', width: '15%', options: (context?.medicationRoutes || []).map(r => ({ label: r, value: r })) },
-    { id: 'frequency', header: 'Freq', type: 'dropdown', width: '15%', options: (context?.frequencies || []).map(f => ({ label: f.id, value: f.id })) },
+    { id: 'frequency', header: 'Freq', type: 'dropdown', width: '15%', options: (context?.frequencies || []).map(f => ({ label: f.label, value: f.value })) },
     { id: 'duration', header: 'Duration', type: 'text', width: '15%' },
   ];
 

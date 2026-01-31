@@ -87,7 +87,7 @@ const MedicationGrid = ({
       genericName: '',
       dose: '',
       route: medicationRoutes[0] || '',
-      frequency: frequencies[0]?.id || '',
+      frequency: frequencies[0]?.value || '',
       duration: '5 days',
       timing: '',
       instructions: '',
@@ -276,7 +276,7 @@ const MedicationGrid = ({
                         disabled={disabled}
                       >
                         {frequencies.map(f => (
-                          <MenuItem key={f.id} value={f.id}>{f.id}</MenuItem>
+                          <MenuItem key={f.value} value={f.value}>{f.label}</MenuItem>
                         ))}
                       </Select>
                     </TableCell>
