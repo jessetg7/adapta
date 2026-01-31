@@ -50,11 +50,13 @@ import PrintIcon from '@mui/icons-material/Print';
 import SaveIcon from '@mui/icons-material/Save';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import ArticleIcon from '@mui/icons-material/Article';
 import { v4 as uuidv4 } from 'uuid';
 
 import usePatientStore from '../core/store/usePatientStore';
 import useTemplateStore from '../core/store/useTemplateStore';
 import FormRenderer from '../components/FormRenderer/FormRenderer';
+import TemplateSelector from '../components/TemplateSelector/TemplateSelector';
 // import MedicationGrid from '../components/PrescriptionBuilder/MedicationGrid';
 // Temporary mock to prevent crashes if the real component is broken or causing issues
 const MedicationGrid = () => <Box p={2} bgcolor="warning.light">Medication Grid Component Unavailable</Box>;
@@ -86,6 +88,8 @@ const PatientConsultation = () => {
     vitals,
     medicationRoutes,
     frequencies,
+    getAllTemplates,
+    getTemplatesByCategory,
     loading: templatesLoading,
   } = useTemplateStore();
 
@@ -109,6 +113,7 @@ const PatientConsultation = () => {
   // Missing state variables
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const [savedPrescriptionId, setSavedPrescriptionId] = useState(null);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [newPatient, setNewPatient] = useState({
     firstName: '',
     lastName: '',
@@ -302,6 +307,34 @@ const PatientConsultation = () => {
       ...prev,
       ...formData
     }));
+  };
+
+  // Handle template loading
+  const handleLoadTemplate = (template) => {
+    // Merge template sections into consultation data
+    const templateData = {};
+
+    template.sections?.forEach(section => {
+      section.fields?.forEach(field => {
+        // Initialize field with default value or empty
+        if (field.type === 'vitals') {
+          templateData.vitals = consultationData.vitals || {};
+        } else if (field.type === 'medications') {
+          templateData.medications = consultationData.medications || [];
+        } else if (field.type === 'investigations') {
+          templateData.investigations = consultationData.investigations || [];
+        } else {
+          templateData[field.id] = consultationData[field.id] || field.defaultValue || '';
+        }
+      });
+    });
+
+    setConsultationData(prev => ({
+      ...prev,
+      ...templateData
+    }));
+
+    setShowTemplateSelector(false);
   };
 
   // Dynamic Consultation Template
@@ -681,20 +714,30 @@ const PatientConsultation = () => {
               <Typography variant="h6">
                 Consultation
               </Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isEmergencyMode}
-                    onChange={(e) => setIsEmergencyMode(e.target.checked)}
-                    color="error"
-                  />
-                }
-                label={
-                  <Typography color={isEmergencyMode ? 'error' : 'textSecondary'} fontWeight="bold">
-                    Emergency Mode
-                  </Typography>
-                }
-              />
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArticleIcon />}
+                  onClick={() => setShowTemplateSelector(true)}
+                  size="small"
+                >
+                  Load Template
+                </Button>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isEmergencyMode}
+                      onChange={(e) => setIsEmergencyMode(e.target.checked)}
+                      color="error"
+                    />
+                  }
+                  label={
+                    <Typography color={isEmergencyMode ? 'error' : 'textSecondary'} fontWeight="bold">
+                      Emergency Mode
+                    </Typography>
+                  }
+                />
+              </Box>
             </Box>
 
             {isEmergencyMode && (
@@ -1033,6 +1076,15 @@ const PatientConsultation = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Template Selector Dialog */}
+      <TemplateSelector
+        open={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelect={handleLoadTemplate}
+        filterCategory="consultation"
+        title="Load Consultation Template"
+      />
     </Box>
   );
 };

@@ -65,6 +65,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import EventIcon from '@mui/icons-material/Event';
 import NotesIcon from '@mui/icons-material/Notes';
 import DrawIcon from '@mui/icons-material/Draw';
+import ArticleIcon from '@mui/icons-material/Article';
 import { v4 as uuidv4 } from 'uuid';
 
 import useTemplateStore from '../../core/store/useTemplateStore';
@@ -73,6 +74,7 @@ import { facilityService } from '../../services/facilityService';
 import PrescriptionPDF from '../PDFRenderer/PrescriptionPDF';
 import { PAGE_SIZES, FONT_FAMILIES } from '../../config/prescriptionConfig';
 import { PDFDownloadLink } from '@react-pdf/renderer';
+import TemplateSelector from '../TemplateSelector/TemplateSelector';
 
 import {
   DEFAULT_PRESCRIPTION_SECTIONS as DEFAULT_SECTIONS,
@@ -200,6 +202,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
   const [selectedSectionId, setSelectedSectionId] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [activeTab, setActiveTab] = useState(0);
   const [facilities, setFacilities] = useState([]);
@@ -320,6 +323,19 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
     onSave?.(template);
   }, [template, templateId, prescriptionTemplates, addPrescriptionTemplate, updatePrescriptionTemplate, onSave]);
 
+  // Load template from Template Manager
+  const handleLoadTemplate = useCallback((selectedTemplate) => {
+    if (selectedTemplate.sections) {
+      setTemplate(prev => ({
+        ...prev,
+        sections: selectedTemplate.sections.map((s, i) => ({ ...s, order: i })),
+        name: selectedTemplate.name + ' (Copy)',
+      }));
+      setSnackbar({ open: true, message: 'Template loaded successfully!', severity: 'success' });
+    }
+    setShowTemplateSelector(false);
+  }, []);
+
   // Sample data for preview
   const sampleData = {
     patient: {
@@ -380,6 +396,12 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
             placeholder="Template Name"
             sx={{ mr: 2, width: 250 }}
           />
+
+          <Tooltip title="Load Template">
+            <IconButton onClick={() => setShowTemplateSelector(true)}>
+              <ArticleIcon />
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title="Settings">
             <IconButton onClick={() => setShowSettings(true)}>
@@ -905,6 +927,15 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Template Selector Dialog */}
+      <TemplateSelector
+        open={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelect={handleLoadTemplate}
+        filterCategory="prescription"
+        title="Load Prescription Template"
+      />
     </Box>
   );
 };
