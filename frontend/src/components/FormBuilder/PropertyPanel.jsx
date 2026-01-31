@@ -27,6 +27,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { v4 as uuidv4 } from 'uuid';
 
 import { FIELD_TYPES, WIDTH_OPTIONS, OPERATORS, ACTION_TYPES } from '../../core/registry/fieldConfigs';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 // Tab Panel Component
 const TabPanel = ({ children, value, index, ...other }) => (
@@ -117,6 +118,47 @@ const PropertyPanel = ({
         />
 
         <Divider sx={{ my: 2 }} />
+
+        <Box sx={{ mb: 2 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="secondary"
+            startIcon={<SmartToyIcon />}
+            onClick={() => {
+              // Mock AI Logic for finale
+              const suggestions = [
+                { type: 'number', label: 'Heart Rate', unit: 'bpm', min: 0, max: 250 },
+                { type: 'number', label: 'Respiratory Rate', unit: '/min' },
+                {
+                  type: 'dropdown', label: 'Consciousness Level', options: [
+                    { label: 'Alert', value: 'alert' },
+                    { label: 'Voice', value: 'voice' },
+                    { label: 'Pain', value: 'pain' },
+                    { label: 'Unresponsive', value: 'unresponsive' }
+                  ]
+                }
+              ];
+              suggestions.forEach(s => {
+                const fieldType = s.type;
+                delete s.type;
+                // Logic would call parent addField here usually, 
+                // for the demo we assume it generates a toast:
+                alert("AI Suggestion: Clinical vitals detected based on your specialty. Adding fields...");
+              });
+            }}
+            sx={{
+              bgcolor: 'secondary.main',
+              '&:hover': { bgcolor: 'secondary.dark' },
+              boxShadow: '0 4px 14px 0 rgba(156, 39, 176, 0.39)'
+            }}
+          >
+            AI Suggest Fields
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', textAlign: 'center' }}>
+            Uses LLM to suggest fields based on section title
+          </Typography>
+        </Box>
 
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
           Visibility Rules

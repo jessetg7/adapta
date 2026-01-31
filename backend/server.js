@@ -16,6 +16,9 @@ const ruleRoutes = require('./routes/rules');
 const patientRoutes = require('./routes/patients');
 const visitRoutes = require('./routes/visits');
 const prescriptionRoutes = require('./routes/prescriptions');
+const medicalRoutes = require('./routes/medical');
+const facilityRoutes = require('./routes/facilities');
+const configRoutes = require('./routes/config');
 
 const app = express();
 
@@ -23,13 +26,13 @@ const app = express();
 connectDB();
 
 // 2. Security Middleware
-app.use(helmet()); 
+app.use(helmet());
 
 // CORS configuration
 // NOTE: Ensure config.corsOrigin is NOT '*' if credentials is true.
 // It must be specific, e.g., 'http://localhost:5173'
 app.use(cors({
-    origin: config.corsOrigin, 
+    origin: config.corsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -39,7 +42,7 @@ app.use(cors({
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 20, // INCREASED: 5 is too low for testing (accidental double clicks, etc)
-    standardHeaders: true, 
+    standardHeaders: true,
     legacyHeaders: false,
     message: { success: false, error: 'Too many login attempts, please try again after 15 minutes' }
 });
@@ -92,6 +95,9 @@ app.use('/api/rules', apiLimiter, ruleRoutes);
 app.use('/api/patients', apiLimiter, patientRoutes);
 app.use('/api/visits', apiLimiter, visitRoutes);
 app.use('/api/prescriptions', apiLimiter, prescriptionRoutes);
+app.use('/api/medical', apiLimiter, medicalRoutes);
+app.use('/api/facilities', apiLimiter, facilityRoutes);
+app.use('/api/config', apiLimiter, configRoutes);
 
 // 7. 404 Handler (Moved BEFORE Error Handler)
 app.use((req, res, next) => {

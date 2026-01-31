@@ -30,6 +30,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Autocomplete,
 } from '@mui/material';
 import {
   DndContext,
@@ -68,32 +69,15 @@ import { v4 as uuidv4 } from 'uuid';
 
 import useTemplateStore from '../../core/store/useTemplateStore';
 import PrescriptionPreview from './PrescriptionPreview';
+import { facilityService } from '../../services/facilityService';
+import PrescriptionPDF from '../PDFRenderer/PrescriptionPDF';
+import { PAGE_SIZES, FONT_FAMILIES } from '../../config/prescriptionConfig';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 
-// Default prescription sections
-const DEFAULT_SECTIONS = [
-  { id: 'header', type: 'header', title: 'Clinic Header', enabled: true, order: 0, icon: 'LocalHospital' },
-  { id: 'patient-info', type: 'patient-info', title: 'Patient Information', enabled: true, order: 1, icon: 'Person' },
-  { id: 'vitals', type: 'vitals', title: 'Vitals', enabled: true, order: 2, icon: 'MonitorHeart' },
-  { id: 'diagnosis', type: 'diagnosis', title: 'Diagnosis', enabled: true, order: 3, icon: 'MedicalServices' },
-  { id: 'medications', type: 'medications', title: 'Medications', enabled: true, order: 4, icon: 'Medication' },
-  { id: 'investigations', type: 'investigations', title: 'Investigations', enabled: false, order: 5, icon: 'Science' },
-  { id: 'advice', type: 'advice', title: 'Advice', enabled: true, order: 6, icon: 'Notes' },
-  { id: 'follow-up', type: 'follow-up', title: 'Follow-up', enabled: true, order: 7, icon: 'Event' },
-  { id: 'signature', type: 'signature', title: 'Signature', enabled: true, order: 8, icon: 'Draw' },
-];
-
-// Section icons mapping
-const SECTION_ICONS = {
-  LocalHospital: LocalHospitalIcon,
-  Person: PersonIcon,
-  Medication: MedicationIcon,
-  Science: ScienceIcon,
-  Event: EventIcon,
-  Notes: NotesIcon,
-  Draw: DrawIcon,
-  MonitorHeart: LocalHospitalIcon,
-  MedicalServices: LocalHospitalIcon,
-};
+import {
+  DEFAULT_PRESCRIPTION_SECTIONS as DEFAULT_SECTIONS,
+  SECTION_ICONS
+} from '../../core/schemas/prescriptionSections';
 
 // Sortable Section Item
 const SortableSectionItem = ({ section, isSelected, onSelect, onToggle }) => {
@@ -142,13 +126,13 @@ const SortableSectionItem = ({ section, isSelected, onSelect, onToggle }) => {
       >
         <DragIndicatorIcon fontSize="small" />
       </IconButton>
-      
+
       <IconComponent fontSize="small" color="primary" sx={{ mr: 1 }} />
-      
+
       <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 500 }}>
         {section.title}
       </Typography>
-      
+
       <Tooltip title={section.enabled ? 'Enabled' : 'Disabled'}>
         <IconButton
           size="small"
@@ -188,6 +172,12 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
         email: 'info@medical.com',
         logo: null,
       },
+      doctorInfo: {
+        name: '',
+        qualification: '',
+        specialization: '',
+        registrationNo: '',
+      },
       pageSize: 'A4',
       orientation: 'portrait',
       margins: { top: 20, right: 20, bottom: 20, left: 20 },
@@ -212,6 +202,43 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [activeTab, setActiveTab] = useState(0);
+  const [facilities, setFacilities] = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch facilities
+  React.useEffect(() => {
+    const loadFacilities = async () => {
+      setLoading(true);
+      try {
+        const response = await facilityService.getFacilities();
+        setFacilities(response.data);
+      } catch (err) {
+        console.error('Failed to load facilities:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadFacilities();
+  }, []);
+
+  // Fetch staff when clinic name changes (matching by name for now to maintain compatibility with existing template structure)
+  React.useEffect(() => {
+    const loadStaff = async () => {
+      const facility = facilities.find(f => f.name === template.clinicInfo.name);
+      if (facility?._id) {
+        try {
+          const response = await facilityService.getFacilityStaff(facility._id);
+          setStaff(response.data);
+        } catch (err) {
+          console.error('Failed to load staff:', err);
+        }
+      } else {
+        setStaff([]);
+      }
+    };
+    loadStaff();
+  }, [template.clinicInfo.name, facilities]);
 
   // DnD sensors
   const sensors = useSensors(
@@ -259,12 +286,12 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
   // Handle drag end
   const handleDragEnd = useCallback((event) => {
     const { active, over } = event;
-    
+
     if (active.id !== over?.id) {
       setTemplate(prev => {
         const oldIndex = prev.sections.findIndex(s => s.id === active.id);
         const newIndex = prev.sections.findIndex(s => s.id === over.id);
-        
+
         return {
           ...prev,
           sections: arrayMove(prev.sections, oldIndex, newIndex).map((s, i) => ({
@@ -322,7 +349,19 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
     investigations: ['CBC', 'Chest X-Ray'],
     advice: ['Rest for 2-3 days', 'Drink plenty of fluids', 'Avoid cold drinks'],
     followUp: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    // For obstetric history table preview
+    prevObstetricHistory: [
+      { outcome: 'Full Term', modeConception: 'Spontaneous', weeks: 39, modeDelivery: 'LSCS', babyOutcome: 'Healthy Boy', complications: 'Nil' },
+      { outcome: 'Miscarriage', modeConception: 'Spontaneous', weeks: 8, modeDelivery: 'D&C', babyOutcome: 'N/A', complications: 'Excessive bleeding' }
+    ]
   };
+
+  // Helper to prepare data for PDF
+  const pdfData = useMemo(() => ({
+    ...sampleData,
+    clinic: template.clinicInfo,
+    doctor: template.doctorInfo,
+  }), [sampleData, template.clinicInfo, template.doctorInfo]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'grey.100' }}>
@@ -333,7 +372,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Prescription Builder
           </Typography>
-          
+
           <TextField
             size="small"
             value={template.name}
@@ -341,19 +380,36 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
             placeholder="Template Name"
             sx={{ mr: 2, width: 250 }}
           />
-          
+
           <Tooltip title="Settings">
             <IconButton onClick={() => setShowSettings(true)}>
               <SettingsIcon />
             </IconButton>
           </Tooltip>
-          
+
           <Tooltip title="Preview">
             <IconButton onClick={() => setShowPreview(true)}>
               <PreviewIcon />
             </IconButton>
           </Tooltip>
-          
+
+          <PDFDownloadLink
+            document={<PrescriptionPDF data={pdfData} template={template} />}
+            fileName={`${template.name.replace(/\s+/g, '_')}.pdf`}
+            style={{ textDecoration: 'none' }}
+          >
+            {({ loading }) => (
+              <Button
+                variant="outlined"
+                startIcon={<PrintIcon />}
+                disabled={loading}
+                sx={{ ml: 2 }}
+              >
+                {loading ? 'Preparing...' : 'Download PDF'}
+              </Button>
+            )}
+          </PDFDownloadLink>
+
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
@@ -362,7 +418,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
           >
             Save
           </Button>
-          
+
           {onClose && (
             <IconButton onClick={onClose} sx={{ ml: 1 }}>
               <CloseIcon />
@@ -378,7 +434,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
             Prescription Sections
           </Typography>
-          
+
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
             Drag to reorder. Click eye icon to show/hide sections.
           </Typography>
@@ -422,12 +478,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
               template={template}
               data={sampleData}
               clinicInfo={template.clinicInfo}
-              doctor={{
-                name: 'Dr. John Smith',
-                qualification: 'MBBS, MD',
-                specialization: 'General Medicine',
-                registrationNo: 'MCI-12345',
-              }}
+              doctor={template.doctorInfo}
             />
           </Paper>
         </Box>
@@ -439,7 +490,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                 Section Properties
               </Typography>
-              
+
               <TextField
                 fullWidth
                 label="Section Title"
@@ -448,7 +499,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
                 sx={{ mb: 2 }}
                 size="small"
               />
-              
+
               <FormControlLabel
                 control={
                   <Switch
@@ -473,22 +524,44 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
 
               {selectedSection.type === 'header' && (
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    Clinic Information
+                  <Typography variant="subtitle2" sx={{ mb: 1.5, color: 'primary.main' }}>
+                    🏥 Facility Information
                   </Typography>
-                  <TextField
-                    fullWidth
-                    label="Clinic Name"
-                    value={template.clinicInfo.name}
-                    onChange={(e) => updateTemplate({
-                      clinicInfo: { ...template.clinicInfo, name: e.target.value }
-                    })}
-                    sx={{ mb: 1 }}
-                    size="small"
+                  <Autocomplete
+                    options={facilities}
+                    getOptionLabel={(option) => option.name || ''}
+                    value={facilities.find(h => h.name === template.clinicInfo.name) || null}
+                    loading={loading}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        updateTemplate({
+                          clinicInfo: {
+                            name: newValue.name,
+                            address: `${newValue.address?.street || ''}, ${newValue.address?.city || ''}`,
+                            phone: newValue.contact?.phone || '',
+                            email: newValue.contact?.email || '',
+                            logo: template.clinicInfo.logo,
+                          }
+                        });
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Search Hospital" size="small" fullWidth sx={{ mb: 1 }} />
+                    )}
+                    freeSolo
+                    onInputChange={(event, newInputValue) => {
+                      if (!facilities.some(h => h.name === newInputValue)) {
+                        updateTemplate({
+                          clinicInfo: { ...template.clinicInfo, name: newInputValue }
+                        });
+                      }
+                    }}
                   />
                   <TextField
                     fullWidth
                     label="Address"
+                    multiline
+                    rows={2}
                     value={template.clinicInfo.address}
                     onChange={(e) => updateTemplate({
                       clinicInfo: { ...template.clinicInfo, address: e.target.value }
@@ -496,22 +569,92 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
                     sx={{ mb: 1 }}
                     size="small"
                   />
+                  <Grid container spacing={1} sx={{ mb: 2 }}>
+                    <Grid item xs={6}>
+                      <TextField
+                        fullWidth
+                        label="Phone"
+                        value={template.clinicInfo.phone}
+                        onChange={(e) => updateTemplate({
+                          clinicInfo: { ...template.clinicInfo, phone: e.target.value }
+                        })}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        fullWidth
+                        label="Email"
+                        value={template.clinicInfo.email}
+                        onChange={(e) => updateTemplate({
+                          clinicInfo: { ...template.clinicInfo, email: e.target.value }
+                        })}
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Typography variant="subtitle2" sx={{ mb: 1.5, color: 'primary.main' }}>
+                    👨‍⚕️ Doctor Information
+                  </Typography>
+
+                  <Autocomplete
+                    options={staff}
+                    getOptionLabel={(option) => option.username || option.name || ''}
+                    value={staff.find(d => d.username === template.doctorInfo.name || d.name === template.doctorInfo.name) || null}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        updateTemplate({
+                          doctorInfo: {
+                            name: newValue.username || newValue.name,
+                            qualification: newValue.profile?.qualification || '',
+                            specialization: newValue.profile?.specialization || '',
+                            registrationNo: newValue.profile?.registrationNo || '',
+                          }
+                        });
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Search Doctor" size="small" fullWidth sx={{ mb: 1 }} />
+                    )}
+                    freeSolo
+                    onInputChange={(event, newInputValue) => {
+                      if (!staff.some(d => (d.username || d.name) === newInputValue)) {
+                        updateTemplate({
+                          doctorInfo: { ...template.doctorInfo, name: newInputValue }
+                        });
+                      }
+                    }}
+                  />
+
                   <TextField
                     fullWidth
-                    label="Phone"
-                    value={template.clinicInfo.phone}
+                    label="Qualification"
+                    value={template.doctorInfo.qualification}
                     onChange={(e) => updateTemplate({
-                      clinicInfo: { ...template.clinicInfo, phone: e.target.value }
+                      doctorInfo: { ...template.doctorInfo, qualification: e.target.value }
                     })}
                     sx={{ mb: 1 }}
                     size="small"
                   />
                   <TextField
                     fullWidth
-                    label="Email"
-                    value={template.clinicInfo.email}
+                    label="Specialization"
+                    value={template.doctorInfo.specialization}
                     onChange={(e) => updateTemplate({
-                      clinicInfo: { ...template.clinicInfo, email: e.target.value }
+                      doctorInfo: { ...template.doctorInfo, specialization: e.target.value }
+                    })}
+                    sx={{ mb: 1 }}
+                    size="small"
+                  />
+                  <TextField
+                    fullWidth
+                    label="Registration No."
+                    value={template.doctorInfo.registrationNo}
+                    onChange={(e) => updateTemplate({
+                      doctorInfo: { ...template.doctorInfo, registrationNo: e.target.value }
                     })}
                     size="small"
                   />
@@ -552,9 +695,9 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
                     label="Page Size"
                     onChange={(e) => updateTemplate({ pageSize: e.target.value })}
                   >
-                    <MenuItem value="A4">A4</MenuItem>
-                    <MenuItem value="A5">A5</MenuItem>
-                    <MenuItem value="Letter">Letter</MenuItem>
+                    {PAGE_SIZES.map(opt => (
+                      <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -658,10 +801,9 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
                       styling: { ...template.styling, fontFamily: e.target.value }
                     })}
                   >
-                    <MenuItem value="Arial, sans-serif">Arial</MenuItem>
-                    <MenuItem value="'Times New Roman', serif">Times New Roman</MenuItem>
-                    <MenuItem value="'Courier New', monospace">Courier New</MenuItem>
-                    <MenuItem value="Georgia, serif">Georgia</MenuItem>
+                    {FONT_FAMILIES.map(opt => (
+                      <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -729,19 +871,26 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
               template={template}
               data={sampleData}
               clinicInfo={template.clinicInfo}
-              doctor={{
-                name: 'Dr. John Smith',
-                qualification: 'MBBS, MD',
-                specialization: 'General Medicine',
-                registrationNo: 'MCI-12345',
-              }}
+              doctor={template.doctorInfo}
             />
           </Paper>
         </DialogContent>
         <DialogActions>
-          <Button startIcon={<PrintIcon />} variant="contained">
-            Print
-          </Button>
+          <PDFDownloadLink
+            document={<PrescriptionPDF data={pdfData} template={template} />}
+            fileName={`${template.name.replace(/\s+/g, '_')}.pdf`}
+            style={{ textDecoration: 'none' }}
+          >
+            {({ loading }) => (
+              <Button
+                startIcon={<PrintIcon />}
+                variant="contained"
+                disabled={loading}
+              >
+                {loading ? 'Generating...' : 'Download PDF'}
+              </Button>
+            )}
+          </PDFDownloadLink>
           <Button onClick={() => setShowPreview(false)}>Close</Button>
         </DialogActions>
       </Dialog>

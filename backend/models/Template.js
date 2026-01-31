@@ -12,50 +12,47 @@ const templateSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['medical', 'administrative', 'consent', 'assessment', 'other'],
+        enum: ['medical', 'administrative', 'consent', 'assessment', 'department', 'other'],
         default: 'other'
     },
-    fields: [{
+    specialty: {
+        type: String,
+        trim: true
+    },
+    sections: [{
         id: {
             type: String,
             required: true
         },
-        type: {
-            type: String,
-            required: true,
-            enum: ['text', 'textarea', 'number', 'date', 'select', 'checkbox', 'radio', 'file', 'signature']
-        },
-        label: {
+        title: {
             type: String,
             required: true
         },
-        placeholder: String,
-        defaultValue: mongoose.Schema.Types.Mixed,
-        required: {
-            type: Boolean,
-            default: false
-        },
-        validation: {
-            type: mongoose.Schema.Types.Mixed,
-            default: {}
-        },
-        options: [String],
-        metadata: {
-            type: mongoose.Schema.Types.Mixed,
-            default: {}
-        }
-    }],
-    layout: {
-        type: mongoose.Schema.Types.Mixed,
-        default: {}
-    },
-    rules: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Rule'
-    }],
-    workflows: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Workflow'
+        fields: [{
+            id: {
+                type: String,
+                required: true
+            },
+            type: {
+                type: String,
+                required: true
+            },
+            label: {
+                type: String,
+                required: true
+            },
+            width: {
+                type: String,
+                default: 'full'
+            },
+            options: [mongoose.Schema.Types.Mixed],
+            required: {
+                type: Boolean,
+                default: false
+            },
+            visibilityRules: [mongoose.Schema.Types.Mixed],
+            validation: [mongoose.Schema.Types.Mixed]
+        }]
     }],
     version: {
         type: Number,

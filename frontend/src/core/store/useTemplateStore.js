@@ -1,15 +1,84 @@
-// src/core/store/useTemplateStore.js
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { v4 as uuidv4 } from 'uuid';
+import { templateService } from '../../services/templateService';
+import { configService } from '../../services/configService';
 
 const useTemplateStore = create(
   persist(
     immer((set, get) => ({
       templates: {},
       prescriptionTemplates: {},
+      remoteTemplates: [],
+      specialties: [],
+      vitals: [],
+      medicationRoutes: [],
+      frequencies: [],
+      loading: false,
+      error: null,
       activeTemplateId: null,
+
+      fetchVitals: async () => {
+        set({ loading: true, error: null });
+        try {
+          const response = await configService.getVitals();
+          set((state) => {
+            state.vitals = response.data;
+            state.loading = false;
+          });
+          return response.data;
+        } catch (error) {
+          set({ error: error.message, loading: false });
+          return [];
+        }
+      },
+
+      fetchMetadata: async () => {
+        set({ loading: true, error: null });
+        try {
+          const response = await configService.getMetadata();
+          set((state) => {
+            state.medicationRoutes = response.data.routes;
+            state.frequencies = response.data.frequencies;
+            state.loading = false;
+          });
+          return response.data;
+        } catch (error) {
+          set({ error: error.message, loading: false });
+          return null;
+        }
+      },
+
+      fetchSpecialties: async () => {
+        set({ loading: true, error: null });
+        try {
+          const response = await templateService.getSpecialties();
+          set((state) => {
+            state.specialties = response.data;
+            state.loading = false;
+          });
+          return response.data;
+        } catch (error) {
+          set({ error: error.message, loading: false });
+          return [];
+        }
+      },
+
+      fetchDepartmentTemplates: async (specialty) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await templateService.getTemplates({ category: 'department', specialty });
+          set((state) => {
+            state.remoteTemplates = response.data;
+            state.loading = false;
+          });
+          return response.data;
+        } catch (error) {
+          set({ error: error.message, loading: false });
+          return [];
+        }
+      },
 
       // Template CRUD
       addTemplate: (template) => {
@@ -58,7 +127,7 @@ const useTemplateStore = create(
       cloneTemplate: (id) => {
         const original = get().templates[id];
         if (!original) return null;
-        
+
         const newId = uuidv4();
         set((state) => {
           const cloned = JSON.parse(JSON.stringify(original));
@@ -95,7 +164,7 @@ const useTemplateStore = create(
       addSection: (templateId, section) => {
         const template = get().templates[templateId];
         if (!template) return null;
-        
+
         const sectionId = uuidv4();
         set((state) => {
           const t = state.templates[templateId];
@@ -115,7 +184,7 @@ const useTemplateStore = create(
         set((state) => {
           const template = state.templates[templateId];
           if (!template) return;
-          
+
           const sectionIndex = template.sections.findIndex(s => s.id === sectionId);
           if (sectionIndex !== -1) {
             template.sections[sectionIndex] = {
@@ -132,7 +201,7 @@ const useTemplateStore = create(
         set((state) => {
           const template = state.templates[templateId];
           if (!template) return;
-          
+
           template.sections = template.sections.filter(s => s.id !== sectionId);
           template.sections.forEach((s, i) => (s.order = i));
           template.version++;
@@ -144,7 +213,7 @@ const useTemplateStore = create(
         set((state) => {
           const template = state.templates[templateId];
           if (!template) return;
-          
+
           const sectionMap = new Map(template.sections.map(s => [s.id, s]));
           template.sections = orderedIds
             .map((id, index) => {
@@ -155,7 +224,7 @@ const useTemplateStore = create(
               return null;
             })
             .filter(Boolean);
-          
+
           template.version++;
           template.metadata.updatedAt = new Date().toISOString();
         });
@@ -165,10 +234,10 @@ const useTemplateStore = create(
       addField: (templateId, sectionId, field) => {
         const template = get().templates[templateId];
         if (!template) return null;
-        
+
         const section = template.sections.find(s => s.id === sectionId);
         if (!section) return null;
-        
+
         const fieldId = uuidv4();
         set((state) => {
           const t = state.templates[templateId];
@@ -190,10 +259,10 @@ const useTemplateStore = create(
         set((state) => {
           const template = state.templates[templateId];
           if (!template) return;
-          
+
           const section = template.sections.find(s => s.id === sectionId);
           if (!section) return;
-          
+
           const fieldIndex = section.fields.findIndex(f => f.id === fieldId);
           if (fieldIndex !== -1) {
             section.fields[fieldIndex] = {
@@ -210,10 +279,10 @@ const useTemplateStore = create(
         set((state) => {
           const template = state.templates[templateId];
           if (!template) return;
-          
+
           const section = template.sections.find(s => s.id === sectionId);
           if (!section) return;
-          
+
           section.fields = section.fields.filter(f => f.id !== fieldId);
           section.fields.forEach((f, i) => (f.order = i));
           template.version++;
@@ -225,20 +294,20 @@ const useTemplateStore = create(
         set((state) => {
           const template = state.templates[templateId];
           if (!template) return;
-          
+
           const fromSection = template.sections.find(s => s.id === fromSectionId);
           const toSection = template.sections.find(s => s.id === toSectionId);
           if (!fromSection || !toSection) return;
-          
+
           const fieldIndex = fromSection.fields.findIndex(f => f.id === fieldId);
           if (fieldIndex === -1) return;
-          
+
           const [field] = fromSection.fields.splice(fieldIndex, 1);
           toSection.fields.splice(newIndex, 0, { ...field, order: newIndex });
-          
+
           fromSection.fields.forEach((f, i) => (f.order = i));
           toSection.fields.forEach((f, i) => (f.order = i));
-          
+
           template.version++;
           template.metadata.updatedAt = new Date().toISOString();
         });
@@ -248,10 +317,10 @@ const useTemplateStore = create(
         set((state) => {
           const template = state.templates[templateId];
           if (!template) return;
-          
+
           const section = template.sections.find(s => s.id === sectionId);
           if (!section) return;
-          
+
           const fieldMap = new Map(section.fields.map(f => [f.id, f]));
           section.fields = orderedIds
             .map((id, index) => {
@@ -262,7 +331,7 @@ const useTemplateStore = create(
               return null;
             })
             .filter(Boolean);
-          
+
           template.version++;
           template.metadata.updatedAt = new Date().toISOString();
         });
@@ -309,18 +378,18 @@ const useTemplateStore = create(
 
       // Getters
       getTemplate: (id) => get().templates[id],
-      
-      getTemplatesByType: (type) => 
+
+      getTemplatesByType: (type) =>
         Object.values(get().templates).filter(t => t.type === type),
-      
-      getTemplatesByCategory: (category) => 
+
+      getTemplatesByCategory: (category) =>
         Object.values(get().templates).filter(t => t.category === category),
 
       getAllTemplates: () => Object.values(get().templates),
 
       // Import/Export
       exportTemplates: () => JSON.stringify(get().templates, null, 2),
-      
+
       importTemplates: (json) => {
         try {
           const templates = JSON.parse(json);

@@ -1,6 +1,7 @@
 // src/components/PrescriptionBuilder/PrescriptionPreview.jsx
 import React from 'react';
 import { Box, Typography, Divider, Grid, Table, TableBody, TableCell, TableRow } from '@mui/material';
+import { formatDate, formatVitals, shouldRenderSection } from './prescriptionUtils';
 
 /**
  * PrescriptionPreview - Renders prescription based on template
@@ -9,30 +10,9 @@ import { Box, Typography, Divider, Grid, Table, TableBody, TableCell, TableRow }
 const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
   const styling = template?.styling || {};
   const sections = template?.sections || [];
-  const enabledSections = sections.filter(s => s.enabled).sort((a, b) => a.order - b.order);
-
-  // Format date
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  // Format vitals
-  const formatVitals = (vitals) => {
-    const items = [];
-    if (vitals?.temperature) items.push(`Temp: ${vitals.temperature}°F`);
-    if (vitals?.bloodPressureSystolic && vitals?.bloodPressureDiastolic) {
-      items.push(`BP: ${vitals.bloodPressureSystolic}/${vitals.bloodPressureDiastolic} mmHg`);
-    }
-    if (vitals?.heartRate) items.push(`HR: ${vitals.heartRate} bpm`);
-    if (vitals?.weight) items.push(`Weight: ${vitals.weight} kg`);
-    if (vitals?.height) items.push(`Height: ${vitals.height} cm`);
-    return items;
-  };
+  const enabledSections = sections
+    .filter(s => shouldRenderSection(s, data))
+    .sort((a, b) => a.order - b.order);
 
   // Render section based on type
   const renderSection = (section) => {
@@ -89,7 +69,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
               <strong>Age/Sex:</strong> {data?.patient?.age || 'N/A'} / {data?.patient?.gender || 'N/A'}
             </Typography>
             <Typography variant="body2">
-              <strong>Date:</strong> {formatDate(data?.visit?.date)}
+              <strong>Date:</strong> {formatDate(data?.visit?.date || data?.date)}
             </Typography>
             <Typography variant="body2">
               <strong>Patient ID:</strong> {data?.patient?.patientId || 'N/A'}
@@ -99,7 +79,6 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
 
       case 'vitals':
         const vitals = formatVitals(data?.vitals);
-        if (vitals.length === 0) return null;
         return (
           <Box key={section.id} sx={{ mb: 2 }}>
             <Typography
@@ -123,8 +102,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
         );
 
       case 'diagnosis':
-        if (!data?.diagnosis || data.diagnosis.length === 0) return null;
-        const diagnosisArray = Array.isArray(data.diagnosis) ? data.diagnosis : [data.diagnosis];
+        const diagnosisArray = Array.isArray(data.diagnosis) ? data.diagnosis : (data.diagnosis ? [data.diagnosis] : []);
         return (
           <Box key={section.id} sx={{ mb: 2 }}>
             <Typography
@@ -142,7 +120,6 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
         );
 
       case 'medications':
-        if (!data?.medications || data.medications.length === 0) return null;
         return (
           <Box key={section.id} sx={{ mb: 2 }}>
             <Typography
@@ -186,7 +163,6 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
         );
 
       case 'investigations':
-        if (!data?.investigations || data.investigations.length === 0) return null;
         return (
           <Box key={section.id} sx={{ mb: 2 }}>
             <Typography
@@ -210,7 +186,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
         );
 
       case 'advice':
-        if (!data?.advice || data.advice.length === 0) return null;
+        const adviceArray = Array.isArray(data.advice) ? data.advice : (data.advice ? data.advice.split('\n') : []);
         return (
           <Box key={section.id} sx={{ mb: 2 }}>
             <Typography
@@ -224,7 +200,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
               {section.title}
             </Typography>
             <Box component="ul" sx={{ m: 0, pl: 3 }}>
-              {data.advice.map((adv, i) => (
+              {adviceArray.map((adv, i) => (
                 <li key={i}>
                   <Typography variant="body2">{adv}</Typography>
                 </li>
@@ -234,7 +210,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
         );
 
       case 'follow-up':
-        if (!data?.followUp) return null;
+        const fuDate = data.followUp || data.followUpDate;
         return (
           <Box key={section.id} sx={{ mb: 2 }}>
             <Typography
@@ -248,7 +224,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
               {section.title}
             </Typography>
             <Typography variant="body2">
-              Please visit on: <strong>{formatDate(data.followUp)}</strong>
+              Please visit on: <strong>{formatDate(fuDate)}</strong>
             </Typography>
           </Box>
         );
@@ -264,6 +240,44 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
                 <Typography variant="caption">{doctor?.qualification}</Typography>
               </Box>
             </Box>
+          </Box>
+        );
+
+      case 'table':
+        const tableData = data[section.id] || [];
+        const columns = section.config?.columns || [];
+        return (
+          <Box key={section.id} sx={{ mb: 2 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: styling.primaryColor || 'primary.main',
+                fontWeight: 600,
+                mb: 1,
+              }}
+            >
+              {section.title}
+            </Typography>
+            <Table size="small" sx={{ border: '1px solid', borderColor: 'divider' }}>
+              <TableBody>
+                <TableRow sx={{ bgcolor: 'grey.50' }}>
+                  {columns.map(col => (
+                    <TableCell key={col.id} sx={{ fontWeight: 700, py: 1 }}>
+                      {col.header}
+                    </TableCell>
+                  ))}
+                </TableRow>
+                {tableData.map((row, i) => (
+                  <TableRow key={i}>
+                    {columns.map(col => (
+                      <TableCell key={col.id} sx={{ py: 1 }}>
+                        {row[col.id] || '-'}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Box>
         );
 

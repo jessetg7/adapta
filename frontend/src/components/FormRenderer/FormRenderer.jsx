@@ -32,6 +32,7 @@ const FormRenderer = ({
   readOnly = false,
   showSubmit = true,
   showSave = true,
+  onChange,
 }) => {
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
@@ -52,7 +53,7 @@ const FormRenderer = ({
   // Compute field states based on rules
   const fieldStates = useMemo(() => {
     const states = new Map();
-    
+
     if (!template?.sections) return states;
 
     template.sections.forEach(section => {
@@ -69,7 +70,7 @@ const FormRenderer = ({
   // Compute section states
   const sectionStates = useMemo(() => {
     const states = new Map();
-    
+
     if (!template?.sections) return states;
 
     template.sections.forEach(section => {
@@ -88,10 +89,19 @@ const FormRenderer = ({
 
   // Handle field change
   const handleFieldChange = useCallback((fieldId, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldId]: value,
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [fieldId]: value,
+      };
+
+      // Notify parent of change
+      if (onChange) {
+        onChange(newData);
+      }
+
+      return newData;
+    });
 
     // Clear error for this field
     if (errors[fieldId]) {
@@ -101,7 +111,7 @@ const FormRenderer = ({
         return newErrors;
       });
     }
-  }, [errors]);
+  }, [errors, onChange]);
 
   // Toggle section collapse
   const toggleSection = useCallback((sectionId) => {
@@ -184,7 +194,7 @@ const FormRenderer = ({
   // Handle submit
   const handleSubmit = async (e) => {
     e?.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -221,9 +231,9 @@ const FormRenderer = ({
       {alerts.length > 0 && (
         <Box sx={{ mb: 2 }}>
           {alerts.map((alert, index) => (
-            <Alert 
-              key={index} 
-              severity={alert.severity || 'warning'} 
+            <Alert
+              key={index}
+              severity={alert.severity || 'warning'}
               sx={{ mb: 1 }}
             >
               {alert.message}
@@ -293,7 +303,7 @@ const FormRenderer = ({
                     .sort((a, b) => (a.order || 0) - (b.order || 0))
                     .map(field => {
                       const fieldState = fieldStates.get(field.id) || {};
-                      
+
                       return (
                         <DynamicField
                           key={field.id}

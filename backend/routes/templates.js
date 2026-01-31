@@ -6,13 +6,16 @@ const {
     createTemplate,
     updateTemplate,
     deleteTemplate,
-    cloneTemplate
+    cloneTemplate,
+    getSpecialties
 } = require('../controllers/templateController');
 const { protect, authorize } = require('../middleware/auth');
 const { auditMiddleware } = require('../middleware/auditLogger');
 
 // All routes require authentication
 router.use(protect);
+
+router.get('/specialties', getSpecialties);
 
 router.route('/')
     .get(getTemplates)

@@ -25,6 +25,7 @@ import TemplateManager from './pages/TemplateManager';
 import RuleManager from './pages/RuleManager';
 import WorkflowManager from './pages/WorkflowManager';
 import CreatePrescriptionPage from './pages/CreatePrescriptionPage';
+import ReportPage from './pages/ReportPage';
 
 // 1. Create a Layout Wrapper to handle the Outlet
 // This allows MainLayout to stay mounted while child routes change
@@ -38,17 +39,17 @@ const AppLayout = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <CssBaseline />
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <AuthProvider>
-            <AdaptaProvider>
+    <AdaptaProvider>
+      <ThemeProvider>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <AuthProvider>
               <Routes>
                 {/* --- Public Routes --- */}
                 <Route path="/login" element={<LoginPage />} />
@@ -56,9 +57,9 @@ function App() {
 
                 {/* --- Protected Routes (Layout Persists) --- */}
                 {/* 
-                   We wrap the AppLayout in a ProtectedRoute. 
-                   This ensures the entire layout is only visible if logged in.
-                */}
+                      We wrap the AppLayout in a ProtectedRoute. 
+                      This ensures the entire layout is only visible if logged in.
+                    */}
                 <Route
                   element={
                     <ProtectedRoute>
@@ -154,16 +155,25 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="/reports"
+                    element={
+                      <ProtectedRoute requiredPermission="reports.view">
+                        <ReportPage />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Route>
 
                 {/* --- Fallback --- */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-            </AdaptaProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </LocalizationProvider>
-    </ThemeProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </LocalizationProvider>
+      </ThemeProvider>
+    </AdaptaProvider>
   );
 }
 

@@ -29,12 +29,16 @@ import {
   Alert,
 } from '@mui/material';
 import { DatePicker, TimePicker, DateTimePicker } from '@mui/x-date-pickers';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { v4 as uuidv4 } from 'uuid';
+import { medicalService } from '../../services/medicalService';
+import {
+  MEDICATION_ROUTES,
+  MEDICATION_FREQUENCIES,
+  DEFAULT_VITALS_CONFIG
+} from '../../config/prescriptionConfig';
 
 // ============================================
 // TEXT FIELD RENDERER
@@ -116,69 +120,63 @@ export const TextareaFieldRenderer = ({ field, value, onChange, error, disabled 
 // DATE FIELD RENDERER
 // ============================================
 export const DateFieldRenderer = ({ field, value, onChange, error, disabled }) => (
-  <LocalizationProvider dateAdapter={AdapterDayjs}>
-    <DatePicker
-      label={field.label}
-      value={value ? dayjs(value) : null}
-      onChange={(date) => onChange(date ? date.format('YYYY-MM-DD') : null)}
-      disabled={disabled}
-      slotProps={{
-        textField: {
-          fullWidth: true,
-          required: field.required,
-          error: !!error,
-          helperText: error || field.description,
-          size: 'small',
-        },
-      }}
-    />
-  </LocalizationProvider>
+  <DatePicker
+    label={field.label}
+    value={value ? dayjs(value) : null}
+    onChange={(date) => onChange(date ? date.format('YYYY-MM-DD') : null)}
+    disabled={disabled}
+    slotProps={{
+      textField: {
+        fullWidth: true,
+        required: field.required,
+        error: !!error,
+        helperText: error || field.description,
+        size: 'small',
+      },
+    }}
+  />
 );
 
 // ============================================
 // TIME FIELD RENDERER
 // ============================================
 export const TimeFieldRenderer = ({ field, value, onChange, error, disabled }) => (
-  <LocalizationProvider dateAdapter={AdapterDayjs}>
-    <TimePicker
-      label={field.label}
-      value={value ? dayjs(value, 'HH:mm') : null}
-      onChange={(time) => onChange(time ? time.format('HH:mm') : null)}
-      disabled={disabled}
-      slotProps={{
-        textField: {
-          fullWidth: true,
-          required: field.required,
-          error: !!error,
-          helperText: error || field.description,
-          size: 'small',
-        },
-      }}
-    />
-  </LocalizationProvider>
+  <TimePicker
+    label={field.label}
+    value={value ? dayjs(value, 'HH:mm') : null}
+    onChange={(time) => onChange(time ? time.format('HH:mm') : null)}
+    disabled={disabled}
+    slotProps={{
+      textField: {
+        fullWidth: true,
+        required: field.required,
+        error: !!error,
+        helperText: error || field.description,
+        size: 'small',
+      },
+    }}
+  />
 );
 
 // ============================================
 // DATETIME FIELD RENDERER
 // ============================================
 export const DateTimeFieldRenderer = ({ field, value, onChange, error, disabled }) => (
-  <LocalizationProvider dateAdapter={AdapterDayjs}>
-    <DateTimePicker
-      label={field.label}
-      value={value ? dayjs(value) : null}
-      onChange={(date) => onChange(date ? date.toISOString() : null)}
-      disabled={disabled}
-      slotProps={{
-        textField: {
-          fullWidth: true,
-          required: field.required,
-          error: !!error,
-          helperText: error || field.description,
-          size: 'small',
-        },
-      }}
-    />
-  </LocalizationProvider>
+  <DateTimePicker
+    label={field.label}
+    value={value ? dayjs(value) : null}
+    onChange={(date) => onChange(date ? date.toISOString() : null)}
+    disabled={disabled}
+    slotProps={{
+      textField: {
+        fullWidth: true,
+        required: field.required,
+        error: !!error,
+        helperText: error || field.description,
+        size: 'small',
+      },
+    }}
+  />
 );
 
 // ============================================
@@ -378,6 +376,17 @@ export const TableFieldRenderer = ({ field, value, onChange, disabled }) => {
                           </MenuItem>
                         ))}
                       </Select>
+                    ) : col.type === 'autocomplete' ? (
+                      <Autocomplete
+                        freeSolo
+                        size="small"
+                        options={col.options || []}
+                        value={row[col.id] || ''}
+                        onChange={(e, newValue) => updateRow(rowIndex, col.id, newValue)}
+                        onInputChange={(e, newValue) => updateRow(rowIndex, col.id, newValue)}
+                        disabled={disabled}
+                        renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+                      />
                     ) : col.type === 'number' ? (
                       <TextField
                         type="number"
@@ -431,19 +440,11 @@ export const TableFieldRenderer = ({ field, value, onChange, disabled }) => {
 // ============================================
 // VITALS TABLE RENDERER
 // ============================================
-export const VitalsTableRenderer = ({ field, value, onChange, disabled }) => {
+export const VitalsTableRenderer = ({ field, value, onChange, disabled, context }) => {
   const vitals = value || {};
 
-  const vitalsConfig = field.config?.fields || [
-    { id: 'temperature', label: 'Temperature', unit: '°C' },
-    { id: 'bloodPressureSystolic', label: 'BP Systolic', unit: 'mmHg' },
-    { id: 'bloodPressureDiastolic', label: 'BP Diastolic', unit: 'mmHg' },
-    { id: 'heartRate', label: 'Heart Rate', unit: 'bpm' },
-    { id: 'respiratoryRate', label: 'Resp. Rate', unit: '/min' },
-    { id: 'oxygenSaturation', label: 'SpO2', unit: '%' },
-    { id: 'weight', label: 'Weight', unit: 'kg' },
-    { id: 'height', label: 'Height', unit: 'cm' },
-  ];
+  // Priority: 1. Store via context, 2. Field config, 3. Hardcoded default
+  const vitalsConfig = context?.vitals || field.config?.fields || DEFAULT_VITALS_CONFIG;
 
   const updateVital = (key, newValue) => {
     onChange({ ...vitals, [key]: newValue });
@@ -452,26 +453,27 @@ export const VitalsTableRenderer = ({ field, value, onChange, disabled }) => {
   return (
     <Box>
       <Typography variant="subtitle2" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        {field.label || 'Vitals'}
+        🩺 {field.label || 'Vitals'}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 2 }}>
-        {vitalsConfig.map((vital) => (
+        {vitalsConfig.map((v) => (
           <TextField
-            key={vital.id}
-            label={vital.label}
+            key={v.id || v.label}
+            label={v.label}
             type="number"
             size="small"
-            value={vitals[vital.id] ?? ''}
+            value={vitals[v.id] ?? ''}
             onChange={(e) =>
-              updateVital(vital.id, e.target.value ? Number(e.target.value) : null)
+              updateVital(v.id, e.target.value ? Number(e.target.value) : null)
             }
             disabled={disabled}
+            placeholder={v.config?.placeholder}
             InputProps={{
-              endAdornment: (
+              endAdornment: v.unit ? (
                 <Typography variant="caption" color="text.secondary">
-                  {vital.unit}
+                  {v.unit}
                 </Typography>
-              ),
+              ) : undefined,
             }}
           />
         ))}
@@ -483,41 +485,53 @@ export const VitalsTableRenderer = ({ field, value, onChange, disabled }) => {
 // ============================================
 // MEDICATION GRID RENDERER
 // ============================================
-export const MedicationGridRenderer = ({ field, value, onChange, disabled, context }) => {
-  const medications = Array.isArray(value) ? value : [];
-  
+export const MedicationGridRenderer = ({ field, value: medications = [], onChange, disabled, context }) => {
+  const [drugOptions, setDrugOptions] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+
   const columns = field.config?.columns || [
-    { id: 'name', header: 'Medicine Name', type: 'text', width: '25%' },
+    { id: 'name', header: 'Medicine', type: 'text', width: '30%' },
     { id: 'dose', header: 'Dose', type: 'text', width: '15%' },
-    { id: 'route', header: 'Route', type: 'dropdown', width: '15%', options: [
-      { label: 'Oral', value: 'oral' },
-      { label: 'IV', value: 'iv' },
-      { label: 'IM', value: 'im' },
-      { label: 'SC', value: 'sc' },
-      { label: 'Topical', value: 'topical' },
-    ]},
-    { id: 'frequency', header: 'Frequency', type: 'dropdown', width: '15%', options: [
-      { label: 'OD', value: 'OD' },
-      { label: 'BD', value: 'BD' },
-      { label: 'TDS', value: 'TDS' },
-      { label: 'QID', value: 'QID' },
-      { label: 'PRN', value: 'PRN' },
-    ]},
+    { id: 'route', header: 'Route', type: 'dropdown', width: '15%', options: (context?.medicationRoutes || []).map(r => ({ label: r, value: r })) },
+    { id: 'frequency', header: 'Freq', type: 'dropdown', width: '15%', options: (context?.frequencies || []).map(f => ({ label: f.id, value: f.id })) },
     { id: 'duration', header: 'Duration', type: 'text', width: '15%' },
-    { id: 'instructions', header: 'Instructions', type: 'text', width: '15%' },
   ];
 
+  const handleSearch = async (query) => {
+    if (!query || query.length < 2) return;
+    setLoading(true);
+    try {
+      const results = await medicalService.searchDrugs(query);
+      setDrugOptions(results.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addMedication = () => {
-    const newMed = { id: uuidv4() };
-    columns.forEach((col) => {
-      newMed[col.id] = '';
-    });
+    const newMed = { id: uuidv4(), name: '', dose: '', route: '', frequency: '', duration: '' };
     onChange([...medications, newMed]);
   };
 
   const updateMedication = (index, columnId, newValue) => {
     const updated = [...medications];
     updated[index] = { ...updated[index], [columnId]: newValue };
+
+    if (columnId === 'name') {
+      const drug = drugOptions.find(d => d.name === newValue);
+      if (drug) {
+        updated[index] = {
+          ...updated[index],
+          name: drug.name,
+          dose: drug.defaultDose || updated[index].dose,
+          route: drug.defaultRoute || updated[index].route,
+          frequency: drug.defaultFrequency || updated[index].frequency,
+          duration: drug.defaultDuration || updated[index].duration,
+        };
+      }
+    }
     onChange(updated);
   };
 
@@ -525,7 +539,6 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
     onChange(medications.filter((_, i) => i !== index));
   };
 
-  // Check for drug allergies if context is provided
   const checkAllergy = (medName) => {
     if (!context?.patient?.allergies || !medName) return null;
     const allergies = context.patient.allergies.map(a => a.toLowerCase());
@@ -541,7 +554,7 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
         💊 {field.label || 'Medications'}
         {field.required && <span style={{ color: 'red' }}> *</span>}
       </Typography>
-      
+
       <TableContainer component={Paper} variant="outlined">
         <Table size="small">
           <TableHead>
@@ -571,6 +584,7 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
                             value={med[col.id] || ''}
                             onChange={(e) => updateMedication(index, col.id, e.target.value)}
                             disabled={disabled}
+                            variant="standard"
                           >
                             <MenuItem value="">-</MenuItem>
                             {(col.options || []).map((opt) => (
@@ -579,6 +593,32 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
                               </MenuItem>
                             ))}
                           </Select>
+                        ) : col.id === 'name' ? (
+                          <Autocomplete
+                            freeSolo
+                            size="small"
+                            options={drugOptions.map(m => m.name)}
+                            loading={loading}
+                            value={med.name || ''}
+                            onInputChange={(e, newValue) => {
+                              handleSearch(newValue);
+                              updateMedication(index, 'name', newValue);
+                            }}
+                            onChange={(e, newValue) => updateMedication(index, 'name', typeof newValue === 'object' ? newValue?.name || '' : newValue)}
+                            disabled={disabled}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                variant="standard"
+                                placeholder="Search..."
+                                error={!!allergyWarning}
+                                InputProps={{
+                                  ...params.InputProps,
+                                  disableUnderline: true,
+                                }}
+                              />
+                            )}
+                          />
                         ) : (
                           <TextField
                             size="small"
@@ -586,13 +626,16 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
                             value={med[col.id] || ''}
                             onChange={(e) => updateMedication(index, col.id, e.target.value)}
                             disabled={disabled}
-                            error={col.id === 'name' && !!allergyWarning}
+                            variant="standard"
+                            InputProps={{
+                              disableUnderline: true,
+                            }}
                           />
                         )}
                       </TableCell>
                     ))}
                     {!disabled && (
-                      <TableCell>
+                      <TableCell align="center">
                         <IconButton size="small" onClick={() => deleteMedication(index)} color="error">
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -601,10 +644,10 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
                   </TableRow>
                   {allergyWarning && (
                     <TableRow>
-                      <TableCell colSpan={columns.length + 2} sx={{ py: 0.5, border: 0 }}>
-                        <Alert severity="warning" sx={{ py: 0 }}>
+                      <TableCell colSpan={columns.length + 2} sx={{ py: 0, borderBottom: 'none' }}>
+                        <Typography variant="caption" color="error" sx={{ px: 2 }}>
                           {allergyWarning}
-                        </Alert>
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   )}
@@ -614,24 +657,15 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
             {medications.length === 0 && (
               <TableRow>
                 <TableCell colSpan={columns.length + 2} align="center" sx={{ py: 3 }}>
-                  <Typography color="text.secondary">
-                    No medications added. Click "Add Medication" to begin.
-                  </Typography>
+                  <Typography color="text.secondary">No medications added.</Typography>
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
-      
       {!disabled && (
-        <Button 
-          startIcon={<AddIcon />} 
-          onClick={addMedication} 
-          size="small" 
-          variant="outlined"
-          sx={{ mt: 1 }}
-        >
+        <Button startIcon={<AddIcon />} onClick={addMedication} size="small" sx={{ mt: 1 }}>
           Add Medication
         </Button>
       )}
@@ -643,11 +677,11 @@ export const MedicationGridRenderer = ({ field, value, onChange, disabled, conte
 // SECTION HEADER RENDERER
 // ============================================
 export const SectionHeaderRenderer = ({ field }) => (
-  <Typography 
-    variant="h6" 
-    sx={{ 
-      mt: 2, 
-      mb: 1, 
+  <Typography
+    variant="h6"
+    sx={{
+      mt: 2,
+      mb: 1,
       color: 'primary.main',
       borderBottom: '2px solid',
       borderColor: 'primary.main',
@@ -671,6 +705,53 @@ export const SpacerRenderer = ({ field }) => (
 );
 
 // ============================================
+// INVESTIGATIONS RENDERER
+// ============================================
+export const InvestigationsRenderer = ({ field, value: investigations = [], onChange, disabled }) => {
+  const [options, setOptions] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSearch = async (query) => {
+    if (!query || query.length < 2) return;
+    setLoading(true);
+    try {
+      const results = await medicalService.searchInvestigations(query);
+      setOptions(results.data.map(i => i.name));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fieldConfig = {
+    ...field,
+    config: {
+      ...field.config,
+      columns: field.config?.columns || [
+        {
+          id: 'name',
+          header: 'Investigation Name',
+          type: 'autocomplete',
+          width: '70%',
+          options: options
+        },
+        { id: 'result', header: 'Result (Optional)', type: 'text', width: '30%' },
+      ]
+    }
+  };
+
+  return <TableFieldRenderer
+    field={fieldConfig}
+    value={investigations}
+    onChange={onChange}
+    disabled={disabled}
+    onAutocompleteSearch={handleSearch}
+    loading={loading}
+  />;
+};
+
+// ============================================
 // FIELD TYPE TO RENDERER MAPPING
 // ============================================
 export const FIELD_RENDERERS = {
@@ -690,7 +771,7 @@ export const FIELD_RENDERERS = {
   table: TableFieldRenderer,
   vitals: VitalsTableRenderer,
   medications: MedicationGridRenderer,
-  investigations: TableFieldRenderer,
+  investigations: InvestigationsRenderer,
   sectionHeader: SectionHeaderRenderer,
   divider: DividerRenderer,
   spacer: SpacerRenderer,

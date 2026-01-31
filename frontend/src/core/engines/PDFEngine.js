@@ -21,7 +21,7 @@ class PDFEngine {
     return {
       id: prescription.id || uuidv4(),
       generatedAt: new Date().toISOString(),
-      
+
       // Clinic/Hospital Info
       clinic: {
         name: clinicInfo?.name || 'Medical Center',
@@ -32,7 +32,7 @@ class PDFEngine {
         website: clinicInfo?.website || '',
         registrationNumber: clinicInfo?.registrationNumber || '',
       },
-      
+
       // Doctor Info
       doctor: {
         name: doctor?.name || 'Dr. Unknown',
@@ -41,7 +41,7 @@ class PDFEngine {
         registrationNo: doctor?.registrationNo || '',
         signature: doctor?.signature || null,
       },
-      
+
       // Patient Info
       patient: {
         name: `${patient?.firstName || ''} ${patient?.lastName || ''}`.trim(),
@@ -51,14 +51,14 @@ class PDFEngine {
         address: patient?.address?.street || '',
         patientId: patient?.id || '',
       },
-      
+
       // Visit Info
       visit: {
         date: prescription.date || new Date().toISOString(),
         type: prescription.visitType || 'Consultation',
         chiefComplaint: prescription.chiefComplaint || '',
       },
-      
+
       // Clinical Data
       vitals: prescription.vitals || {},
       diagnosis: prescription.diagnosis || [],
@@ -87,20 +87,20 @@ class PDFEngine {
   formatMedication(med, index) {
     const parts = [];
     parts.push(`${index + 1}. ${med.name || 'Unknown'}`);
-    
+
     if (med.dose) parts.push(med.dose);
     if (med.route) parts.push(`(${med.route})`);
     if (med.frequency) parts.push(`- ${med.frequency}`);
     if (med.duration) parts.push(`for ${med.duration}`);
     if (med.instructions) parts.push(`[${med.instructions}]`);
-    
+
     return parts.join(' ');
   }
 
   // Format vitals for display
   formatVitals(vitals) {
     const formatted = [];
-    
+
     if (vitals.temperature) {
       formatted.push(`Temp: ${vitals.temperature}°C`);
     }
@@ -122,14 +122,14 @@ class PDFEngine {
     if (vitals.height) {
       formatted.push(`Height: ${vitals.height} cm`);
     }
-    
+
     return formatted;
   }
 
   // Generate HTML for printing
   generatePrintHTML(data, template = null) {
     const styles = template?.styling || this.getDefaultStyles();
-    
+
     return `
       <!DOCTYPE html>
       <html>
@@ -159,6 +159,8 @@ class PDFEngine {
 
   generateCSS(styles) {
     return `
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+      
       * {
         margin: 0;
         padding: 0;
@@ -166,35 +168,62 @@ class PDFEngine {
       }
       
       body {
-        font-family: ${styles.fontFamily || 'Arial, sans-serif'};
-        font-size: ${styles.bodyFontSize || '12pt'};
-        line-height: ${styles.lineHeight || '1.5'};
-        color: #333;
+        font-family: 'Inter', sans-serif;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #1a202c;
+        background: white;
       }
       
       .prescription {
-        max-width: 800px;
+        max-width: 850px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 40px;
+        position: relative;
+        min-height: 1100px;
+      }
+
+      /* Watermark */
+      .prescription::before {
+        content: 'Prescription';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 100pt;
+        color: #f7fafc;
+        z-index: -1;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 10px;
+        pointer-events: none;
       }
       
       .header {
-        border-bottom: 2px solid ${styles.primaryColor || '#1976d2'};
-        padding-bottom: 15px;
-        margin-bottom: 15px;
         display: flex;
         justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: 30px;
+        margin-bottom: 30px;
+        border-bottom: 3px solid ${styles.primaryColor || '#1976d2'};
       }
       
+      .clinic-info {
+        max-width: 60%;
+      }
+
       .clinic-info h1 {
         color: ${styles.primaryColor || '#1976d2'};
-        font-size: ${styles.headerFontSize || '18pt'};
-        margin-bottom: 5px;
+        font-size: 24pt;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: -1px;
       }
       
       .clinic-info p {
-        font-size: 10pt;
-        color: #666;
+        font-size: 9.5pt;
+        color: #4a5568;
+        line-height: 1.4;
       }
       
       .doctor-info {
@@ -202,103 +231,165 @@ class PDFEngine {
       }
       
       .doctor-info h2 {
-        color: ${styles.primaryColor || '#1976d2'};
-        font-size: 14pt;
+        color: #2d3748;
+        font-size: 16pt;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .doctor-info p {
+        font-size: 9pt;
+        color: #718096;
       }
       
       .patient-info {
-        background: #f5f5f5;
-        padding: 10px 15px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
+        background: #f8fafc;
+        padding: 20px 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        border: 1px solid #e2e8f0;
       }
       
-      .patient-info p {
-        margin: 3px 15px 3px 0;
+      .info-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .info-label {
+        font-size: 8pt;
+        text-transform: uppercase;
+        color: #a0aec0;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .info-value {
+        font-size: 10.5pt;
+        color: #1a202c;
+        font-weight: 600;
       }
       
       .section {
-        margin-bottom: 15px;
+        margin-bottom: 25px;
       }
       
       .section-title {
-        font-weight: bold;
+        font-weight: 700;
         color: ${styles.primaryColor || '#1976d2'};
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 5px;
-        margin-bottom: 10px;
-        font-size: 12pt;
+        font-size: 11pt;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+      }
+
+      .section-title::after {
+        content: '';
+        flex-grow: 1;
+        height: 1px;
+        background: #edf2f7;
+        margin-left: 15px;
       }
       
       .vitals-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        background: #fff;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
       }
       
       .vital-item {
-        padding: 5px;
-        background: #f9f9f9;
-        border-radius: 3px;
-        font-size: 10pt;
+        padding: 12px;
+        background: #fff;
+        border: 1px solid #edf2f7;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
       }
+
+      .vital-label { font-size: 8pt; color: #718096; }
+      .vital-value { font-size: 11pt; font-weight: 700; color: #1a202c; }
       
+      .rx-container {
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .rx-symbol {
+        font-size: 40pt;
+        font-weight: 800;
+        color: ${styles.primaryColor || '#1976d2'};
+        margin-right: 25px;
+        font-family: 'Times New Roman', serif;
+        opacity: 0.15;
+        line-height: 1;
+      }
+
       .medications-list {
         list-style: none;
+        flex-grow: 1;
       }
       
       .medication-item {
-        padding: 8px 0;
-        border-bottom: 1px dashed #ddd;
+        padding: 12px 0;
+        border-bottom: 1px solid #f7fafc;
       }
       
-      .medication-item:last-child {
-        border-bottom: none;
-      }
-      
-      .rx-symbol {
-        font-size: 18pt;
-        color: ${styles.primaryColor || '#1976d2'};
-        margin-right: 10px;
-      }
-      
-      .advice-list, .investigation-list {
-        list-style: disc;
-        margin-left: 20px;
-      }
-      
-      .footer {
-        margin-top: 30px;
-        border-top: 1px solid #ddd;
-        padding-top: 15px;
+      .med-header {
         display: flex;
         justify-content: space-between;
+        margin-bottom: 4px;
+      }
+
+      .med-name { font-weight: 700; font-size: 11.5pt; }
+      .med-freq { color: ${styles.primaryColor || '#1976d2'}; font-weight: 600; font-size: 10pt; }
+      .med-details { font-size: 9.5pt; color: #718096; }
+      
+      .footer {
+        margin-top: auto;
+        padding-top: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+
+      .qr-code {
+        width: 80px;
+        height: 80px;
+        background: #f7fafc;
+        border: 1px solid #edf2f7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8pt;
+        color: #cbd5e0;
+        border-radius: 4px;
       }
       
       .signature {
         text-align: right;
+        min-width: 250px;
       }
       
+      .signature-img {
+         max-height: 60px;
+         margin-bottom: 10px;
+         filter: grayscale(1) contrast(1.5);
+      }
+
       .signature-line {
-        width: 200px;
-        border-top: 1px solid #333;
-        margin-top: 50px;
-        padding-top: 5px;
+        border-top: 1px solid #2d3748;
+        padding-top: 8px;
+        font-weight: 700;
+        color: #2d3748;
       }
       
       @media print {
-        body {
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
-        }
-        
-        .prescription {
-          padding: 0;
-        }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .prescription { padding: 0.5in; }
       }
     `;
   }
@@ -336,7 +427,7 @@ class PDFEngine {
   generateVitals(data) {
     const vitals = this.formatVitals(data.vitals);
     if (vitals.length === 0) return '';
-    
+
     return `
       <div class="section">
         <div class="section-title">Vitals</div>
@@ -349,9 +440,9 @@ class PDFEngine {
 
   generateDiagnosis(data) {
     if (!data.diagnosis || data.diagnosis.length === 0) return '';
-    
+
     const diagnosisArray = Array.isArray(data.diagnosis) ? data.diagnosis : [data.diagnosis];
-    
+
     return `
       <div class="section">
         <div class="section-title">Diagnosis</div>
@@ -362,7 +453,7 @@ class PDFEngine {
 
   generateMedications(data) {
     if (!data.medications || data.medications.length === 0) return '';
-    
+
     return `
       <div class="section">
         <div class="section-title"><span class="rx-symbol">℞</span> Medications</div>
@@ -377,7 +468,7 @@ class PDFEngine {
 
   generateInvestigations(data) {
     if (!data.investigations || data.investigations.length === 0) return '';
-    
+
     return `
       <div class="section">
         <div class="section-title">Investigations</div>
@@ -390,7 +481,7 @@ class PDFEngine {
 
   generateAdvice(data) {
     if (!data.advice || data.advice.length === 0) return '';
-    
+
     return `
       <div class="section">
         <div class="section-title">Advice</div>
@@ -403,7 +494,7 @@ class PDFEngine {
 
   generateFollowUp(data) {
     if (!data.followUp) return '';
-    
+
     return `
       <div class="section">
         <div class="section-title">Follow-up</div>
@@ -445,7 +536,7 @@ class PDFEngine {
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.focus();
-    
+
     // Wait for content to load before printing
     setTimeout(() => {
       printWindow.print();
@@ -458,7 +549,7 @@ class PDFEngine {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(html);
     printWindow.document.close();
-    
+
     // Trigger print dialog for PDF save
     setTimeout(() => {
       printWindow.print();

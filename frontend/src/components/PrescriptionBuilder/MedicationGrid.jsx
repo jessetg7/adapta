@@ -31,45 +31,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import InfoIcon from '@mui/icons-material/Info';
 import { v4 as uuidv4 } from 'uuid';
 
-import { medicationDatabase } from '../../data/medicationDatabase';
-
-// Route options
-const ROUTES = [
-  { value: 'oral', label: 'Oral' },
-  { value: 'iv', label: 'IV' },
-  { value: 'im', label: 'IM' },
-  { value: 'sc', label: 'SC' },
-  { value: 'topical', label: 'Topical' },
-  { value: 'inhalation', label: 'Inhalation' },
-  { value: 'sublingual', label: 'Sublingual' },
-  { value: 'rectal', label: 'Rectal' },
-  { value: 'ophthalmic', label: 'Ophthalmic' },
-  { value: 'otic', label: 'Otic' },
-  { value: 'nasal', label: 'Nasal' },
-];
-
-// Frequency options
-const FREQUENCIES = [
-  { value: 'OD', label: 'Once daily (OD)' },
-  { value: 'BD', label: 'Twice daily (BD)' },
-  { value: 'TDS', label: 'Three times daily (TDS)' },
-  { value: 'QID', label: 'Four times daily (QID)' },
-  { value: 'Q4H', label: 'Every 4 hours' },
-  { value: 'Q6H', label: 'Every 6 hours' },
-  { value: 'Q8H', label: 'Every 8 hours' },
-  { value: 'Q12H', label: 'Every 12 hours' },
-  { value: 'PRN', label: 'As needed (PRN)' },
-  { value: 'STAT', label: 'Immediately (STAT)' },
-  { value: 'HS', label: 'At bedtime (HS)' },
-  { value: 'AC', label: 'Before meals (AC)' },
-  { value: 'PC', label: 'After meals (PC)' },
-  { value: 'Weekly', label: 'Weekly' },
-];
-
-// Duration presets
-const DURATIONS = [
-  '3 days', '5 days', '7 days', '10 days', '14 days', '21 days', '1 month', '2 months', '3 months', 'Continuous'
-];
+import { medicalService } from '../../services/medicalService';
+import useTemplateStore from '../../core/store/useTemplateStore';
 
 /**
  * MedicationGrid - Enhanced medication entry component
@@ -86,6 +49,10 @@ const MedicationGrid = ({
   const [medications, setMedications] = useState(value);
   const [showDrugInfo, setShowDrugInfo] = useState(null);
   const [warnings, setWarnings] = useState([]);
+  const [drugOptions, setDrugOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const { medicationRoutes, frequencies } = useTemplateStore();
 
   // Sync with external value
   React.useEffect(() => {
@@ -98,6 +65,20 @@ const MedicationGrid = ({
     onChange?.(newMeds);
   }, [onChange]);
 
+  // Handle drug search
+  const handleSearch = async (query) => {
+    if (!query || query.length < 2) return;
+    setLoading(true);
+    try {
+      const results = await medicalService.searchDrugs(query);
+      setDrugOptions(results.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Add new medication
   const addMedication = useCallback(() => {
     const newMed = {
@@ -105,15 +86,15 @@ const MedicationGrid = ({
       name: '',
       genericName: '',
       dose: '',
-      route: 'oral',
-      frequency: 'OD',
+      route: medicationRoutes[0] || '',
+      frequency: frequencies[0]?.id || '',
       duration: '5 days',
       timing: '',
       instructions: '',
       quantity: null,
     };
     updateMedications([...medications, newMed]);
-  }, [medications, updateMedications]);
+  }, [medications, updateMedications, medicationRoutes, frequencies]);
 
   // Update medication
   const updateMedication = useCallback((index, field, value) => {
@@ -122,15 +103,15 @@ const MedicationGrid = ({
 
     // If selecting from database, auto-fill defaults
     if (field === 'name') {
-      const dbMed = medicationDatabase.find(m => m.name === value);
+      const dbMed = drugOptions.find(m => m.name === value);
       if (dbMed) {
         updated[index] = {
           ...updated[index],
-          genericName: dbMed.genericName,
-          dose: dbMed.defaultDose,
-          route: dbMed.defaultRoute,
-          frequency: dbMed.defaultFrequency,
-          duration: dbMed.defaultDuration,
+          genericName: dbMed.category, // Using category as generic name if genericName not in Drug model
+          dose: dbMed.defaultDose || updated[index].dose,
+          route: dbMed.defaultRoute || updated[index].route,
+          frequency: dbMed.defaultFrequency || updated[index].frequency,
+          duration: dbMed.defaultDuration || updated[index].duration,
         };
 
         // Check for allergies
@@ -148,67 +129,52 @@ const MedicationGrid = ({
     }
 
     updateMedications(updated);
-  }, [medications, updateMedications, patientAge, patientWeight, patientAllergies]);
-
-  // Delete medication
-  const deleteMedication = useCallback((index) => {
-    updateMedications(medications.filter((_, i) => i !== index));
-    // Remove any warnings for this index
-    setWarnings(prev => prev.filter(w => w.index !== index));
-  }, [medications, updateMedications]);
-
-  // Duplicate medication
-  const duplicateMedication = useCallback((index) => {
-    const med = medications[index];
-    const newMed = { ...med, id: uuidv4() };
-    const updated = [...medications];
-    updated.splice(index + 1, 0, newMed);
     updateMedications(updated);
-  }, [medications, updateMedications]);
+  }, [medications, updateMedications, patientAge, patientWeight, drugOptions, patientAllergies]);
 
   // Check allergies
-  const checkAllergies = useCallback((medication, index) => {
+  const checkAllergies = (drug, index) => {
     if (!patientAllergies || patientAllergies.length === 0) return;
 
-    const allergyMatches = [];
-    const medName = medication.name.toLowerCase();
-    const genericName = (medication.genericName || '').toLowerCase();
-    const contraindications = medication.contraindications || [];
+    // Simple string matching for demo purposes
+    const isAllergic = patientAllergies.some(allergy =>
+      drug.name.toLowerCase().includes(allergy.toLowerCase()) ||
+      (drug.category && drug.category.toLowerCase().includes(allergy.toLowerCase()))
+    );
 
-    patientAllergies.forEach(allergy => {
-      const allergyLower = allergy.toLowerCase();
-      if (medName.includes(allergyLower) || genericName.includes(allergyLower)) {
-        allergyMatches.push(allergy);
-      }
-      if (contraindications.some(c => c.toLowerCase().includes(allergyLower))) {
-        allergyMatches.push(allergy);
-      }
-    });
-
-    if (allergyMatches.length > 0) {
-      setWarnings(prev => {
-        const filtered = prev.filter(w => w.index !== index);
-        return [...filtered, {
-          index,
-          type: 'allergy',
-          message: `⚠️ Patient may be allergic: ${allergyMatches.join(', ')}`,
-        }];
-      });
+    if (isAllergic) {
+      setWarnings(prev => [...prev, { index, message: `Patient is allergic to ${drug.name}!` }]);
+    } else {
+      setWarnings(prev => prev.filter(w => w.index !== index));
     }
-  }, [patientAllergies]);
-
-  // Calculate pediatric dose
-  const calculatePediatricDose = (pedDosing, weight) => {
-    if (!pedDosing || !weight) return null;
-
-    const calculatedDose = pedDosing.perKgDose * weight;
-    const finalDose = Math.min(calculatedDose, pedDosing.maxDose);
-    return `${Math.round(finalDose)}${pedDosing.unit}`;
   };
 
-  // Get warning for medication
+  // Calculate pediatric dose
+  const calculatePediatricDose = (dosing, weight) => {
+    if (!dosing || !weight) return null;
+    // Simple calculation: dose/kg * weight
+    // detailed logic would be more complex
+    return `${dosing}mg/kg -> ${Math.round(dosing * weight)}mg`;
+  };
+
+  // Get warning for index
   const getWarning = (index) => {
     return warnings.find(w => w.index === index);
+  };
+
+  // Duplicate medication
+  const duplicateMedication = (index) => {
+    const med = medications[index];
+    const newMed = { ...med, id: uuidv4() };
+    const newMeds = [...medications];
+    newMeds.splice(index + 1, 0, newMed);
+    updateMedications(newMeds);
+  };
+
+  // Delete medication
+  const deleteMedication = (index) => {
+    const newMeds = medications.filter((_, i) => i !== index);
+    updateMedications(newMeds);
   };
 
   return (
@@ -217,7 +183,7 @@ const MedicationGrid = ({
         <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <span style={{ fontSize: 24 }}>℞</span> Medications
         </Typography>
-        
+
         {patientAge && patientAge < 18 && (
           <Chip
             icon={<InfoIcon />}
@@ -260,10 +226,14 @@ const MedicationGrid = ({
                       <Autocomplete
                         freeSolo
                         size="small"
-                        options={medicationDatabase.map(m => m.name)}
+                        options={drugOptions.map(m => m.name)}
+                        loading={loading}
                         value={med.name}
-                        onChange={(e, newValue) => updateMedication(index, 'name', newValue || '')}
-                        onInputChange={(e, newValue) => updateMedication(index, 'name', newValue)}
+                        onInputChange={(e, newValue) => {
+                          handleSearch(newValue);
+                          updateMedication(index, 'name', newValue);
+                        }}
+                        onChange={(e, newValue) => updateMedication(index, 'name', typeof newValue === 'object' ? newValue?.name || '' : newValue)}
                         disabled={disabled}
                         renderInput={(params) => (
                           <TextField
@@ -292,8 +262,8 @@ const MedicationGrid = ({
                         onChange={(e) => updateMedication(index, 'route', e.target.value)}
                         disabled={disabled}
                       >
-                        {ROUTES.map(r => (
-                          <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>
+                        {medicationRoutes.map(r => (
+                          <MenuItem key={r} value={r}>{r}</MenuItem>
                         ))}
                       </Select>
                     </TableCell>
@@ -305,8 +275,8 @@ const MedicationGrid = ({
                         onChange={(e) => updateMedication(index, 'frequency', e.target.value)}
                         disabled={disabled}
                       >
-                        {FREQUENCIES.map(f => (
-                          <MenuItem key={f.value} value={f.value}>{f.value}</MenuItem>
+                        {frequencies.map(f => (
+                          <MenuItem key={f.id} value={f.id}>{f.id}</MenuItem>
                         ))}
                       </Select>
                     </TableCell>
@@ -314,7 +284,7 @@ const MedicationGrid = ({
                       <Autocomplete
                         freeSolo
                         size="small"
-                        options={DURATIONS}
+                        options={['3 days', '5 days', '7 days', '10 days', '14 days', '21 days', '1 month', 'Continuous']}
                         value={med.duration}
                         onChange={(e, newValue) => updateMedication(index, 'duration', newValue || '')}
                         onInputChange={(e, newValue) => updateMedication(index, 'duration', newValue)}

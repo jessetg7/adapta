@@ -34,7 +34,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 
+import { useAdapta } from '../context/AdaptaContext';
 import useTemplateStore from '../core/store/useTemplateStore';
 import usePatientStore from '../core/store/usePatientStore';
 import useRuleStore from '../core/store/useRuleStore';
@@ -44,6 +46,9 @@ import useWorkflowStore from '../core/store/useWorkflowStore';
 import AnimatedStatCard from '../components/shared/AnimatedStatCard';
 import ActivityFeed from '../components/shared/ActivityFeed';
 import PatientTrendsChart from '../components/shared/PatientTrendsChart';
+import BlueprintSelector from '../components/Dashboard/BlueprintSelector';
+import BrandingCustomizer from '../components/Dashboard/BrandingCustomizer';
+import PaletteIcon from '@mui/icons-material/Palette';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -51,6 +56,9 @@ const Dashboard = () => {
   const { patients, visits, prescriptions } = usePatientStore();
   const { rules } = useRuleStore();
   const { workflows } = useWorkflowStore();
+  const [showBlueprints, setShowBlueprints] = React.useState(false);
+  const [showBranding, setShowBranding] = React.useState(false);
+  const { clinicInfo } = useAdapta();
 
   // Stats
   const stats = useMemo(() => ({
@@ -72,43 +80,43 @@ const Dashboard = () => {
   // Quick actions
   const quickActions = [
     {
-      title: 'Form Builder',
-      description: 'Create and edit medical forms',
-      icon: <BuildIcon sx={{ fontSize: 40 }} />,
-      color: '#1976d2',
-      path: '/form-builder',
-    },
-    {
-      title: 'Prescription Builder',
-      description: 'Design prescription layouts',
-      icon: <MedicationIcon sx={{ fontSize: 40 }} />,
-      color: '#9c27b0',
-      path: '/prescription-builder',
-    },
-    {
-      title: 'Patient Consultation',
-      description: 'Start a new consultation',
-      icon: <LocalHospitalIcon sx={{ fontSize: 40 }} />,
+      title: 'Patient Registration',
+      description: 'Register and manage patient profiles',
+      icon: <PeopleIcon sx={{ fontSize: 40 }} />,
       color: '#2e7d32',
+      path: '/consultation', // Reusing consultation for now as registration entry
+    },
+    {
+      title: 'OPD / Consultation',
+      description: 'Outpatient department consultations',
+      icon: <LocalHospitalIcon sx={{ fontSize: 40 }} />,
+      color: '#1976d2',
       path: '/consultation',
     },
     {
-      title: 'Template Manager',
-      description: 'Manage all form templates',
+      title: 'Lab & Investigations',
+      description: 'Manage lab tests and reports',
       icon: <ArticleIcon sx={{ fontSize: 40 }} />,
       color: '#ed6c02',
       path: '/templates',
     },
     {
-      title: 'Rule Engine',
-      description: 'Configure business rules',
+      title: 'Pharmacy & Billing',
+      description: 'Prescriptions and billing reports',
+      icon: <MedicationIcon sx={{ fontSize: 40 }} />,
+      color: '#9c27b0',
+      path: '/prescription-builder',
+    },
+    {
+      title: 'Rule Engine (LCNC)',
+      description: 'Configure clinical alerts & logic',
       icon: <RuleIcon sx={{ fontSize: 40 }} />,
       color: '#d32f2f',
       path: '/rules',
     },
     {
-      title: 'Workflow Manager',
-      description: 'Design patient workflows',
+      title: 'Workflow Designer',
+      description: 'Customize the patient journey',
       icon: <AccountTreeIcon sx={{ fontSize: 40 }} />,
       color: '#0288d1',
       path: '/workflows',
@@ -122,11 +130,14 @@ const Dashboard = () => {
         <Toolbar>
           <LocalHospitalIcon sx={{ mr: 2 }} />
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
-            ADAPTA
+            {clinicInfo.name} (LCNC)
           </Typography>
           <Typography variant="body2" sx={{ mr: 2 }}>
-            Low-Code Medical Forms Platform
+            Universal Hospital Framework
           </Typography>
+          <IconButton color="inherit" onClick={() => setShowBranding(true)}>
+            <PaletteIcon />
+          </IconButton>
           <IconButton color="inherit">
             <SettingsIcon />
           </IconButton>
@@ -148,21 +159,30 @@ const Dashboard = () => {
           <Grid container alignItems="center" spacing={3}>
             <Grid item xs={12} md={8}>
               <Typography variant="h4" fontWeight={700} gutterBottom>
-                Welcome to ADAPTA
+                HMS LCNC Framework
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Build, customize, and manage medical forms and prescriptions without writing code.
-                Everything is template-driven and fully configurable.
+                The "WordPress for Hospital Software." Configure Registration, OPD, IPD, Lab, and Billing modules without writing code.
+                Customize your hospital's unique workflow in real-time.
               </Typography>
             </Grid>
             <Grid item xs={12} md={4} sx={{ textAlign: 'right' }}>
               <Button
                 variant="contained"
                 size="large"
+                startIcon={<AutoFixHighIcon />}
+                sx={{ mr: 1, bgcolor: 'warning.main', color: 'white', '&:hover': { bgcolor: 'warning.dark' } }}
+                onClick={() => setShowBlueprints(true)}
+              >
+                Apply Blueprint
+              </Button>
+              <Button
+                variant="contained"
+                size="large"
                 sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: 'grey.100' } }}
                 onClick={() => navigate('/consultation')}
               >
-                Start Consultation
+                Open Patient Module
               </Button>
             </Grid>
           </Grid>
@@ -315,6 +335,16 @@ const Dashboard = () => {
           </Grid>
         </Paper>
       </Container>
+
+      <BlueprintSelector
+        open={showBlueprints}
+        onClose={() => setShowBlueprints(false)}
+        onSelect={(id) => {
+          console.log(`Blueprint selected: ${id}`);
+          setShowBlueprints(false);
+          // Potential logic: toast.success(`Applied ${id} blueprint!`);
+        }}
+      />
     </Box>
   );
 };

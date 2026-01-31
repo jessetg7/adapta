@@ -10,6 +10,7 @@ exports.getTemplates = async (req, res, next) => {
         let query = {};
 
         if (category) query.category = category;
+        if (specialty) query.specialty = specialty;
         if (isActive !== undefined) query.isActive = isActive === 'true';
         if (search) {
             query.$text = { $search: search };
@@ -159,6 +160,28 @@ exports.cloneTemplate = async (req, res, next) => {
         res.status(201).json({
             success: true,
             data: clonedTemplate
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Get unique specialties for department templates
+// @route   GET /api/templates/specialties
+// @access  Private
+exports.getSpecialties = async (req, res, next) => {
+    try {
+        const specialties = await Template.distinct('specialty', { category: 'department', isActive: true });
+
+        const data = specialties.map(s => ({
+            id: s,
+            name: s.charAt(0).toUpperCase() + s.slice(1)
+        }));
+
+        res.status(200).json({
+            success: true,
+            count: data.length,
+            data
         });
     } catch (error) {
         next(error);

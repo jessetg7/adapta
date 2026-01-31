@@ -41,6 +41,17 @@ const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    facility: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Facility'
+    },
+    profile: {
+        qualification: String,
+        specialization: String,
+        registrationNumber: String,
+        signature: String, // String representation or path
+        phone: String
     }
 }, {
     timestamps: true

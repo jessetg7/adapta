@@ -65,18 +65,27 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
     }
     return {
       id: uuidv4(),
-      name: 'New Workflow',
-      description: '',
-      department: '',
-      category: 'custom',
-      steps: [],
-      transitions: [],
-      startStepId: '',
-      endStepIds: [],
+      name: 'Standard HMS Journey',
+      description: 'A visual patient journey from Registration to Consultation, Lab, and Billing.',
+      department: 'General',
+      category: 'hms',
+      steps: [
+        { id: 'step-reg', name: 'Patient Registration', type: 'form', assignedRole: 'receptionist', position: { x: 100, y: 100 } },
+        { id: 'step-cons', name: 'Doctor Consultation', type: 'form', assignedRole: 'doctor', position: { x: 400, y: 100 } },
+        { id: 'step-lab', name: 'Laboratory Tests', type: 'form', assignedRole: 'lab_tech', position: { x: 700, y: 100 } },
+        { id: 'step-bill', name: 'Final Billing', type: 'form', assignedRole: 'billing', position: { x: 1000, y: 100 } },
+      ],
+      transitions: [
+        { id: 't1', fromStepId: 'step-reg', toStepId: 'step-cons', label: 'Registered' },
+        { id: 't2', fromStepId: 'step-cons', toStepId: 'step-lab', label: 'Tests Ordered' },
+        { id: 't3', fromStepId: 'step-lab', toStepId: 'step-bill', label: 'Results Ready' },
+      ],
+      startStepId: 'step-reg',
+      endStepIds: ['step-bill'],
       version: 1,
       isActive: true,
       metadata: {
-        author: 'user',
+        author: 'system',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -131,7 +140,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
     }
 
     const existingIndex = workflow.steps.findIndex(s => s.id === editingStep.id);
-    
+
     if (existingIndex >= 0) {
       // Update existing step
       setWorkflow(prev => ({
@@ -191,7 +200,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
     }
 
     const existingIndex = workflow.transitions.findIndex(t => t.id === editingTransition.id);
-    
+
     if (existingIndex >= 0) {
       setWorkflow(prev => ({
         ...prev,
@@ -252,7 +261,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Workflow Builder
           </Typography>
-          
+
           <TextField
             size="small"
             value={workflow.name}
@@ -260,7 +269,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
             placeholder="Workflow Name"
             sx={{ mr: 2, width: 250 }}
           />
-          
+
           <FormControlLabel
             control={
               <Switch
@@ -270,7 +279,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
             }
             label="Active"
           />
-          
+
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
@@ -279,7 +288,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
           >
             Save
           </Button>
-          
+
           {onClose && (
             <IconButton onClick={onClose} sx={{ ml: 1 }}>
               <CloseIcon />
@@ -408,42 +417,85 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
         </Paper>
 
         {/* Center - Visual Canvas */}
-        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3 }}>
-          <Paper sx={{ minHeight: 500, p: 3, position: 'relative' }}>
-            <Typography variant="h6" color="text.secondary" sx={{ textAlign: 'center', py: 10 }}>
-              Workflow Visualization
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-              Visual workflow canvas would be rendered here using a library like React Flow.
-              <br />
-              For now, manage steps and transitions using the left panel.
-            </Typography>
+        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3, position: 'relative', bgcolor: 'white' }}>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" color="primary" fontWeight={700}>Visual Patient Journey</Typography>
+            <Chip label="LCNC Workflow Engine Active" color="success" size="small" variant="outlined" />
+          </Box>
 
-            {/* Simple visual representation */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 4, justifyContent: 'center' }}>
-              {workflow.steps.map((step, index) => (
+          <Box
+            sx={{
+              minHeight: 600,
+              p: 4,
+              position: 'relative',
+              background: 'radial-gradient(#e0e0e0 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+              borderRadius: 4,
+              border: '1px solid #eee',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            {workflow.steps.map((step, index) => (
+              <React.Fragment key={step.id}>
+                {/* Visual Connection Arrow */}
+                {index > 0 && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <ArrowForwardIcon sx={{ transform: 'rotate(90deg)', color: 'primary.light', fontSize: 30 }} />
+                    <Typography variant="caption" sx={{ mt: -0.5, bgcolor: 'white', px: 1, color: 'text.secondary' }}>
+                      {workflow.transitions.find(t => t.toStepId === step.id)?.label || 'Proceed'}
+                    </Typography>
+                  </Box>
+                )}
+
                 <Paper
-                  key={step.id}
-                  elevation={3}
+                  elevation={selectedStepId === step.id ? 8 : 2}
                   sx={{
-                    p: 2,
-                    minWidth: 150,
+                    p: 2.5,
+                    minWidth: 220,
                     textAlign: 'center',
-                    border: step.id === workflow.startStepId ? '2px solid green' : '1px solid #ddd',
-                    borderRadius: 2,
+                    border: '2px solid',
+                    borderColor: step.id === workflow.startStepId ? 'success.main' : (selectedStepId === step.id ? 'primary.main' : '#ddd'),
+                    borderRadius: 3,
+                    bgcolor: selectedStepId === step.id ? 'primary.50' : 'white',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    '&:hover': { transform: 'scale(1.05)', boxShadow: 6 }
                   }}
+                  onClick={() => setSelectedStepId(step.id)}
                 >
-                  <Chip label={index + 1} size="small" sx={{ mb: 1 }} />
-                  <Typography variant="body2" fontWeight={600}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+                    <Avatar sx={{ bgcolor: step.type === 'form' ? 'primary.main' : 'secondary.main', width: 32, height: 32 }}>
+                      {index + 1}
+                    </Avatar>
+                  </Box>
+                  <Typography variant="subtitle1" fontWeight={700}>
                     {step.name}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {step.type}
+                  <Typography variant="caption" color="text.secondary" display="block">
+                    Role: <Chip label={step.assignedRole || 'System'} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
                   </Typography>
+                  {step.type === 'form' && step.templateId && (
+                    <Typography variant="caption" color="success.main" sx={{ mt: 0.5, display: 'block' }}>
+                      Linked to Form Template
+                    </Typography>
+                  )}
                 </Paper>
-              ))}
-            </Box>
-          </Paper>
+              </React.Fragment>
+            ))}
+
+            {workflow.steps.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 20 }}>
+                <AccountTreeIcon sx={{ fontSize: 60, color: 'grey.300', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary">Start building your patient journey</Typography>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddStep} sx={{ mt: 2 }}>
+                  Add First Step
+                </Button>
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* Right Panel - Selected Step Details */}
@@ -453,7 +505,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                 Step Details
               </Typography>
-              
+
               <TextField
                 fullWidth
                 label="Step Name"
@@ -469,7 +521,7 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
                 sx={{ mb: 2 }}
                 size="small"
               />
-              
+
               <FormControl fullWidth sx={{ mb: 2 }} size="small">
                 <InputLabel>Step Type</InputLabel>
                 <Select

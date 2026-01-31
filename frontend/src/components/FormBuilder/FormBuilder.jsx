@@ -363,6 +363,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
   const [selectedFieldId, setSelectedFieldId] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
   const [showPreview, setShowPreview] = useState(false);
+  const [splitPreview, setSplitPreview] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [activeTab, setActiveTab] = useState(0);
@@ -679,7 +680,19 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Preview">
+          <Tooltip title="Toggle Split-Screen Preview">
+            <IconButton
+              color={splitPreview ? "primary" : "default"}
+              onClick={() => setSplitPreview(!splitPreview)}
+            >
+              <Box sx={{ display: 'flex', position: 'relative' }}>
+                <PreviewIcon fontSize="small" />
+                <Box sx={{ position: 'absolute', right: -4, bottom: -4, fontSize: 10, fontWeight: 'bold' }}>2</Box>
+              </Box>
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Full Preview">
             <IconButton onClick={() => setShowPreview(true)}>
               <PreviewIcon />
             </IconButton>
@@ -833,13 +846,10 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
         {/* Right Panel - Properties & Preview */}
         <Paper
           sx={{
-            width: 360, // Widened slightly for better preview
-            flexShrink: 0,
-            borderRadius: 0,
-            display: 'flex',
-            flexDirection: 'column',
             borderLeft: 1,
             borderColor: 'divider',
+            transition: 'width 0.3s ease',
+            width: splitPreview ? '45%' : 360,
           }}
         >
           <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
@@ -851,7 +861,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
               indicatorColor="primary"
             >
               <Tab icon={<SettingsIcon fontSize="small" />} iconPosition="start" label="Properties" />
-              <Tab icon={<PreviewIcon fontSize="small" />} iconPosition="start" label="Live Preview" />
+              {!splitPreview && <Tab icon={<PreviewIcon fontSize="small" />} iconPosition="start" label="Live Preview" />}
             </Tabs>
           </Box>
 

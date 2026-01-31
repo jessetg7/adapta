@@ -17,6 +17,7 @@
     "@mui/material": "^5.15.14",
     "@mui/x-date-pickers": "^7.0.0",
     "@react-pdf/renderer": "^3.4.4",
+    "axios": "^1.13.4",
     "dayjs": "^1.11.10",
     "immer": "^10.0.4",
     "lodash": "^4.17.21",

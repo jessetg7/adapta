@@ -40,6 +40,7 @@ export const AdaptaProvider = ({ children }) => {
     phone: '+1 (555) 123-4567',
     email: 'info@adapta-medical.com',
     website: 'www.adapta-medical.com',
+    primaryColor: '#1976d2',
     registrationNumber: 'HC-2024-001',
   });
 

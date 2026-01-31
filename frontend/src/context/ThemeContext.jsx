@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { getTheme } from '../theme';
+import { useAdapta } from './AdaptaContext';
 
 const ThemeContext = createContext();
 
@@ -51,7 +52,9 @@ export const ThemeProvider = ({ children }) => {
         setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
     };
 
-    const theme = useMemo(() => getTheme(mode), [mode]);
+    const { clinicInfo } = useAdapta();
+
+    const theme = useMemo(() => getTheme(mode, clinicInfo?.primaryColor), [mode, clinicInfo?.primaryColor]);
 
     const value = useMemo(
         () => ({

@@ -5,11 +5,11 @@ import { createTheme } from '@mui/material/styles';
  * Create theme based on mode (light/dark)
  * Optimized for medical applications with high contrast and readability
  */
-export const getTheme = (mode) => createTheme({
+export const getTheme = (mode, customPrimary) => createTheme({
   palette: {
     mode,
     primary: {
-      main: mode === 'dark' ? '#42a5f5' : '#1976d2',
+      main: customPrimary || (mode === 'dark' ? '#42a5f5' : '#1976d2'),
       light: mode === 'dark' ? '#64b5f6' : '#42a5f5',
       dark: mode === 'dark' ? '#1976d2' : '#1565c0',
       contrastText: '#ffffff',

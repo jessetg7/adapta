@@ -435,17 +435,6 @@ export const defaultTemplates = {
             required: false,
             width: 'half',
             order: 1,
-            config: { min: 21, max: 45 },
-          },
-          {
-            id: 'field-duration',
-            type: 'number',
-            name: 'periodDuration',
-            label: 'Period Duration (days)',
-            required: false,
-            width: 'half',
-            order: 2,
-            config: { min: 1, max: 10 },
           },
           {
             id: 'field-flow',
@@ -467,7 +456,7 @@ export const defaultTemplates = {
             name: 'cycleRegularity',
             label: 'Cycle Regularity',
             required: false,
-            width: 'full',
+            width: 'half',
             order: 4,
             options: [
               { value: 'regular', label: 'Regular' },
@@ -477,58 +466,9 @@ export const defaultTemplates = {
         ],
       },
       {
-        id: 'section-obstetric',
-        title: 'Obstetric History',
-        order: 2,
-        collapsible: true,
-        columns: 4,
-        fields: [
-          {
-            id: 'field-gravida',
-            type: 'number',
-            name: 'gravida',
-            label: 'Gravida (G)',
-            required: false,
-            width: 'quarter',
-            order: 0,
-            config: { min: 0 },
-          },
-          {
-            id: 'field-para',
-            type: 'number',
-            name: 'para',
-            label: 'Para (P)',
-            required: false,
-            width: 'quarter',
-            order: 1,
-            config: { min: 0 },
-          },
-          {
-            id: 'field-abortions',
-            type: 'number',
-            name: 'abortions',
-            label: 'Abortions (A)',
-            required: false,
-            width: 'quarter',
-            order: 2,
-            config: { min: 0 },
-          },
-          {
-            id: 'field-living',
-            type: 'number',
-            name: 'livingChildren',
-            label: 'Living (L)',
-            required: false,
-            width: 'quarter',
-            order: 3,
-            config: { min: 0 },
-          },
-        ],
-      },
-      {
         id: 'section-complaint',
         title: 'Chief Complaint',
-        order: 3,
+        order: 2,
         collapsible: false,
         fields: [
           {
@@ -545,8 +485,8 @@ export const defaultTemplates = {
       },
       {
         id: 'section-examination',
-        title: 'Examination',
-        order: 4,
+        title: 'Clinical Examination',
+        order: 3,
         collapsible: true,
         fields: [
           {
@@ -557,7 +497,6 @@ export const defaultTemplates = {
             required: false,
             width: 'full',
             order: 0,
-            config: { rows: 2 },
           },
           {
             id: 'field-pelvic',
@@ -567,14 +506,13 @@ export const defaultTemplates = {
             required: false,
             width: 'full',
             order: 1,
-            config: { rows: 2 },
           },
         ],
       },
       {
-        id: 'section-diagnosis',
-        title: 'Diagnosis & Treatment',
-        order: 5,
+        id: 'section-prescription',
+        title: 'Diagnosis & Prescription',
+        order: 4,
         collapsible: false,
         fields: [
           {
@@ -595,6 +533,16 @@ export const defaultTemplates = {
             width: 'full',
             order: 1,
           },
+          {
+            id: 'field-advice',
+            type: 'textarea',
+            name: 'advice',
+            label: 'Advice',
+            required: false,
+            width: 'full',
+            order: 2,
+            config: { rows: 3 },
+          },
         ],
       },
     ],
@@ -605,6 +553,246 @@ export const defaultTemplates = {
       isSystem: true,
       isActive: true,
     },
+  },
+
+  // Antenatal Booking Visit (First Visit)
+  antenatalBookingVisit: {
+    id: 'template-antenatal-booking',
+    name: 'Antenatal Booking Visit',
+    type: 'consultation',
+    category: 'obstetrics',
+    genderSpecific: 'female',
+    visitType: 'first',
+    version: 1,
+    sections: [
+      {
+        id: 'section-general',
+        title: 'General Information',
+        order: 0,
+        columns: 2,
+        fields: [
+          { id: 'occupation', type: 'text', label: 'Occupation', width: 'half' },
+          { id: 'place', type: 'text', label: 'Place', width: 'half' },
+          { id: 'reference', type: 'text', label: 'Reference', width: 'full' },
+        ]
+      },
+      {
+        id: 'section-obstetric-score',
+        title: 'Obstetric Status',
+        order: 1,
+        columns: 5,
+        fields: [
+          { id: 'gravida', type: 'number', label: 'G (Gravida)', width: 'fifth' },
+          { id: 'para', type: 'number', label: 'P (Para)', width: 'fifth' },
+          { id: 'living', type: 'number', label: 'L (Living)', width: 'fifth' },
+          { id: 'abortions', type: 'number', label: 'A (Abortions)', width: 'fifth' },
+          { id: 'ectopic', type: 'number', label: 'E (Ectopic)', width: 'fifth' },
+        ]
+      },
+      {
+        id: 'section-pregnancy-details',
+        title: 'Current Pregnancy',
+        order: 2,
+        columns: 2,
+        fields: [
+          { id: 'lmp', type: 'date', label: 'LMP (Last Menstrual Period)', width: 'half', required: true },
+          { id: 'edd', type: 'date', label: 'EDD (Estimated Delivery Date)', width: 'half' },
+          { id: 'pog', type: 'text', label: 'POG (Weeks)', width: 'half' },
+          {
+            id: 'conceptionMode',
+            type: 'dropdown',
+            label: 'Mode of Conception',
+            width: 'half',
+            options: [
+              { value: 'spontaneous', label: 'Spontaneous' },
+              { value: 'iui', label: 'IUI' },
+              { value: 'icsi', label: 'ICSI' },
+              { value: 'ivf', label: 'IVF' },
+            ]
+          },
+        ]
+      },
+      {
+        id: 'section-symptoms',
+        title: '1st Trimester Symptoms',
+        order: 3,
+        columns: 2,
+        fields: [
+          { id: 'nausea', type: 'toggle', label: 'Nausea', width: 'half' },
+          { id: 'vomiting', type: 'toggle', label: 'Vomiting', width: 'half' },
+          { id: 'bleeding', type: 'toggle', label: 'Bleeding/Spotting', width: 'half' },
+          { id: 'folicAcid', type: 'toggle', label: 'Preconceptional Folic Acid', width: 'half' },
+          {
+            id: 'ttInj', type: 'dropdown', label: 'Inj TT Taken', width: 'half', options: [
+              { value: 'none', label: 'None' },
+              { value: '1dose', label: '1 Dose' },
+              { value: '2doses', label: '2 Doses' },
+            ]
+          },
+          { id: 'picme', type: 'text', label: 'PICME Number', width: 'half' },
+        ]
+      },
+      {
+        id: 'section-comorbidities',
+        title: 'Comorbidities in Pregnancy',
+        order: 4,
+        columns: 2,
+        fields: [
+          {
+            id: 'dm', type: 'dropdown', label: 'GDM/Type 2 DM', width: 'half', options: [
+              { value: 'nil', label: 'Nil' },
+              { value: 'gdm', label: 'GDM' },
+              { value: 'dm2', label: 'Type 2 DM' },
+            ]
+          },
+          {
+            id: 'htn', type: 'dropdown', label: 'PIH/Hypertension', width: 'half', options: [
+              { value: 'nil', label: 'Nil' },
+              { value: 'pih', label: 'PIH' },
+              { value: 'essential', label: 'Essential HTN' },
+            ]
+          },
+          { id: 'thyroid', type: 'toggle', label: 'Hypothyroidism', width: 'half' },
+          { id: 'asthma', type: 'toggle', label: 'Asthma', width: 'half' },
+        ]
+      },
+      {
+        id: 'section-obstetric-history',
+        title: 'Previous Obstetric History',
+        order: 5,
+        fields: [
+          {
+            id: 'prevObstetricHistory',
+            type: 'table',
+            label: 'History of Previous Pregnancies',
+            width: 'full',
+            config: {
+              columns: [
+                { id: 'outcome', header: 'Outcome', type: 'text', width: '15%' },
+                {
+                  id: 'modeConception', header: 'Mode of Conception', type: 'dropdown', width: '15%', options: [
+                    { value: 'spontaneous', label: 'Spontaneous' },
+                    { value: 'assisted', label: 'Assisted' },
+                  ]
+                },
+                { id: 'weeks', header: 'Weeks', type: 'number', width: '10%' },
+                { id: 'modeDelivery', header: 'Mode of Delivery', type: 'text', width: '15%' },
+                { id: 'babyOutcome', header: 'Baby Outcome', type: 'text', width: '15%' },
+                { id: 'complications', header: 'Complications', type: 'text', width: '30%' },
+              ]
+            }
+          }
+        ]
+      },
+    ],
+    metadata: { author: 'system', isSystem: true, isActive: true }
+  },
+
+  // Antenatal Follow-up Prescription
+  antenatalFollowupVisit: {
+    id: 'template-antenatal-followup',
+    name: 'Antenatal Follow-up',
+    type: 'consultation',
+    category: 'obstetrics',
+    genderSpecific: 'female',
+    visitType: 'followup',
+    version: 1,
+    sections: [
+      {
+        id: 'section-vitals-pog',
+        title: 'Status & Vitals',
+        order: 0,
+        columns: 4,
+        fields: [
+          { id: 'obstetricScoreSummary', type: 'text', label: 'Obstetric Score', width: 'half' },
+          { id: 'pog', type: 'text', label: 'POG (Weeks)', width: 'half' },
+          { id: 'vitals', type: 'vitals', label: 'Vitals', width: 'full' },
+          { id: 'prevWeight', type: 'number', label: 'Previous Visit Weight (kg)', width: 'half' },
+          {
+            id: 'pallor', type: 'dropdown', label: 'Pallor', width: 'half', options: [
+              { value: 'no', label: 'No' },
+              { value: 'yes', label: 'Yes' },
+            ]
+          },
+          {
+            id: 'pedalEdema', type: 'dropdown', label: 'Pedal Edema', width: 'half', options: [
+              { value: 'no', label: 'No' },
+              { value: 'yes', label: 'Yes' },
+            ]
+          },
+        ]
+      },
+      {
+        id: 'section-screening',
+        title: 'Screening & Reports',
+        order: 1,
+        columns: 2,
+        fields: [
+          {
+            id: 'screeningReport', type: 'dropdown', label: 'Screening Report', width: 'half', options: [
+              { value: 'double-marker', label: 'Double Marker' },
+              { value: 'nipt', label: 'NIPT' },
+              { value: 'none', label: 'None' },
+            ]
+          },
+          {
+            id: 'riskStatus', type: 'dropdown', label: 'Risk Level', width: 'half', options: [
+              { value: 'low', label: 'Low Risk' },
+              { value: 'intermediate', label: 'Intermediate' },
+              { value: 'high', label: 'High Risk' },
+            ]
+          },
+          {
+            id: 'bloodReports', type: 'radio', label: 'Blood Reports', width: 'half', options: [
+              { value: 'entered', label: 'Entered' },
+              { value: 'not-entered', label: 'Not Entered' },
+            ]
+          },
+        ]
+      },
+      {
+        id: 'section-examination',
+        title: 'Examination (O/E)',
+        order: 2,
+        columns: 1,
+        fields: [
+          { id: 'paFindings', type: 'textarea', label: 'Per Abdomen (P/A)', width: 'full', config: { rows: 2, placeholder: 'e.g., Uterus 16 weeks, relaxed, liquor average, FHS good' } },
+          { id: 'cervicalLength', type: 'text', label: 'Cervical Length', width: 'half' },
+        ]
+      },
+      {
+        id: 'section-vaccination',
+        title: 'Vaccination',
+        order: 3,
+        columns: 2,
+        fields: [
+          {
+            id: 'tdVac', type: 'dropdown', label: 'Inj. Td vac 0.5 ml IM', width: 'half', options: [
+              { value: 'given', label: 'Given' },
+              { value: 'not-given', label: 'Not Given' },
+            ]
+          },
+          {
+            id: 'tdap', type: 'dropdown', label: 'Tdap vaccine', width: 'half', options: [
+              { value: 'discussed', label: 'Discussed' },
+              { value: 'taken', label: 'Taken' },
+              { value: 'pending', label: 'Pending' },
+            ]
+          },
+        ]
+      },
+      {
+        id: 'section-prescription',
+        title: 'Prescription',
+        order: 4,
+        fields: [
+          { id: 'medications', type: 'medications', label: 'Medications Advised', width: 'full' },
+          { id: 'investigations', type: 'investigations', label: 'Ordered Investigations', width: 'full' },
+          { id: 'advice', type: 'textarea', label: 'Advice', width: 'full', config: { rows: 3 } },
+        ]
+      },
+    ],
+    metadata: { author: 'system', isSystem: true, isActive: true }
   },
 
   // Pediatric Consultation

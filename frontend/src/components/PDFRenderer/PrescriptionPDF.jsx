@@ -1,32 +1,35 @@
 // src/components/PDFRenderer/PrescriptionPDF.jsx
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { formatDate, formatVitals, shouldRenderSection } from '../PrescriptionBuilder/prescriptionUtils';
 
-// Define styles
-const styles = StyleSheet.create({
+// Define styles dynamically based on template settings
+const createStyles = (styling) => StyleSheet.create({
   page: {
-    padding: 30,
+    padding: 40,
     fontFamily: 'Helvetica',
-    fontSize: 11,
+    fontSize: styling.bodyFontSize ? parseInt(styling.bodyFontSize) : 11,
     color: '#333',
+    lineHeight: styling.lineHeight || 1.4,
   },
   header: {
     marginBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: '#1976d2',
-    paddingBottom: 10,
+    borderBottomColor: styling.primaryColor || '#1976d2',
+    paddingBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   clinicName: {
-    fontSize: 24,
-    color: '#1976d2',
+    fontSize: styling.headerFontSize ? parseInt(styling.headerFontSize) + 4 : 22,
+    color: styling.primaryColor || '#1976d2',
     fontWeight: 'bold',
     marginBottom: 4,
   },
   clinicInfo: {
     fontSize: 9,
     color: '#666',
+    marginBottom: 2,
   },
   doctorInfo: {
     textAlign: 'right',
@@ -34,52 +37,62 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#1976d2',
+    color: styling.primaryColor || '#1976d2',
+    marginBottom: 2,
   },
   patientInfoBox: {
-    backgroundColor: '#f5f5f5',
-    padding: 10,
+    backgroundColor: '#f9f9f9',
+    padding: 12,
     borderRadius: 4,
     marginBottom: 20,
     flexDirection: 'row',
     flexWrap: 'wrap',
+    borderWidth: 0.5,
+    borderColor: '#eee',
   },
   patientText: {
     width: '50%',
-    marginBottom: 4,
+    marginBottom: 6,
     fontSize: 10,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  section: {
+    marginBottom: 15,
   },
   sectionTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#1976d2',
+    color: styling.primaryColor || '#1976d2',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#eee',
     marginBottom: 8,
-    marginTop: 10,
-    paddingBottom: 2,
+    marginTop: 5,
+    paddingBottom: 3,
+    textTransform: 'uppercase',
   },
   vitalsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   vitalItem: {
-    width: '25%',
+    width: '33%',
     fontSize: 10,
-    marginBottom: 4,
-    backgroundColor: '#fff',
+    marginBottom: 6,
   },
   rxSymbol: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Helvetica-Bold',
-    marginRight: 5,
+    marginRight: 8,
+    color: styling.primaryColor || '#1976d2',
   },
   medicationRow: {
-    marginBottom: 8,
-    paddingBottom: 4,
+    marginBottom: 10,
+    paddingBottom: 6,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
   medName: {
     fontSize: 11,
@@ -87,27 +100,56 @@ const styles = StyleSheet.create({
   },
   medDetails: {
     fontSize: 10,
-    color: '#444',
-    marginTop: 2,
+    color: '#555',
+    marginTop: 3,
+    paddingLeft: 12,
+  },
+  bulletItem: {
+    fontSize: 10,
+    marginBottom: 4,
+    paddingLeft: 10,
+  },
+  table: {
+    display: 'table',
+    width: 'auto',
+    borderStyle: 'solid',
+    borderWidth: 0.5,
+    borderColor: '#eee',
+    marginBottom: 10,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#eee',
+  },
+  tableHeader: {
+    backgroundColor: '#f5f5f5',
+  },
+  tableCell: {
+    padding: 5,
+    fontSize: 8,
+    borderRightWidth: 0.5,
+    borderRightColor: '#eee',
   },
   footer: {
     position: 'absolute',
     bottom: 30,
-    left: 30,
-    right: 30,
+    left: 40,
+    right: 40,
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingTop: 10,
+    borderTopColor: '#eee',
+    paddingTop: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   signatureLine: {
-    width: 150,
+    width: 180,
     borderTopWidth: 1,
-    borderTopColor: '#000',
-    marginTop: 40,
+    borderTopColor: '#333',
+    marginTop: 30,
     textAlign: 'center',
     fontSize: 10,
+    paddingTop: 5,
   },
 });
 
@@ -115,64 +157,81 @@ const styles = StyleSheet.create({
  * PDF Document Component
  */
 const PrescriptionPDF = ({ data, template }) => {
-  const { patient, visit, doctor, clinic, vitals, medications, diagnosis, investigations, advice } = data;
+  const styling = template?.styling || {};
+  const styles = createStyles(styling);
+  const sections = template?.sections || [];
+  const enabledSections = sections
+    .filter(s => shouldRenderSection(s, data))
+    .sort((a, b) => a.order - b.order);
 
-  const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'N/A';
-
-  return (
-    <Document>
-      <Page size={template?.pageSize || 'A4'} style={styles.page}>
-        
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.clinicName}>{clinic.name}</Text>
-            <Text style={styles.clinicInfo}>{clinic.address}</Text>
-            <Text style={styles.clinicInfo}>{clinic.phone} | {clinic.email}</Text>
-          </View>
-          <View style={styles.doctorInfo}>
-            <Text style={styles.doctorName}>{doctor.name}</Text>
-            <Text style={styles.clinicInfo}>{doctor.qualification}</Text>
-            <Text style={styles.clinicInfo}>{doctor.specialization}</Text>
-            <Text style={styles.clinicInfo}>Reg: {doctor.registrationNo}</Text>
-          </View>
-        </View>
-
-        {/* Patient Info */}
-        <View style={styles.patientInfoBox}>
-          <Text style={styles.patientText}>Name: {patient.name}</Text>
-          <Text style={styles.patientText}>Date: {formatDate(visit.date)}</Text>
-          <Text style={styles.patientText}>Age/Sex: {patient.age} / {patient.gender}</Text>
-          <Text style={styles.patientText}>ID: {patient.patientId}</Text>
-        </View>
-
-        {/* Vitals */}
-        {vitals && Object.keys(vitals).length > 0 && (
-          <View>
-            <Text style={styles.sectionTitle}>Vitals</Text>
-            <View style={styles.vitalsRow}>
-              {vitals.temperature && <Text style={styles.vitalItem}>Temp: {vitals.temperature}</Text>}
-              {vitals.bloodPressureSystolic && <Text style={styles.vitalItem}>BP: {vitals.bloodPressureSystolic}/{vitals.bloodPressureDiastolic}</Text>}
-              {vitals.heartRate && <Text style={styles.vitalItem}>HR: {vitals.heartRate}</Text>}
-              {vitals.weight && <Text style={styles.vitalItem}>Wt: {vitals.weight}</Text>}
+  const renderSectionContent = (section) => {
+    switch (section.type) {
+      case 'header':
+        return (
+          <View style={styles.header} key={section.id}>
+            <View>
+              <Text style={styles.clinicName}>{data.clinic?.name || 'Medical Center'}</Text>
+              <Text style={styles.clinicInfo}>{data.clinic?.address}</Text>
+              <Text style={styles.clinicInfo}>{data.clinic?.phone} | {data.clinic?.email}</Text>
+            </View>
+            <View style={styles.doctorInfo}>
+              <Text style={styles.doctorName}>{data.doctor?.name}</Text>
+              <Text style={styles.clinicInfo}>{data.doctor?.qualification}</Text>
+              <Text style={styles.clinicInfo}>{data.doctor?.specialization}</Text>
+              <Text style={styles.clinicInfo}>Reg. No: {data.doctor?.registrationNo}</Text>
             </View>
           </View>
-        )}
+        );
 
-        {/* Diagnosis */}
-        {diagnosis && diagnosis.length > 0 && (
-          <View>
-            <Text style={styles.sectionTitle}>Diagnosis</Text>
-            <Text style={{ fontSize: 10 }}>{Array.isArray(diagnosis) ? diagnosis.join(', ') : diagnosis}</Text>
+      case 'patient-info':
+        return (
+          <View style={styles.patientInfoBox} key={section.id}>
+            <Text style={styles.patientText}>
+              <Text style={styles.bold}>Patient: </Text>{data.patient?.name || 'N/A'}
+            </Text>
+            <Text style={styles.patientText}>
+              <Text style={styles.bold}>Date: </Text>{formatDate(data.visit?.date || data.date)}
+            </Text>
+            <Text style={styles.patientText}>
+              <Text style={styles.bold}>Age/Sex: </Text>{data.patient?.age || 'N/A'} / {data.patient?.gender || 'N/A'}
+            </Text>
+            <Text style={styles.patientText}>
+              <Text style={styles.bold}>Patient ID: </Text>{data.patient?.patientId || 'N/A'}
+            </Text>
           </View>
-        )}
+        );
 
-        {/* Medications */}
-        {medications && medications.length > 0 && (
-          <View style={{ marginTop: 15 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+      case 'vitals':
+        const vitals = formatVitals(data.vitals);
+        return (
+          <View style={styles.section} key={section.id}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <View style={styles.vitalsRow}>
+              {vitals.map((vital, i) => (
+                <Text key={i} style={styles.vitalItem}>{vital}</Text>
+              ))}
+            </View>
+          </View>
+        );
+
+      case 'diagnosis':
+        const diagnosis = Array.isArray(data.diagnosis) ? data.diagnosis : (data.diagnosis ? [data.diagnosis] : []);
+        return (
+          <View style={styles.section} key={section.id}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <Text style={{ fontSize: 10 }}>
+              {diagnosis.join(', ')}
+            </Text>
+          </View>
+        );
+
+      case 'medications':
+        const medications = data.medications || [];
+        return (
+          <View style={styles.section} key={section.id}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.rxSymbol}>Rx</Text>
-              <Text style={styles.sectionTitle}>Medications</Text>
+              <Text style={styles.sectionTitle}>{section.title}</Text>
             </View>
             {medications.map((med, index) => (
               <View key={index} style={styles.medicationRow}>
@@ -180,45 +239,99 @@ const PrescriptionPDF = ({ data, template }) => {
                   {index + 1}. {med.name} {med.dose && `- ${med.dose}`}
                 </Text>
                 <Text style={styles.medDetails}>
-                  {med.frequency} | {med.duration} | {med.route}
+                  {med.route} | {med.frequency} | {med.duration}
                   {med.instructions ? ` | [${med.instructions}]` : ''}
                 </Text>
               </View>
             ))}
           </View>
-        )}
+        );
 
-        {/* Investigations */}
-        {investigations && investigations.length > 0 && (
-          <View style={{ marginTop: 10 }}>
-            <Text style={styles.sectionTitle}>Investigations</Text>
+      case 'investigations':
+        const investigations = data.investigations || [];
+        return (
+          <View style={styles.section} key={section.id}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
             {investigations.map((inv, i) => (
-              <Text key={i} style={{ fontSize: 10, marginBottom: 2 }}>• {inv}</Text>
+              <Text key={i} style={styles.bulletItem}>• {typeof inv === 'object' ? inv.name : inv}</Text>
             ))}
           </View>
-        )}
+        );
 
-        {/* Advice */}
-        {advice && advice.length > 0 && (
-          <View style={{ marginTop: 10 }}>
-            <Text style={styles.sectionTitle}>Advice</Text>
-            {advice.map((adv, i) => (
-              <Text key={i} style={{ fontSize: 10, marginBottom: 2 }}>• {adv}</Text>
+      case 'advice':
+        const adviceArray = Array.isArray(data.advice) ? data.advice : (data.advice ? data.advice.split('\n') : []);
+        return (
+          <View style={styles.section} key={section.id}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            {adviceArray.map((adv, i) => (
+              <Text key={i} style={styles.bulletItem}>• {adv}</Text>
             ))}
           </View>
-        )}
+        );
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <View>
-            <Text style={{ fontSize: 8, color: '#999' }}>Generated by ADAPTA</Text>
-            <Text style={{ fontSize: 8, color: '#999' }}>{new Date().toLocaleString()}</Text>
+      case 'follow-up':
+        const fuDate = data.followUp || data.followUpDate;
+        return (
+          <View style={styles.section} key={section.id}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <Text style={{ fontSize: 10 }}>
+              Please visit on: <Text style={styles.bold}>{formatDate(fuDate)}</Text>
+            </Text>
           </View>
-          <View>
-            <Text style={styles.signatureLine}>{doctor.name}</Text>
-          </View>
-        </View>
+        );
 
+      case 'signature':
+        return (
+          <View style={styles.footer} key={section.id}>
+            <View>
+              <Text style={{ fontSize: 8, color: '#999' }}>Generated by ADAPTA Smart Systems</Text>
+              <Text style={{ fontSize: 8, color: '#999' }}>{new Date().toLocaleString()}</Text>
+            </View>
+            <View>
+              <View style={styles.signatureLine}>
+                <Text style={styles.bold}>{data.doctor?.name}</Text>
+                <Text style={{ fontSize: 8 }}>{data.doctor?.qualification}</Text>
+              </View>
+            </View>
+          </View>
+        );
+
+      case 'table':
+        const tableData = data[section.id] || [];
+        const columns = section.config?.columns || [];
+        return (
+          <View style={styles.section} key={section.id}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <View style={styles.table}>
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                {columns.map(col => (
+                  <View key={col.id} style={[styles.tableCell, { width: col.width || 'auto' }]}>
+                    <Text style={styles.bold}>{col.header}</Text>
+                  </View>
+                ))}
+              </View>
+              {tableData.map((row, i) => (
+                <View key={i} style={styles.tableRow}>
+                  {columns.map(col => (
+                    <View key={col.id} style={[styles.tableCell, { width: col.width || 'auto' }]}>
+                      <Text>{row[col.id] || '-'}</Text>
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Document>
+      <Page size={template?.pageSize || 'A4'} style={styles.page}>
+        {enabledSections.map(renderSectionContent)}
       </Page>
     </Document>
   );

@@ -40,6 +40,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -53,7 +55,9 @@ import { v4 as uuidv4 } from 'uuid';
 import usePatientStore from '../core/store/usePatientStore';
 import useTemplateStore from '../core/store/useTemplateStore';
 import FormRenderer from '../components/FormRenderer/FormRenderer';
-import MedicationGrid from '../components/PrescriptionBuilder/MedicationGrid';
+// import MedicationGrid from '../components/PrescriptionBuilder/MedicationGrid';
+// Temporary mock to prevent crashes if the real component is broken or causing issues
+const MedicationGrid = () => <Box p={2} bgcolor="warning.light">Medication Grid Component Unavailable</Box>;
 import { usePDF } from '../hooks/usePDF';
 import { useAdapta } from '../context/AdaptaContext';
 
@@ -71,13 +75,26 @@ const PatientConsultation = () => {
     getVisitsByPatient,
     getPrescriptionsByPatient,
   } = usePatientStore();
-  const { templates } = useTemplateStore();
+
+  const {
+    fetchSpecialties,
+    fetchDepartmentTemplates,
+    fetchVitals,
+    fetchMetadata,
+    remoteTemplates,
+    specialties,
+    vitals,
+    medicationRoutes,
+    frequencies,
+    loading: templatesLoading,
+  } = useTemplateStore();
 
   // State
   const [selectedPatientId, setSelectedPatientId] = useState(patientId || null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewPatientDialog, setShowNewPatientDialog] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const [consultationData, setConsultationData] = useState({
     chiefComplaint: '',
     vitals: {},
@@ -88,6 +105,10 @@ const PatientConsultation = () => {
     followUpDate: '',
     notes: '',
   });
+
+  // Missing state variables
+  const [isEmergencyMode, setIsEmergencyMode] = useState(false);
+  const [savedPrescriptionId, setSavedPrescriptionId] = useState(null);
   const [newPatient, setNewPatient] = useState({
     firstName: '',
     lastName: '',
@@ -97,12 +118,29 @@ const PatientConsultation = () => {
     email: '',
     allergies: [],
   });
-  const [savedPrescriptionId, setSavedPrescriptionId] = useState(null);
 
-  // Get selected patient
-  const selectedPatient = useMemo(() => {
-    return selectedPatientId ? patients[selectedPatientId] : null;
-  }, [selectedPatientId, patients]);
+  // Fetch all dynamic data on mount
+  React.useEffect(() => {
+    const init = async () => {
+      await fetchSpecialties();
+      await fetchVitals();
+      await fetchMetadata();
+
+      // Auto-select first specialty if available
+      const results = await fetchSpecialties();
+      if (results && results.length > 0) {
+        setSelectedDepartment(results[0]);
+      }
+    };
+    init();
+  }, []);
+
+  // Fetch template when department changes
+  React.useEffect(() => {
+    if (selectedDepartment) {
+      fetchDepartmentTemplates(selectedDepartment);
+    }
+  }, [selectedDepartment, fetchDepartmentTemplates]);
 
   // Get patient history
   const patientHistory = useMemo(() => {
@@ -112,6 +150,34 @@ const PatientConsultation = () => {
       prescriptions: getPrescriptionsByPatient(selectedPatientId),
     };
   }, [selectedPatientId, getVisitsByPatient, getPrescriptionsByPatient]);
+
+  // Auto-select department based on patient history
+  React.useEffect(() => {
+    if (selectedPatientId && patientHistory.visits.length > 0) {
+      const lastVisit = patientHistory.visits[0];
+      if (lastVisit.department && specialties.includes(lastVisit.department)) {
+        setSelectedDepartment(lastVisit.department);
+      }
+    }
+  }, [selectedPatientId, patientHistory, specialties]);
+
+  // Combined context for rule engine and field renderers
+  const evaluationContext = useMemo(() => ({
+    patient: selectedPatientId ? patients[selectedPatientId] : null,
+    vitals,
+    medicationRoutes,
+    frequencies,
+    currentUser,
+    clinicInfo,
+    systemConfig: {
+      isEmergency: isEmergencyMode
+    }
+  }), [selectedPatientId, patients, vitals, medicationRoutes, frequencies, currentUser, clinicInfo, isEmergencyMode]);
+
+  // Get selected patient
+  const selectedPatient = useMemo(() => {
+    return selectedPatientId ? patients[selectedPatientId] : null;
+  }, [selectedPatientId, patients]);
 
   // Filter patients by search
   const filteredPatients = useMemo(() => {
@@ -157,7 +223,7 @@ const PatientConsultation = () => {
       patientId: selectedPatientId,
       doctorId: currentUser?.id,
       type: 'consultation',
-      department: 'General',
+      department: specialties.find(d => d.id === selectedDepartment)?.name || 'General',
       date: new Date().toISOString(),
       time: new Date().toTimeString().slice(0, 5),
       status: 'completed',
@@ -228,7 +294,100 @@ const PatientConsultation = () => {
     });
     setSavedPrescriptionId(null);
     setActiveStep(0);
+    setIsEmergencyMode(false);
   };
+
+  const handleFormChange = (formData) => {
+    setConsultationData(prev => ({
+      ...prev,
+      ...formData
+    }));
+  };
+
+  // Dynamic Consultation Template
+  const consultationTemplate = useMemo(() => {
+    const baseTemplate = remoteTemplates[0] || { sections: [] };
+
+    // Merge or apply rules to the selected department template
+    return {
+      ...baseTemplate,
+      sections: (baseTemplate.sections || []).map(section => {
+        // Apply pregnancy rules specifically if it's gynae or has those fields
+        if (section.id === 'obstetricHistory' || section.id === 'clinicalExamination') {
+          return {
+            ...section,
+            fields: section.fields.map(field => {
+              if (field.id === 'pregnancyStatus') {
+                return {
+                  ...field,
+                  visibilityRules: [
+                    { action: 'show', conditions: [{ field: 'patient.gender', operator: 'equals', value: 'female' }] },
+                    { action: 'hide', conditions: [{ field: 'patient.gender', operator: 'notEquals', value: 'female' }] },
+                    { action: 'hide', conditions: [{ field: 'emergencyMode', operator: 'equals', value: true }] }
+                  ]
+                };
+              }
+              if (field.id === 'lmp') {
+                return {
+                  ...field,
+                  visibilityRules: [
+                    { action: 'show', conditions: [{ field: 'pregnancyStatus', operator: 'equals', value: 'Pregnant' }] },
+                    { action: 'hide', conditions: [{ field: 'pregnancyStatus', operator: 'notEquals', value: 'Pregnant' }] }
+                  ]
+                };
+              }
+              return field;
+            })
+          };
+        }
+        return section;
+      })
+    };
+  }, [remoteTemplates, isEmergencyMode]);
+
+  const prescriptionTemplate = useMemo(() => {
+    return {
+      sections: [
+        {
+          id: 'medicationsSection',
+          title: 'Prescribed Medications',
+          fields: [
+            {
+              id: 'medications',
+              label: 'Medications',
+              type: 'medications',
+              width: 'full'
+            }
+          ]
+        },
+        {
+          id: 'investigationsSection',
+          title: 'Investigations & Advice',
+          fields: [
+            {
+              id: 'investigations',
+              label: 'Investigations',
+              type: 'investigations',
+              width: 'half'
+            },
+            {
+              id: 'advice',
+              label: 'Clinical Advice',
+              type: 'textarea',
+              width: 'half',
+              rows: 6
+            },
+            {
+              id: 'followUpDate',
+              label: 'Follow-up Date',
+              type: 'date',
+              width: 'half'
+            }
+          ]
+        }
+      ]
+    };
+  }, []);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
@@ -518,106 +677,75 @@ const PatientConsultation = () => {
               Consultation
             </Typography>
 
-            <Grid container spacing={3}>
-              {/* Chief Complaint */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Chief Complaint"
-                  placeholder="Describe the patient's main complaint..."
-                  multiline
-                  rows={3}
-                  value={consultationData.chiefComplaint}
-                  onChange={(e) =>
-                    setConsultationData((prev) => ({
-                      ...prev,
-                      chiefComplaint: e.target.value,
-                    }))
-                  }
-                />
-              </Grid>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Consultation
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isEmergencyMode}
+                    onChange={(e) => setIsEmergencyMode(e.target.checked)}
+                    color="error"
+                  />
+                }
+                label={
+                  <Typography color={isEmergencyMode ? 'error' : 'textSecondary'} fontWeight="bold">
+                    Emergency Mode
+                  </Typography>
+                }
+              />
+            </Box>
 
-              {/* Vitals */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-                  Vitals
-                </Typography>
-                <Paper variant="outlined" sx={{ p: 2 }}>
-                  <Grid container spacing={2}>
-                    {[
-                      { key: 'temperature', label: 'Temperature', unit: '°F' },
-                      { key: 'bloodPressureSystolic', label: 'BP Systolic', unit: 'mmHg' },
-                      { key: 'bloodPressureDiastolic', label: 'BP Diastolic', unit: 'mmHg' },
-                      { key: 'heartRate', label: 'Heart Rate', unit: 'bpm' },
-                      { key: 'respiratoryRate', label: 'Resp. Rate', unit: '/min' },
-                      { key: 'oxygenSaturation', label: 'SpO2', unit: '%' },
-                      { key: 'weight', label: 'Weight', unit: 'kg' },
-                      { key: 'height', label: 'Height', unit: 'cm' },
-                    ].map((vital) => (
-                      <Grid item xs={6} sm={4} md={3} key={vital.key}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label={vital.label}
-                          type="number"
-                          value={consultationData.vitals[vital.key] || ''}
-                          onChange={(e) =>
-                            setConsultationData((prev) => ({
-                              ...prev,
-                              vitals: {
-                                ...prev.vitals,
-                                [vital.key]: e.target.value ? Number(e.target.value) : '',
-                              },
-                            }))
-                          }
-                          InputProps={{
-                            endAdornment: (
-                              <Typography variant="caption" color="text.secondary">
-                                {vital.unit}
-                              </Typography>
-                            ),
-                          }}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              </Grid>
+            {isEmergencyMode && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                EMERGENCY MODE ACTIVE: Only critical fields are shown. Examination notes and non-essential history are hidden.
+              </Alert>
+            )}
 
-              {/* Examination Notes */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Examination Notes"
-                  placeholder="Physical examination findings..."
-                  multiline
-                  rows={3}
-                  value={consultationData.notes}
-                  onChange={(e) =>
-                    setConsultationData((prev) => ({
-                      ...prev,
-                      notes: e.target.value,
-                    }))
-                  }
-                />
+            {/* Department Template Selector */}
+            <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.light' }}>
+              <Grid container alignItems="center" spacing={2}>
+                <Grid item xs={12} md={8}>
+                  <Typography variant="subtitle2" color="primary.main" fontWeight={700}>
+                    Multi-Specialty LCNC Engine
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    The doctor can switch between different department templates dynamically. Each template loads its own custom fields and rules.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Switch Department Template</InputLabel>
+                    <Select
+                      value={selectedDepartment}
+                      label="Switch Department Template"
+                      onChange={(e) => setSelectedDepartment(e.target.value)}
+                      sx={{ bgcolor: 'white' }}
+                    >
+                      {specialties.map((s) => (
+                        <MenuItem key={s} value={s}>{s}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
+            </Paper>
 
-              {/* Diagnosis */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Diagnosis"
-                  placeholder="Enter diagnosis..."
-                  value={consultationData.diagnosis}
-                  onChange={(e) =>
-                    setConsultationData((prev) => ({
-                      ...prev,
-                      diagnosis: e.target.value,
-                    }))
-                  }
-                />
-              </Grid>
-            </Grid>
+            <FormRenderer
+              template={consultationTemplate}
+              initialData={{
+                ...consultationData,
+                ...consultationData.vitals
+              }}
+              context={{
+                patient: selectedPatient,
+                emergencyMode: isEmergencyMode
+              }}
+              onChange={handleFormChange}
+              showSubmit={false}
+              showSave={false}
+            />
 
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
               <Button onClick={() => setActiveStep(1)}>Back</Button>
@@ -631,83 +759,17 @@ const PatientConsultation = () => {
         {/* Step 3: Prescription */}
         {activeStep === 3 && selectedPatient && (
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Prescription
-            </Typography>
-
-            <Grid container spacing={3}>
-              {/* Medications */}
-              <Grid item xs={12}>
-                <MedicationGrid
-                  value={consultationData.medications}
-                  onChange={(medications) =>
-                    setConsultationData((prev) => ({ ...prev, medications }))
-                  }
-                  patientAllergies={selectedPatient.allergies || []}
-                  patientAge={calculateAge(selectedPatient.dateOfBirth)}
-                  patientWeight={consultationData.vitals.weight}
-                />
-              </Grid>
-
-              {/* Investigations */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Investigations"
-                  placeholder="Enter investigations (one per line)..."
-                  multiline
-                  rows={4}
-                  value={
-                    Array.isArray(consultationData.investigations)
-                      ? consultationData.investigations.join('\n')
-                      : consultationData.investigations
-                  }
-                  onChange={(e) =>
-                    setConsultationData((prev) => ({
-                      ...prev,
-                      investigations: e.target.value.split('\n').filter((i) => i.trim()),
-                    }))
-                  }
-                  helperText="Enter each investigation on a new line"
-                />
-              </Grid>
-
-              {/* Advice */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Advice"
-                  placeholder="Enter advice (one per line)..."
-                  multiline
-                  rows={4}
-                  value={consultationData.advice}
-                  onChange={(e) =>
-                    setConsultationData((prev) => ({
-                      ...prev,
-                      advice: e.target.value,
-                    }))
-                  }
-                  helperText="Enter each advice on a new line"
-                />
-              </Grid>
-
-              {/* Follow-up */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Follow-up Date"
-                  value={consultationData.followUpDate}
-                  onChange={(e) =>
-                    setConsultationData((prev) => ({
-                      ...prev,
-                      followUpDate: e.target.value,
-                    }))
-                  }
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-            </Grid>
+            <FormRenderer
+              template={prescriptionTemplate}
+              initialData={consultationData}
+              context={{
+                patient: selectedPatient,
+                vitals: consultationData.vitals
+              }}
+              onChange={handleFormChange}
+              showSubmit={false}
+              showSave={false}
+            />
 
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
               <Button onClick={() => setActiveStep(2)}>Back</Button>

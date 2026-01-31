@@ -31,7 +31,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   number: {
     type: 'number',
     label: 'Number',
@@ -50,7 +50,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   textarea: {
     type: 'textarea',
     label: 'Text Area',
@@ -68,7 +68,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   email: {
     type: 'email',
     label: 'Email',
@@ -84,7 +84,7 @@ export const FIELD_TYPES = {
       ],
     },
   },
-  
+
   phone: {
     type: 'phone',
     label: 'Phone',
@@ -115,7 +115,7 @@ export const FIELD_TYPES = {
       options: [],
     },
   },
-  
+
   multiselect: {
     type: 'multiselect',
     label: 'Multi-Select',
@@ -129,7 +129,7 @@ export const FIELD_TYPES = {
       options: [],
     },
   },
-  
+
   checkbox: {
     type: 'checkbox',
     label: 'Checkbox',
@@ -142,7 +142,7 @@ export const FIELD_TYPES = {
       width: 'half',
     },
   },
-  
+
   radio: {
     type: 'radio',
     label: 'Radio Group',
@@ -156,7 +156,7 @@ export const FIELD_TYPES = {
       options: [],
     },
   },
-  
+
   toggle: {
     type: 'toggle',
     label: 'Toggle Switch',
@@ -186,7 +186,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   time: {
     type: 'time',
     label: 'Time Picker',
@@ -202,7 +202,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   datetime: {
     type: 'datetime',
     label: 'Date & Time',
@@ -241,7 +241,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   medications: {
     type: 'medications',
     label: 'Medication Grid',
@@ -256,22 +256,26 @@ export const FIELD_TYPES = {
         columns: [
           { id: 'name', header: 'Medicine Name', type: 'text', width: '25%' },
           { id: 'dose', header: 'Dose', type: 'text', width: '15%' },
-          { id: 'route', header: 'Route', type: 'dropdown', width: '15%', options: [
-            { label: 'Oral', value: 'oral' },
-            { label: 'IV', value: 'iv' },
-            { label: 'IM', value: 'im' },
-            { label: 'SC', value: 'sc' },
-            { label: 'Topical', value: 'topical' },
-            { label: 'Inhalation', value: 'inhalation' },
-          ]},
-          { id: 'frequency', header: 'Frequency', type: 'dropdown', width: '15%', options: [
-            { label: 'Once daily', value: 'OD' },
-            { label: 'Twice daily', value: 'BD' },
-            { label: 'Thrice daily', value: 'TDS' },
-            { label: 'Four times', value: 'QID' },
-            { label: 'As needed', value: 'PRN' },
-            { label: 'At bedtime', value: 'HS' },
-          ]},
+          {
+            id: 'route', header: 'Route', type: 'dropdown', width: '15%', options: [
+              { label: 'Oral', value: 'oral' },
+              { label: 'IV', value: 'iv' },
+              { label: 'IM', value: 'im' },
+              { label: 'SC', value: 'sc' },
+              { label: 'Topical', value: 'topical' },
+              { label: 'Inhalation', value: 'inhalation' },
+            ]
+          },
+          {
+            id: 'frequency', header: 'Frequency', type: 'dropdown', width: '15%', options: [
+              { label: 'Once daily', value: 'OD' },
+              { label: 'Twice daily', value: 'BD' },
+              { label: 'Thrice daily', value: 'TDS' },
+              { label: 'Four times', value: 'QID' },
+              { label: 'As needed', value: 'PRN' },
+              { label: 'At bedtime', value: 'HS' },
+            ]
+          },
           { id: 'duration', header: 'Duration', type: 'text', width: '15%' },
           { id: 'instructions', header: 'Instructions', type: 'text', width: '15%' },
         ],
@@ -280,7 +284,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   investigations: {
     type: 'investigations',
     label: 'Investigations',
@@ -294,11 +298,13 @@ export const FIELD_TYPES = {
       config: {
         columns: [
           { id: 'name', header: 'Investigation', type: 'text', width: '40%' },
-          { id: 'priority', header: 'Priority', type: 'dropdown', width: '20%', options: [
-            { label: 'Routine', value: 'routine' },
-            { label: 'Urgent', value: 'urgent' },
-            { label: 'STAT', value: 'stat' },
-          ]},
+          {
+            id: 'priority', header: 'Priority', type: 'dropdown', width: '20%', options: [
+              { label: 'Routine', value: 'routine' },
+              { label: 'Urgent', value: 'urgent' },
+              { label: 'STAT', value: 'stat' },
+            ]
+          },
           { id: 'notes', header: 'Notes', type: 'text', width: '40%' },
         ],
         allowAddRow: true,
@@ -306,7 +312,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   diagnosis: {
     type: 'diagnosis',
     label: 'Diagnosis',
@@ -323,7 +329,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   allergies: {
     type: 'allergies',
     label: 'Allergies',
@@ -361,7 +367,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   signature: {
     type: 'signature',
     label: 'Signature',
@@ -374,7 +380,7 @@ export const FIELD_TYPES = {
       width: 'half',
     },
   },
-  
+
   fileUpload: {
     type: 'fileUpload',
     label: 'File Upload',
@@ -392,7 +398,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   calculated: {
     type: 'calculated',
     label: 'Calculated Field',
@@ -410,6 +416,25 @@ export const FIELD_TYPES = {
     },
   },
 
+  aiAssistant: {
+    type: 'aiAssistant',
+    label: 'AI Field Assist',
+    icon: 'AutoAwesome',
+    category: FIELD_CATEGORIES.ADVANCED,
+    description: 'LLM-powered field for real-time clinical suggestion and summarization.',
+    defaultConfig: {
+      type: 'aiAssistant',
+      label: 'AI Insights',
+      required: false,
+      width: 'full',
+      config: {
+        prompt: 'Summarize the patient vitals and suggest potential follow-up tests.',
+        model: 'gemini-1.5-pro',
+        inputFields: ['vitals', 'medicalHistory'],
+      },
+    },
+  },
+
   // Layout Fields
   sectionHeader: {
     type: 'sectionHeader',
@@ -423,7 +448,7 @@ export const FIELD_TYPES = {
       width: 'full',
     },
   },
-  
+
   divider: {
     type: 'divider',
     label: 'Divider',
@@ -436,7 +461,7 @@ export const FIELD_TYPES = {
       width: 'full',
     },
   },
-  
+
   spacer: {
     type: 'spacer',
     label: 'Spacer',
@@ -452,7 +477,7 @@ export const FIELD_TYPES = {
       },
     },
   },
-  
+
   richText: {
     type: 'richText',
     label: 'Rich Text',
