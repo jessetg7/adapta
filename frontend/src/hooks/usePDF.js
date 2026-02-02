@@ -32,11 +32,18 @@ export const usePDF = () => {
     return pdfEngine.generatePrintHTML(data, template);
   }, []);
 
+  // Print Report (Case Sheet)
+  const printReport = useCallback((prescription, patient, doctor, clinicInfo, template = null) => {
+    const data = pdfEngine.generatePrescriptionData(prescription, patient, doctor, clinicInfo);
+    pdfEngine.printReport(data, template);
+  }, []);
+
   return {
     generatePrescriptionData,
     printPrescription,
     downloadPrescription,
     generatePreviewHTML,
+    printReport,
   };
 };
 

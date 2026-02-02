@@ -16,10 +16,16 @@ const usePatientStore = create(
       // Patient CRUD
       addPatient: (patient) => {
         const id = uuidv4();
+        // Generate a readable Patient ID (e.g. PT-20241001-1234)
+        const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const randomPart = Math.floor(1000 + Math.random() * 9000); // 4 digit random
+        const readableId = `PT-${datePart}-${randomPart}`;
+
         set((state) => {
           state.patients[id] = {
             ...patient,
             id,
+            patientId: readableId, // Store readable ID separately
             registrationDate: new Date().toISOString(),
           };
         });

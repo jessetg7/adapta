@@ -987,6 +987,17 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
               </FormControl>
             </Grid>
 
+            {/* NEW: Specialty Field */}
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Specialty (e.g. Dermatology)"
+                helperText="Required for Department templates"
+                value={template.specialty || ''}
+                onChange={(e) => updateTemplateLocal({ specialty: e.target.value })}
+              />
+            </Grid>
+
             <Grid item xs={6}>
               <FormControl fullWidth>
                 <InputLabel>Gender Specific</InputLabel>

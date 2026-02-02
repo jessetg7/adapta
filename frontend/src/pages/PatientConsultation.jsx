@@ -50,23 +50,21 @@ import PrintIcon from '@mui/icons-material/Print';
 import SaveIcon from '@mui/icons-material/Save';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import ArticleIcon from '@mui/icons-material/Article';
+import DescriptionIcon from '@mui/icons-material/Description';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { v4 as uuidv4 } from 'uuid';
 
 import usePatientStore from '../core/store/usePatientStore';
 import useTemplateStore from '../core/store/useTemplateStore';
 import FormRenderer from '../components/FormRenderer/FormRenderer';
-import TemplateSelector from '../components/TemplateSelector/TemplateSelector';
-// import MedicationGrid from '../components/PrescriptionBuilder/MedicationGrid';
-// Temporary mock to prevent crashes if the real component is broken or causing issues
-const MedicationGrid = () => <Box p={2} bgcolor="warning.light">Medication Grid Component Unavailable</Box>;
+import MedicationGrid from '../components/PrescriptionBuilder/MedicationGrid';
 import { usePDF } from '../hooks/usePDF';
 import { useAdapta } from '../context/AdaptaContext';
 
 const PatientConsultation = () => {
   const { patientId } = useParams();
   const navigate = useNavigate();
-  const { printPrescription } = usePDF();
+  const { printPrescription, printReport } = usePDF();
   const { currentUser, clinicInfo } = useAdapta();
 
   const {
@@ -74,6 +72,8 @@ const PatientConsultation = () => {
     addPatient,
     addVisit,
     addPrescription,
+    updateVisit,
+    deleteVisit,
     getVisitsByPatient,
     getPrescriptionsByPatient,
   } = usePatientStore();
@@ -88,8 +88,6 @@ const PatientConsultation = () => {
     vitals,
     medicationRoutes,
     frequencies,
-    getAllTemplates,
-    getTemplatesByCategory,
     loading: templatesLoading,
   } = useTemplateStore();
 
@@ -113,7 +111,6 @@ const PatientConsultation = () => {
   // Missing state variables
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const [savedPrescriptionId, setSavedPrescriptionId] = useState(null);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [newPatient, setNewPatient] = useState({
     firstName: '',
     lastName: '',
@@ -123,6 +120,8 @@ const PatientConsultation = () => {
     email: '',
     allergies: [],
   });
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [selectedHistoryVisit, setSelectedHistoryVisit] = useState(null);
 
   // Fetch all dynamic data on mount
   React.useEffect(() => {
@@ -309,37 +308,11 @@ const PatientConsultation = () => {
     }));
   };
 
-  // Handle template loading
-  const handleLoadTemplate = (template) => {
-    // Merge template sections into consultation data
-    const templateData = {};
-
-    template.sections?.forEach(section => {
-      section.fields?.forEach(field => {
-        // Initialize field with default value or empty
-        if (field.type === 'vitals') {
-          templateData.vitals = consultationData.vitals || {};
-        } else if (field.type === 'medications') {
-          templateData.medications = consultationData.medications || [];
-        } else if (field.type === 'investigations') {
-          templateData.investigations = consultationData.investigations || [];
-        } else {
-          templateData[field.id] = consultationData[field.id] || field.defaultValue || '';
-        }
-      });
-    });
-
-    setConsultationData(prev => ({
-      ...prev,
-      ...templateData
-    }));
-
-    setShowTemplateSelector(false);
-  };
-
   // Dynamic Consultation Template
   const consultationTemplate = useMemo(() => {
-    const baseTemplate = remoteTemplates[0] || { sections: [] };
+    // Find exact match for department, or fallback
+    const matched = remoteTemplates.find(t => t.specialty === selectedDepartment);
+    const baseTemplate = matched || remoteTemplates[0] || { sections: [] };
 
     // Merge or apply rules to the selected department template
     return {
@@ -376,7 +349,7 @@ const PatientConsultation = () => {
         return section;
       })
     };
-  }, [remoteTemplates, isEmergencyMode]);
+  }, [remoteTemplates, isEmergencyMode, selectedDepartment]);
 
   const prescriptionTemplate = useMemo(() => {
     return {
@@ -669,21 +642,46 @@ const PatientConsultation = () => {
                     ) : (
                       <List dense sx={{ maxHeight: 300, overflow: 'auto' }}>
                         {patientHistory.visits.slice(0, 10).map((visit) => (
-                          <ListItem key={visit.id} divider>
+                          <ListItem
+                            key={visit.id}
+                            divider
+                            secondaryAction={
+                              <IconButton
+                                edge="end"
+                                aria-label="view"
+                                onClick={() => {
+                                  setSelectedHistoryVisit(visit);
+                                  setShowHistoryDialog(true);
+                                }}
+                              >
+                                <DescriptionIcon />
+                              </IconButton>
+                            }
+                          >
                             <ListItemText
                               primary={
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                  <Typography variant="body2">
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mr: 2 }}>
+                                  <Typography variant="body2" fontWeight="bold">
                                     {new Date(visit.date).toLocaleDateString()}
                                   </Typography>
                                   <Chip
                                     label={visit.type}
                                     size="small"
                                     variant="outlined"
+                                    color="primary"
                                   />
                                 </Box>
                               }
-                              secondary={visit.chiefComplaint || 'General consultation'}
+                              secondary={
+                                <>
+                                  <Typography variant="caption" display="block">
+                                    {visit.department || 'General'}
+                                  </Typography>
+                                  <Typography variant="body2" noWrap>
+                                    {visit.chiefComplaint || 'No chief complaint recorded'}
+                                  </Typography>
+                                </>
+                              }
                             />
                           </ListItem>
                         ))}
@@ -693,6 +691,165 @@ const PatientConsultation = () => {
                 </Card>
               </Grid>
             </Grid>
+
+            {/* Visit Details Dialog */}
+            <Dialog
+              open={showHistoryDialog}
+              onClose={() => setShowHistoryDialog(false)}
+              maxWidth="md"
+              fullWidth
+            >
+              <DialogTitle>
+                Consultation Details
+                {selectedHistoryVisit && (
+                  <Typography variant="subtitle2" color="text.secondary">
+                    {new Date(selectedHistoryVisit.date).toLocaleDateString()} - {selectedHistoryVisit.department}
+                  </Typography>
+                )}
+              </DialogTitle>
+              <DialogContent dividers>
+                {selectedHistoryVisit ? (
+                  <Box>
+                    <Typography variant="h6" color="primary" gutterBottom>Chief Complaint</Typography>
+                    <Typography paragraph>{selectedHistoryVisit.chiefComplaint || 'N/A'}</Typography>
+
+                    {selectedHistoryVisit.vitals && (
+                      <Box sx={{ mb: 3 }}>
+                        <Typography variant="h6" color="primary" gutterBottom>Vitals</Typography>
+                        <Grid container spacing={2}>
+                          {Object.entries(selectedHistoryVisit.vitals).map(([key, val]) => (
+                            <Grid item xs={6} sm={4} key={key}>
+                              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                {key.replace(/([A-Z])/g, ' $1')}
+                              </Typography>
+                              <Typography variant="body1" fontWeight="bold">{val}</Typography>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </Box>
+                    )}
+
+                    {/* Show Form Data if available */}
+                    {selectedHistoryVisit.formData && (
+                      <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                        <Typography variant="h6" color="primary" gutterBottom>Clinical Notes</Typography>
+                        {/* We use a simple JSON dump for now as re-rendering the whole form is complex in read-only */}
+                        {Object.entries(selectedHistoryVisit.formData || {}).map(([key, value]) => {
+                          if (['id', 'vitals', 'visit', 'patient', 'doctor'].includes(key)) return null;
+
+                          // Format title
+                          const title = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+
+                          // Render Tables
+                          if (Array.isArray(value) && value.length > 0) {
+                            const headers = Object.keys(value[0]);
+                            return (
+                              <Box key={key} sx={{ mb: 3 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{title}</Typography>
+                                <TableContainer component={Paper} variant="outlined">
+                                  <Table size="small">
+                                    <TableHead>
+                                      <TableRow sx={{ bgcolor: 'grey.100' }}>
+                                        {headers.map(h => (
+                                          <TableCell key={h} sx={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
+                                            {h.replace(/([A-Z])/g, ' $1')}
+                                          </TableCell>
+                                        ))}
+                                      </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                      {value.map((row, i) => (
+                                        <TableRow key={i}>
+                                          {headers.map(h => (
+                                            <TableCell key={h}>
+                                              {typeof row[h] === 'object' ? (row[h]?.label || '-') : (row[h] || '-')}
+                                            </TableCell>
+                                          ))}
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </TableContainer>
+                              </Box>
+                            );
+                          }
+
+                          // Render Simple Fields
+                          if (typeof value === 'string' || typeof value === 'number') {
+                            return (
+                              <Box key={key} sx={{ mb: 1.5 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}>
+                                  {title}
+                                </Typography>
+                                <Typography variant="body1">{value}</Typography>
+                                <Divider sx={{ mt: 1 }} />
+                              </Box>
+                            );
+                          }
+                          return null;
+                        })}
+                      </Box>
+                    )}
+                  </Box>
+                ) : (
+                  <Typography>No details available.</Typography>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setShowHistoryDialog(false)}>Close</Button>
+                {selectedHistoryVisit && (
+                  <>
+                    <Button
+                      color="error"
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this consultation record? This cannot be undone.')) {
+                          deleteVisit(selectedHistoryVisit.id);
+                          setShowHistoryDialog(false);
+                          setSelectedHistoryVisit(null);
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      color="primary"
+                      onClick={() => {
+                        // Load data into form
+                        if (selectedHistoryVisit.department) {
+                          setSelectedDepartment(selectedHistoryVisit.department);
+                        }
+                        setConsultationData({
+                          ...selectedHistoryVisit.formData,
+                          vitals: selectedHistoryVisit.vitals || {},
+                          chiefComplaint: selectedHistoryVisit.chiefComplaint || ''
+                        });
+                        // Set editing context
+                        // Note: For a perfect implementation we would track 'editingVisitId' but 
+                        // for now we will just load it as a new draft based on old data
+                        setActiveStep(2); // Jump to consultation
+                        setShowHistoryDialog(false);
+                      }}
+                    >
+                      Edit / Load
+                    </Button>
+                    <Button
+                      variant="contained"
+                      startIcon={<PrintIcon />}
+                      onClick={() => {
+                        printReport(
+                          selectedHistoryVisit.formData || {},
+                          selectedPatient,
+                          currentUser,
+                          clinicInfo
+                        );
+                      }}
+                    >
+                      Reprint Report
+                    </Button>
+                  </>
+                )}
+              </DialogActions>
+            </Dialog>
 
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
               <Button onClick={() => setActiveStep(0)}>Back</Button>
@@ -714,30 +871,20 @@ const PatientConsultation = () => {
               <Typography variant="h6">
                 Consultation
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<ArticleIcon />}
-                  onClick={() => setShowTemplateSelector(true)}
-                  size="small"
-                >
-                  Load Template
-                </Button>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={isEmergencyMode}
-                      onChange={(e) => setIsEmergencyMode(e.target.checked)}
-                      color="error"
-                    />
-                  }
-                  label={
-                    <Typography color={isEmergencyMode ? 'error' : 'textSecondary'} fontWeight="bold">
-                      Emergency Mode
-                    </Typography>
-                  }
-                />
-              </Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isEmergencyMode}
+                    onChange={(e) => setIsEmergencyMode(e.target.checked)}
+                    color="error"
+                  />
+                }
+                label={
+                  <Typography color={isEmergencyMode ? 'error' : 'textSecondary'} fontWeight="bold">
+                    Emergency Mode
+                  </Typography>
+                }
+              />
             </Box>
 
             {isEmergencyMode && (
@@ -749,15 +896,15 @@ const PatientConsultation = () => {
             {/* Department Template Selector */}
             <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.light' }}>
               <Grid container alignItems="center" spacing={2}>
-                <Grid item xs={12} md={8}>
+                <Grid item xs={12} md={7}>
                   <Typography variant="subtitle2" color="primary.main" fontWeight={700}>
                     Multi-Specialty LCNC Engine
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    The doctor can switch between different department templates dynamically. Each template loads its own custom fields and rules.
+                    The doctor can switch between templates dynamically. Each uses its own rules.
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={3}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Switch Department Template</InputLabel>
                     <Select
@@ -772,10 +919,23 @@ const PatientConsultation = () => {
                     </Select>
                   </FormControl>
                 </Grid>
+                <Grid item xs={12} md={2}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<SettingsIcon />}
+                    onClick={() => window.open('/form-builder/' + consultationTemplate.id, '_blank')}
+                    fullWidth
+                    size="small"
+                    sx={{ bgcolor: 'white', height: '40px' }}
+                  >
+                    Customize
+                  </Button>
+                </Grid>
               </Grid>
             </Paper>
 
             <FormRenderer
+              key={selectedDepartment}
               template={consultationTemplate}
               initialData={{
                 ...consultationData,
@@ -939,6 +1099,23 @@ const PatientConsultation = () => {
               <Button
                 variant="contained"
                 size="large"
+                color="secondary"
+                startIcon={<DescriptionIcon />}
+                onClick={() => {
+                  if (!selectedPatient) return;
+                  printReport(
+                    consultationData,
+                    selectedPatient,
+                    currentUser,
+                    clinicInfo
+                  );
+                }}
+              >
+                Print Medical Report
+              </Button>
+              <Button
+                variant="contained"
+                size="large"
                 startIcon={<PrintIcon />}
                 onClick={handlePrint}
               >
@@ -1076,15 +1253,6 @@ const PatientConsultation = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Template Selector Dialog */}
-      <TemplateSelector
-        open={showTemplateSelector}
-        onClose={() => setShowTemplateSelector(false)}
-        onSelect={handleLoadTemplate}
-        filterCategory="consultation"
-        title="Load Consultation Template"
-      />
     </Box>
   );
 };

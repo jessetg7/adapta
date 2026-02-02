@@ -1,11 +1,19 @@
 // src/data/defaultTemplates.js
 import { v4 as uuidv4 } from 'uuid';
+import { fertilityTemplate } from './fertilityTemplate';
+import { semenAnalysisTemplate } from './semenAnalysisTemplate';
 
 /**
  * Default templates for ADAPTA
  * These are JSON-defined, not hardcoded logic
  */
 export const defaultTemplates = {
+  // Semen Analysis (New)
+  [semenAnalysisTemplate.id]: semenAnalysisTemplate,
+
+  // Fertility Assessment
+  [fertilityTemplate.id]: fertilityTemplate,
+
   // General Patient Intake Form
   patientIntake: {
     id: 'template-patient-intake',
@@ -207,8 +215,9 @@ export const defaultTemplates = {
     id: 'template-general-consultation',
     name: 'General Consultation',
     type: 'consultation',
-    category: 'general',
-    genderSpecific: 'all',
+    type: 'consultation',
+    category: 'department',
+    specialty: 'General Medicine',
     visitType: 'all',
     version: 1,
     sections: [
@@ -372,6 +381,15 @@ export const defaultTemplates = {
             width: 'half',
             order: 1,
           },
+          {
+            id: 'field-email',
+            type: 'email',
+            name: 'email',
+            label: 'Email Address',
+            required: false,
+            width: 'half',
+            order: 5,
+          },
         ],
       },
     ],
@@ -382,6 +400,201 @@ export const defaultTemplates = {
       isSystem: true,
       isActive: true,
     },
+  },
+
+  // Cardiology Assessment
+  cardiologyTemplate: {
+    id: 'template-cardiology',
+    name: 'Cardiology Assessment',
+    type: 'consultation',
+    category: 'department',
+    specialty: 'Cardiology',
+    visitType: 'all',
+    version: 1,
+    sections: [
+      {
+        id: 'section-cardio-vitals',
+        title: 'Hemodynamics',
+        order: 0,
+        columns: 4,
+        fields: [
+          { id: 'bp_sitting', type: 'text', label: 'BP (Sitting)', width: '25%' },
+          { id: 'bp_standing', type: 'text', label: 'BP (Standing)', width: '25%' },
+          { id: 'hr', type: 'number', label: 'Heart Rate', width: '25%' },
+          { id: 'spo2', type: 'number', label: 'SpO2 (%)', width: '25%' },
+        ]
+      },
+      {
+        id: 'section-symptoms',
+        title: 'Cardiac Symptoms',
+        order: 1,
+        columns: 2,
+        fields: [
+          { id: 'chestPain', type: 'toggle', label: 'Chest Pain/Angina', width: 'half' },
+          { id: 'dyspnea', type: 'toggle', label: 'Dyspnea (SOB)', width: 'half' },
+          { id: 'palpitations', type: 'toggle', label: 'Palpitations', width: 'half' },
+          { id: 'edema', type: 'toggle', label: 'Pedal Edema', width: 'half' },
+          { id: 'syncope', type: 'toggle', label: 'Syncope/Presyncope', width: 'half' },
+          { id: 'doe', type: 'dropdown', label: 'Dyspnea on Exertion', width: 'half', options: [{ value: 'class1', label: 'Class I' }, { value: 'class2', label: 'Class II' }, { value: 'class3', label: 'Class III' }, { value: 'class4', label: 'Class IV' }] },
+        ]
+      },
+      {
+        id: 'section-history',
+        title: 'Risk Factors',
+        order: 2,
+        columns: 3,
+        fields: [
+          { id: 'htn', type: 'toggle', label: 'Hypertension', width: '33%' },
+          { id: 'dm', type: 'toggle', label: 'Diabetes', width: '33%' },
+          { id: 'dlp', type: 'toggle', label: 'Dyslipidemia', width: '33%' },
+          { id: 'smoking', type: 'toggle', label: 'Smoker', width: '33%' },
+          { id: 'familyHx', type: 'toggle', label: 'Family History of CAD', width: '33%' },
+        ]
+      },
+      {
+        id: 'section-investigations',
+        title: 'Cardiac Investigations',
+        order: 3,
+        fields: [
+          { id: 'ecg', type: 'textarea', label: 'ECG Findings', width: 'full', config: { rows: 2 } },
+          { id: 'echo', type: 'textarea', label: '2D Echo Report', width: 'full', config: { rows: 3 } },
+        ]
+      },
+      {
+        id: 'section-plan',
+        title: 'Plan & Prescription',
+        order: 4,
+        fields: [
+          { id: 'medications', type: 'medications', label: 'Prescription', width: 'full' },
+          { id: 'advice', type: 'textarea', label: 'Lifestyle Advice', width: 'full' },
+          { id: 'followUpDate', type: 'date', label: 'Next Review', width: 'half' }
+        ]
+      }
+    ],
+    metadata: { isSystem: true }
+  },
+
+  // Pediatrics Assessment
+  pediatricsTemplate: {
+    id: 'template-pediatrics',
+    name: 'Pediatric Assessment',
+    type: 'consultation',
+    category: 'department',
+    specialty: 'Pediatrics',
+    visitType: 'all',
+    version: 1,
+    sections: [
+      {
+        id: 'section-growth',
+        title: 'Growth Parameters',
+        order: 0,
+        columns: 3,
+        fields: [
+          { id: 'weight', type: 'number', label: 'Weight (kg)', width: '33%' },
+          { id: 'height', type: 'number', label: 'Height (cm)', width: '33%' },
+          { id: 'headCircumference', type: 'number', label: 'Head Circumference (cm)', width: '33%' },
+        ]
+      },
+      {
+        id: 'section-development',
+        title: 'Developmental Milestones',
+        order: 1,
+        columns: 2,
+        fields: [
+          { id: 'motor', type: 'text', label: 'Gross Motor', width: 'half' },
+          { id: 'fineMotor', type: 'text', label: 'Fine Motor', width: 'half' },
+          { id: 'social', type: 'text', label: 'Social & Emotional', width: 'half' },
+          { id: 'language', type: 'text', label: 'Language', width: 'half' },
+        ]
+      },
+      {
+        id: 'section-vaccination',
+        title: 'Immunization History',
+        order: 2,
+        fields: [
+          {
+            id: 'vaccinationStatus',
+            type: 'dropdown',
+            label: 'Vaccination Status',
+            width: 'half',
+            options: [{ value: 'uptodate', label: 'Up to date' }, { value: 'delayed', label: 'Delayed' }, { value: 'unknown', label: 'Unknown' }]
+          },
+          { id: 'pendingVaccines', type: 'text', label: 'Pending Vaccines', width: 'half' },
+        ]
+      },
+      {
+        id: 'section-complaint',
+        title: 'Presenting Complaints',
+        order: 3,
+        fields: [
+          { id: 'chiefComplaint', type: 'textarea', label: 'Symptoms (Fever, Cough, etc.)', width: 'full' },
+          { id: 'temp', type: 'number', label: 'Temperature (F)', width: 'half' },
+        ]
+      },
+      {
+        id: 'section-plan',
+        title: 'Treatment',
+        order: 4,
+        fields: [
+          { id: 'medications', type: 'medications', label: 'Medications (Syrups/Drops)', width: 'full' },
+          { id: 'advice', type: 'textarea', label: 'Advice to Parents', width: 'full' },
+        ]
+      }
+    ],
+    metadata: { isSystem: true }
+  },
+
+  // Orthopedics Assessment
+  orthopedicsTemplate: {
+    id: 'template-orthopedics',
+    name: 'Orthopedic Assessment',
+    type: 'consultation',
+    category: 'department',
+    specialty: 'Orthopedics',
+    visitType: 'all',
+    version: 1,
+    sections: [
+      {
+        id: 'section-pain',
+        title: 'Pain Assessment',
+        order: 0,
+        columns: 2,
+        fields: [
+          { id: 'painSite', type: 'text', label: 'Site of Pain', width: 'half' },
+          {
+            id: 'painScore',
+            type: 'dropdown',
+            label: 'VAS Pain Score (0-10)',
+            width: 'half',
+            options: Array.from({ length: 11 }, (_, i) => ({ value: i.toString(), label: i.toString() }))
+          },
+        ]
+      },
+      {
+        id: 'section-examination',
+        title: 'Local Examination',
+        order: 1,
+        columns: 2,
+        fields: [
+          { id: 'swelling', type: 'toggle', label: 'Swelling Present', width: 'half' },
+          { id: 'tenderness', type: 'toggle', label: 'Tenderness', width: 'half' },
+          { id: 'rom', type: 'text', label: 'Range of Motion (ROM)', width: 'full' },
+          { id: 'specialTests', type: 'textarea', label: 'Special Tests (Lachman, SLR, etc.)', width: 'full', config: { rows: 2 } },
+        ]
+      },
+      {
+        id: 'section-diagnosis',
+        title: 'Diagnosis & Plan',
+        order: 2,
+        fields: [
+          { id: 'xray', type: 'text', label: 'X-Ray Findings', width: 'full' },
+          { id: 'diagnosis', type: 'text', label: 'Diagnosis', width: 'full' },
+          { id: 'medications', type: 'medications', label: 'Prescription', width: 'full' },
+          { id: 'physio', type: 'textarea', label: 'Physiotherapy Advice', width: 'full' },
+        ]
+      }
+    ],
+    metadata: { isSystem: true }
   },
 
   // Gynecology Consultation (Female-specific)

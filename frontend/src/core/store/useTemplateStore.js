@@ -55,7 +55,18 @@ const useTemplateStore = create(
         try {
           const response = await templateService.getSpecialties();
           set((state) => {
-            state.specialties = response.data;
+            // Get dynamic specialties from saved templates
+            const dynamicSpecialties = Object.values(state.templates)
+              .filter(t => t.category === 'department' && t.specialty)
+              .map(t => t.specialty);
+
+            // Merge and dedup
+            const allSpecialties = Array.from(new Set([
+              ...response.data,
+              ...dynamicSpecialties
+            ])).sort();
+
+            state.specialties = allSpecialties;
             state.loading = false;
           });
           return response.data;
@@ -68,9 +79,35 @@ const useTemplateStore = create(
       fetchDepartmentTemplates: async (specialty) => {
         set({ loading: true, error: null });
         try {
+          // 1. Get static templates from code
           const response = await templateService.getTemplates({ category: 'department', specialty });
+          const staticTemplates = response.data;
+
           set((state) => {
-            state.remoteTemplates = response.data;
+            // 2. Sync them into persistent store if missing
+            staticTemplates.forEach(t => {
+              if (!state.templates[t.id]) {
+                // Start tracking this template in the store
+                state.templates[t.id] = {
+                  ...t,
+                  version: 1,
+                  metadata: {
+                    ...t.metadata,
+                    isSystem: true,
+                    updatedAt: new Date().toISOString()
+                  }
+                };
+              }
+            });
+
+            // 3. Populate remoteTemplates from the STORE (so we get user edits AND new custom templates)
+            // Filter store templates that match the requested specialty
+            const matchingTemplates = Object.values(state.templates).filter(t =>
+              t.category === 'department' &&
+              (!specialty || t.specialty === specialty)
+            );
+
+            state.remoteTemplates = matchingTemplates;
             state.loading = false;
           });
           return response.data;

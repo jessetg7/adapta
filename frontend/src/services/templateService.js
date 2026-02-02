@@ -37,7 +37,7 @@ export const templateService = {
      */
     getSpecialties: async () => {
         await delay(300);
-        return { data: ['General Medicine', 'Cardiology', 'Pediatrics', 'Gynecology', 'Orthopedics'] };
+        return { data: ['General Medicine', 'Cardiology', 'Pediatrics', 'Gynecology', 'Orthopedics', 'Fertility', 'Andrology'] };
     },
 
     /**
