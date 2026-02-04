@@ -97,6 +97,7 @@ const PatientConsultation = () => {
   const [showNewPatientDialog, setShowNewPatientDialog] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [consultationData, setConsultationData] = useState({
     chiefComplaint: '',
     vitals: {},
@@ -143,6 +144,7 @@ const PatientConsultation = () => {
   React.useEffect(() => {
     if (selectedDepartment) {
       fetchDepartmentTemplates(selectedDepartment);
+      setSelectedTemplateId('');
     }
   }, [selectedDepartment, fetchDepartmentTemplates]);
 
@@ -310,19 +312,28 @@ const PatientConsultation = () => {
 
   // Dynamic Consultation Template
   const consultationTemplate = useMemo(() => {
-    // Find exact match for department, or fallback
-    const matched = remoteTemplates.find(t => t.specialty === selectedDepartment);
-    const baseTemplate = matched || remoteTemplates[0] || { sections: [] };
+    // Determine which template to use
+    let baseTemplate = null;
+
+    if (selectedTemplateId) {
+      baseTemplate = remoteTemplates.find(t => t.id === selectedTemplateId);
+    }
+
+    if (!baseTemplate) {
+      // Fallback: Find exact match for department, or first available
+      baseTemplate = remoteTemplates.find(t => t.specialty === selectedDepartment) || remoteTemplates[0] || { sections: [] };
+    }
 
     // Merge or apply rules to the selected department template
     return {
       ...baseTemplate,
+      id: baseTemplate.id || 'default',
       sections: (baseTemplate.sections || []).map(section => {
         // Apply pregnancy rules specifically if it's gynae or has those fields
         if (section.id === 'obstetricHistory' || section.id === 'clinicalExamination') {
           return {
             ...section,
-            fields: section.fields.map(field => {
+            fields: (section.fields || []).map(field => {
               if (field.id === 'pregnancyStatus') {
                 return {
                   ...field,
@@ -349,7 +360,7 @@ const PatientConsultation = () => {
         return section;
       })
     };
-  }, [remoteTemplates, isEmergencyMode, selectedDepartment]);
+  }, [remoteTemplates, isEmergencyMode, selectedDepartment, selectedTemplateId]);
 
   const prescriptionTemplate = useMemo(() => {
     return {
@@ -896,20 +907,20 @@ const PatientConsultation = () => {
             {/* Department Template Selector */}
             <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.light' }}>
               <Grid container alignItems="center" spacing={2}>
-                <Grid item xs={12} md={7}>
+                <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" color="primary.main" fontWeight={700}>
                     Multi-Specialty LCNC Engine
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    The doctor can switch between templates dynamically. Each uses its own rules.
+                    Select department and specific form template.
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={3}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Switch Department Template</InputLabel>
+                    <InputLabel>Department</InputLabel>
                     <Select
                       value={selectedDepartment}
-                      label="Switch Department Template"
+                      label="Department"
                       onChange={(e) => setSelectedDepartment(e.target.value)}
                       sx={{ bgcolor: 'white' }}
                     >
@@ -918,6 +929,25 @@ const PatientConsultation = () => {
                       ))}
                     </Select>
                   </FormControl>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  {remoteTemplates && remoteTemplates.filter(t => t.specialty === selectedDepartment).length > 1 && (
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Form Template</InputLabel>
+                      <Select
+                        value={selectedTemplateId || consultationTemplate.id}
+                        label="Form Template"
+                        onChange={(e) => setSelectedTemplateId(e.target.value)}
+                        sx={{ bgcolor: 'white' }}
+                      >
+                        {remoteTemplates
+                          .filter(t => t.specialty === selectedDepartment)
+                          .map((t) => (
+                            <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                          ))}
+                      </Select>
+                    </FormControl>
+                  )}
                 </Grid>
                 <Grid item xs={12} md={2}>
                   <Button
@@ -928,7 +958,7 @@ const PatientConsultation = () => {
                     size="small"
                     sx={{ bgcolor: 'white', height: '40px' }}
                   >
-                    Customize
+                    Edit
                   </Button>
                 </Grid>
               </Grid>
@@ -1107,7 +1137,8 @@ const PatientConsultation = () => {
                     consultationData,
                     selectedPatient,
                     currentUser,
-                    clinicInfo
+                    clinicInfo,
+                    consultationTemplate
                   );
                 }}
               >

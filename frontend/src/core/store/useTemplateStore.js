@@ -57,7 +57,7 @@ const useTemplateStore = create(
           set((state) => {
             // Get dynamic specialties from saved templates
             const dynamicSpecialties = Object.values(state.templates)
-              .filter(t => t.category === 'department' && t.specialty)
+              .filter(t => (t.category === 'department' || t.type === 'consultation') && t.specialty)
               .map(t => t.specialty);
 
             // Merge and dedup
@@ -80,7 +80,7 @@ const useTemplateStore = create(
         set({ loading: true, error: null });
         try {
           // 1. Get static templates from code
-          const response = await templateService.getTemplates({ category: 'department', specialty });
+          const response = await templateService.getDepartmentTemplates(specialty);
           const staticTemplates = response.data;
 
           set((state) => {
@@ -97,13 +97,20 @@ const useTemplateStore = create(
                     updatedAt: new Date().toISOString()
                   }
                 };
+              } else if (state.templates[t.id].metadata?.isSystem) {
+                // FORCE UPDATE core identity fields from code to fix categorization bugs
+                // This ensures that if we update 'specialty' in code, it reflects in the store
+                state.templates[t.id].specialty = t.specialty;
+                state.templates[t.id].category = t.category;
+                state.templates[t.id].type = t.type;
+                state.templates[t.id].name = t.name; // Update name just in case
               }
             });
 
             // 3. Populate remoteTemplates from the STORE (so we get user edits AND new custom templates)
             // Filter store templates that match the requested specialty
             const matchingTemplates = Object.values(state.templates).filter(t =>
-              t.category === 'department' &&
+              (t.category === 'department' || t.type === 'consultation') &&
               (!specialty || t.specialty === specialty)
             );
 

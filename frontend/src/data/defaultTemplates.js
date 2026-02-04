@@ -603,6 +603,7 @@ export const defaultTemplates = {
     name: 'Gynecology Consultation',
     type: 'consultation',
     category: 'gynecology',
+    specialty: 'Gynecology',
     genderSpecific: 'female',
     visitType: 'all',
     version: 1,
@@ -768,12 +769,99 @@ export const defaultTemplates = {
     },
   },
 
+  // Antenatal - NT Scan Visit
+  antenatalNTScan: {
+    id: 'template-antenatal-nt-scan',
+    name: '3rd Month / NT Scan Visit Summary',
+    type: 'consultation',
+    category: 'obstetrics',
+    specialty: 'Gynecology',
+    genderSpecific: 'female',
+    visitType: 'all',
+    version: 1,
+    sections: [
+      {
+        id: 'section-header',
+        title: 'Scan Details',
+        order: 0,
+        columns: 4,
+        fields: [
+          { id: 'pog', type: 'text', label: 'POG (Weeks)', width: 'quarter' },
+          { id: 'nt_mm', type: 'number', label: 'NT (mm)', width: 'quarter', config: { step: 0.1 } },
+          { id: 'nb_presence', type: 'dropdown', label: 'Nasal Bone (NB)', width: 'quarter', options: [{ value: 'present', label: 'Present' }, { value: 'absent', label: 'Absent' }] },
+          { id: 'cervical_length', type: 'number', label: 'Cervical Length (cm)', width: 'quarter', config: { step: 0.1 } },
+          { id: 'tr_flow', type: 'text', label: 'Tricuspid Regurgitation (TR)', width: 'half' },
+          { id: 'dv_flow', type: 'text', label: 'Ductus Venosus (DV)', width: 'half' },
+          { id: 'dual_marker', type: 'textarea', label: 'Dual Marker / NIPT Options', width: 'full', config: { rows: 2, placeholder: 'Explained options to patient...' } }
+        ]
+      },
+      {
+        id: 'section-complaints',
+        title: 'Complaints',
+        order: 1,
+        fields: [
+          { id: 'chiefComplaint', type: 'textarea', label: 'Complaints', width: 'full', required: true }
+        ]
+      },
+      {
+        id: 'section-examination',
+        title: 'Clinical Examination',
+        order: 2,
+        columns: 3,
+        fields: [
+          { id: 'pallor', type: 'radio', label: 'Pallor', width: 'third', options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] },
+          { id: 'pedal_edema', type: 'radio', label: 'Pedal Edema', width: 'third', options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] },
+          { id: 'bp', type: 'text', label: 'BP (mmHg)', width: 'third' },
+          { id: 'pulse', type: 'number', label: 'Pulse (/min)', width: 'third' },
+          { id: 'weight', type: 'number', label: 'Weight (kg)', width: 'third' },
+          { id: 'pre_preg_weight', type: 'number', label: 'Pre-pregnancy Weight (kg)', width: 'third' }
+        ]
+      },
+      {
+        id: 'section-prescription',
+        title: 'Medications Prescribed',
+        order: 3,
+        fields: [
+          {
+            id: 'medications',
+            type: 'medications',
+            label: 'Drug Chart',
+            width: 'full',
+            config: {
+              columns: [
+                { id: 'name', header: 'Drug Name', type: 'text', width: '25%' },
+                { id: 'generic', header: 'Generic Name', type: 'text', width: '25%' },
+                { id: 'dose', header: 'Dosage', type: 'text', width: '10%' },
+                { id: 'frequency', header: 'Frequency', type: 'dropdown', width: '15%', options: [{ value: '0-1-0', label: '0-1-0' }, { value: '1-0-1', label: '1-0-1' }, { value: '0-0-1', label: '0-0-1' }, { value: '1-1-1', label: '1-1-1' }, { value: 'SOS', label: 'SOS' }] },
+                { id: 'timing', header: 'Timing', type: 'dropdown', width: '15%', options: [{ value: 'After food', label: 'After food' }, { value: 'Before food', label: 'Before food' }, { value: 'With milk', label: 'With milk' }] },
+                { id: 'duration', header: 'Duration', type: 'text', width: '10%' }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: 'section-advice',
+        title: 'Advice & Instructions',
+        order: 4,
+        fields: [
+          { id: 'next_review', type: 'date', label: 'Next Review', width: 'half' },
+          { id: 'scan_report_submission', type: 'checkbox', label: 'Submit Dual Marker Report', width: 'full' },
+          { id: 'picme_registration', type: 'checkbox', label: 'PICME Registration Check', width: 'full' },
+          { id: 'advice_text', type: 'textarea', label: 'Diet & Exercise Instructions', width: 'full', config: { rows: 4, placeholder: '• 4-hour gap between Iron/Calcium\n• Avoid tea/coffee near iron intake\n• Walk/Yoga advised' } }
+        ]
+      }
+    ],
+    metadata: { isSystem: true, category: 'obstetrics' }
+  },
+
   // Antenatal Booking Visit (First Visit)
   antenatalBookingVisit: {
     id: 'template-antenatal-booking',
     name: 'Antenatal Booking Visit',
     type: 'consultation',
     category: 'obstetrics',
+    specialty: 'Gynecology',
     genderSpecific: 'female',
     visitType: 'first',
     version: 1,
@@ -907,6 +995,7 @@ export const defaultTemplates = {
     name: 'Antenatal Follow-up',
     type: 'consultation',
     category: 'obstetrics',
+    specialty: 'Gynecology',
     genderSpecific: 'female',
     visitType: 'followup',
     version: 1,

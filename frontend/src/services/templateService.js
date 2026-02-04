@@ -27,7 +27,7 @@ export const templateService = {
         await delay(500);
         // For demo, just return relevant templates or all if none specific
         const templates = Object.values(defaultTemplates).filter(t =>
-            t.category === 'department' && (!specialty || t.specialty === specialty)
+            (t.category === 'department' || t.type === 'consultation') && (!specialty || t.specialty === specialty)
         );
         return { data: templates.length > 0 ? templates : Object.values(defaultTemplates) };
     },

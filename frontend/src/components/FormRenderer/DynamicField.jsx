@@ -26,21 +26,26 @@ const DynamicField = ({
   }
 
   // Calculate width based on field configuration
+  // Calculate width based on field configuration
   const widthMap = {
-    full: '100%',
+    full: { xs: '100%', sm: '100%' },
     half: { xs: '100%', sm: '50%' },
-    third: { xs: '100%', sm: '33.33%' },
-    quarter: { xs: '100%', sm: '25%' },
+    third: { xs: '100%', md: '33.33%' },
+    quarter: { xs: '100%', md: '25%' },
+    small: { xs: '50%', sm: '16.66%' } // New 'small' size support
   };
 
-  const width = widthMap[field.width || 'full'];
+  const widthStyle = widthMap[field.width || 'full'] || widthMap.full;
 
   return (
     <Box
       sx={{
-        width,
+        width: widthStyle,
+        flexBasis: widthStyle,
+        minWidth: { xs: '100%', sm: '200px' }, // Force wrap if too squashed
+        flexGrow: 1, // Auto-expand to fill gaps
         px: 1,
-        py: 0.75,
+        py: 1, // Slightly more vertical breathing room
         boxSizing: 'border-box',
       }}
     >

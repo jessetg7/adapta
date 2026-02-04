@@ -182,29 +182,40 @@ export const DateTimeFieldRenderer = ({ field, value, onChange, error, disabled 
 // ============================================
 // DROPDOWN FIELD RENDERER
 // ============================================
-export const DropdownFieldRenderer = ({ field, value, onChange, error, disabled }) => (
-  <FormControl fullWidth error={!!error} size="small" required={field.required}>
-    <InputLabel>{field.label}</InputLabel>
-    <Select
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      label={field.label}
-      disabled={disabled}
-    >
-      <MenuItem value="">
-        <em>Select...</em>
-      </MenuItem>
-      {(field.options || []).map((option) => (
-        <MenuItem key={option.value} value={option.value} disabled={option.disabled}>
-          {option.label}
+export const DropdownFieldRenderer = ({ field, value, onChange, error, disabled }) => {
+  const labelId = `dropdown-label-${field.id}`;
+  return (
+    <FormControl fullWidth error={!!error} size="small" required={field.required}>
+      <InputLabel id={labelId}>{field.label}</InputLabel>
+      <Select
+        labelId={labelId}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        label={field.label}
+        disabled={disabled}
+        MenuProps={{
+          PaperProps: {
+            style: {
+              maxHeight: 300,
+            },
+          },
+        }}
+      >
+        <MenuItem value="">
+          <em>Select...</em>
         </MenuItem>
-      ))}
-    </Select>
-    {(error || field.description) && (
-      <FormHelperText>{error || field.description}</FormHelperText>
-    )}
-  </FormControl>
-);
+        {(field.options || []).map((option) => (
+          <MenuItem key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+      {(error || field.description) && (
+        <FormHelperText>{error || field.description}</FormHelperText>
+      )}
+    </FormControl>
+  );
+};
 
 // ============================================
 // MULTI-SELECT FIELD RENDERER
@@ -368,6 +379,7 @@ export const TableFieldRenderer = ({ field, value, onChange, disabled }) => {
                         value={row[col.id] || ''}
                         onChange={(e) => updateRow(rowIndex, col.id, e.target.value)}
                         disabled={disabled}
+                        MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
                       >
                         <MenuItem value="">-</MenuItem>
                         {(col.options || []).map((opt) => (
@@ -585,6 +597,7 @@ export const MedicationGridRenderer = ({ field, value: medications = [], onChang
                             onChange={(e) => updateMedication(index, col.id, e.target.value)}
                             disabled={disabled}
                             variant="standard"
+                            MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
                           >
                             <MenuItem value="">-</MenuItem>
                             {(col.options || []).map((opt) => (

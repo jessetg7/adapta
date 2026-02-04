@@ -602,7 +602,9 @@ class PDFEngine {
     }
 
     const styles = template?.styling || this.getDefaultStyles();
-    const dynamicSections = this.generateDynamicSections(data);
+    const dynamicSections = template && template.sections
+      ? this.generateTemplateSections(data, template)
+      : this.generateDynamicSections(data);
 
     return `
       <!DOCTYPE html>
@@ -643,6 +645,52 @@ class PDFEngine {
       </body>
       </html>
     `;
+  }
+
+  // --- TEMPLATE BASED RENDERER ---
+  generateTemplateSections(data, template) {
+    if (!template || !template.sections) return '';
+
+    let html = '';
+
+    template.sections.forEach(section => {
+      // Check if section has any data to show
+      const hasData = section.fields && section.fields.some(field => {
+        const value = data[field.id];
+        return value !== undefined && value !== null && value !== '' && (Array.isArray(value) ? value.length > 0 : true);
+      });
+
+      if (!hasData) return;
+
+      html += `<div class="section">
+        <div class="section-title">${section.title}</div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 10pt;">
+          <tbody>`;
+
+      section.fields.forEach((field, index) => {
+        const value = data[field.id];
+        if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) return;
+
+        // Determine display value
+        let displayValue = value;
+        if (typeof value === 'object' && value !== null) {
+          displayValue = value.label || value.value || Object.values(value).join(', ');
+        } else if (Array.isArray(value)) {
+          displayValue = value.map(v => typeof v === 'object' ? (v.label || v.value || JSON.stringify(v)) : v).join(', ');
+        }
+
+        html += `
+          <tr style="border-bottom: 1px solid #edf2f7; background-color: ${index % 2 === 0 ? '#fff' : '#f8fafc'}">
+            <td style="width: 35%; padding: 8px 10px; font-weight: 600; color: #4a5568; border-right: 1px solid #edf2f7;">${field.label}</td>
+            <td style="padding: 8px 10px; color: #2d3748;">${displayValue}</td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table></div>`;
+    });
+
+    return html;
   }
 
   // --- SPECIALIZED SEMEN ANALYSIS RENDERER ---
@@ -835,41 +883,61 @@ class PDFEngine {
   // Open print dialog
   print(data, template = null) {
     const html = this.generatePrintHTML(data, template);
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-
-    // Wait for content to load before printing
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
+    this.triggerPrint(html);
   }
 
   // Print Report (Case Sheet)
   printReport(data, template = null) {
     const html = this.generateReportHTML(data, template);
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
+    this.triggerPrint(html);
+  }
 
+  // Helper to trigger print using iframe to avoid popup blockers
+  triggerPrint(html) {
+    // Create hidden iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.left = '0';
+    iframe.style.top = '0';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
+    iframe.style.overflow = 'hidden';
+
+    // Ensure it's part of the document
+    document.body.appendChild(iframe);
+
+    // Get the iframe's document
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    // Wait for content to render then print
     setTimeout(() => {
-      printWindow.print();
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (e) {
+        console.error('Print failed:', e);
+        alert('Printing failed. Please check your browser settings.');
+      } finally {
+        // Cleanup after a delay to allow print dialog to function
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        }, 5000);
+      }
     }, 500);
   }
 
   // Download as PDF (using browser print to PDF)
+  // Note: For actual file download we might need a library like html2pdf or jsPDF, 
+  // but "Print to PDF" is often what is intended by browser-based apps without heavy deps.
   downloadPDF(data, template = null, filename = 'prescription.pdf') {
     const html = this.generatePrintHTML(data, template);
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(html);
-    printWindow.document.close();
-
-    // Trigger print dialog for PDF save
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
+    this.triggerPrint(html);
   }
 }
 

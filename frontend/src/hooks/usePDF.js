@@ -1,12 +1,12 @@
 // src/hooks/usePDF.js
 import { useCallback } from 'react';
-import PDFEngine from '../core/engines/PDFEngine';
+import { pdfEngine } from '../core/engines/PDFEngine';
 
 /**
  * Hook for PDF generation
  */
 export const usePDF = () => {
-  const pdfEngine = new PDFEngine();
+  // Use singleton
 
   // Generate prescription data
   const generatePrescriptionData = useCallback((prescription, patient, doctor, clinicInfo) => {

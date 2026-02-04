@@ -253,7 +253,7 @@ const FormRenderer = ({
           const isCollapsed = collapsedSections[section.id] ?? section.defaultCollapsed;
 
           return (
-            <Paper key={section.id} sx={{ mb: 2, overflow: 'hidden' }}>
+            <Paper key={section.id} sx={{ mb: 2 }}>
               {/* Section Header */}
               <Box
                 sx={{

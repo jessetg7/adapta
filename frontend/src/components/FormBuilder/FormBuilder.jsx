@@ -346,6 +346,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
       name: 'New Form Template',
       type: 'consultation',
       category: 'general',
+      specialty: 'General Medicine',
       genderSpecific: 'all',
       visitType: 'all',
       sections: [],
