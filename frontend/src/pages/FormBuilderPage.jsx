@@ -69,19 +69,6 @@ const FormBuilderPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Typography sx={{ mt: 2 }}>
-          <a href="/" onClick={() => navigate('/')}>
-            Go back to dashboard
-          </a>
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
     <FormBuilder
       templateId={templateId}
