@@ -1,5 +1,5 @@
 // src/components/FormBuilder/FormBuilder.jsx
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -404,6 +404,20 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
     const section = template.sections?.find((s) => s.id === selectedSectionId);
     return section?.fields?.find((f) => f.id === selectedFieldId);
   }, [template.sections, selectedSectionId, selectedFieldId]);
+
+  // Reload template when templateId changes (e.g., when navigating)
+  useEffect(() => {
+    if (templateId && template.sections?.length === 0) {
+      const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
+      if (defaultTemplate) {
+        setTemplate(JSON.parse(JSON.stringify(defaultTemplate)));
+        console.log('Loaded template from defaultTemplates:', templateId, defaultTemplate);
+      } else if (templates[templateId]) {
+        setTemplate(JSON.parse(JSON.stringify(templates[templateId])));
+        console.log('Loaded template from store:', templateId);
+      }
+    }
+  }, [templateId, templates]);
 
   // ============================================
   // TEMPLATE OPERATIONS

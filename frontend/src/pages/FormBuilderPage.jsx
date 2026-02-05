@@ -14,25 +14,17 @@ const FormBuilderPage = () => {
   const [error, setError] = useState(null);
   const [storeHydrated, setStoreHydrated] = useState(false);
 
+  console.log('FormBuilderPage - templateId:', templateId, 'loading:', loading, 'storeHydrated:', storeHydrated, 'templates:', templates);
+
   // Wait for Zustand store to hydrate from localStorage
   useEffect(() => {
-    const unsubscribe = useTemplateStore.persist.getOptions().onRehydrate?.(() => {
+    // Always mark as hydrated after a short delay
+    const timer = setTimeout(() => {
       setStoreHydrated(true);
-    });
+    }, 100);
 
-    // Also check if already hydrated (fallback)
-    if (Object.keys(templates).length > 0) {
-      setStoreHydrated(true);
-    } else {
-      // Give it a moment to hydrate, then assume it has
-      const timer = setTimeout(() => {
-        setStoreHydrated(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-
-    return () => unsubscribe?.();
-  }, [templates]);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const initializeTemplate = async () => {
