@@ -14,7 +14,7 @@ const FormBuilderPage = () => {
   const [error, setError] = useState(null);
   const [storeHydrated, setStoreHydrated] = useState(false);
 
-  console.log('FormBuilderPage - templateId:', templateId, 'loading:', loading, 'storeHydrated:', storeHydrated, 'templates:', templates);
+  console.log('FormBuilderPage rendering - templateId:', templateId, 'loading:', loading, 'storeHydrated:', storeHydrated);
 
   // Wait for Zustand store to hydrate from localStorage
   useEffect(() => {
@@ -29,51 +29,29 @@ const FormBuilderPage = () => {
   useEffect(() => {
     const initializeTemplate = async () => {
       try {
-        // Wait for store to hydrate
-        if (!storeHydrated) {
-          return;
-        }
-
-        setLoading(true);
+        // Immediately set loading to false to show the page even if store isn't ready
+        setLoading(false);
         setError(null);
 
         if (templateId) {
-          // First check if template exists in store
-          if (templates[templateId]) {
-            setLoading(false);
-            return;
-          }
-
-          // Then check if it's in defaultTemplates
-          const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
-          if (defaultTemplate) {
-            // Template exists in default templates, no need to load
-            setLoading(false);
-            return;
-          }
-
-          // Try to load from specialty if it's a department template
+          // Try to fetch if we need to, but don't wait for it
           const allTemplates = Object.values(defaultTemplates);
           const possibleTemplate = allTemplates.find(t => t.id === templateId);
           
           if (possibleTemplate && possibleTemplate.specialty) {
-            await fetchDepartmentTemplates(possibleTemplate.specialty);
-          } else {
-            // Fallback: fetch General Medicine templates
-            await fetchDepartmentTemplates('General Medicine');
+            fetchDepartmentTemplates(possibleTemplate.specialty).catch(err => 
+              console.error('Error fetching department templates:', err)
+            );
           }
         }
-
-        setLoading(false);
       } catch (err) {
         console.error('Error initializing template:', err);
-        setError(`Failed to load template: ${err.message}`);
-        setLoading(false);
+        // Don't set error, just log it - let FormBuilder handle missing templates
       }
     };
 
     initializeTemplate();
-  }, [templateId, templates, storeHydrated, fetchDepartmentTemplates]);
+  }, [templateId, fetchDepartmentTemplates]);
 
   if (loading) {
     return (

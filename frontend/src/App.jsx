@@ -55,6 +55,42 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
+                {/* --- Form Builder Routes (No Layout) --- */}
+                <Route
+                  path="/form-builder"
+                  element={
+                    <ProtectedRoute requiredPermission="forms.create">
+                      <FormBuilderPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/form-builder/:templateId"
+                  element={
+                    <ProtectedRoute requiredPermission="forms.create">
+                      <FormBuilderPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* --- Prescription Builder Routes (No Layout) --- */}
+                <Route
+                  path="/prescription-builder"
+                  element={
+                    <ProtectedRoute requiredPermission="prescriptions.create">
+                      <PrescriptionBuilderPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/prescription-builder/:templateId"
+                  element={
+                    <ProtectedRoute requiredPermission="prescriptions.create">
+                      <PrescriptionBuilderPage />
+                    </ProtectedRoute>
+                  }
+                />
+
                 {/* --- Protected Routes (Layout Persists) --- */}
                 {/* 
                       We wrap the AppLayout in a ProtectedRoute. 
@@ -82,40 +118,6 @@ function App() {
                     element={
                       <ProtectedRoute requiredPermission="consultation.view">
                         <PatientConsultation />
-                      </ProtectedRoute>
-                    }
-                  />
-
-                  <Route
-                    path="/form-builder"
-                    element={
-                      <ProtectedRoute requiredPermission="forms.create">
-                        <FormBuilderPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/form-builder/:templateId"
-                    element={
-                      <ProtectedRoute requiredPermission="forms.create">
-                        <FormBuilderPage />
-                      </ProtectedRoute>
-                    }
-                  />
-
-                  <Route
-                    path="/prescription-builder"
-                    element={
-                      <ProtectedRoute requiredPermission="prescriptions.create">
-                        <PrescriptionBuilderPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/prescription-builder/:templateId"
-                    element={
-                      <ProtectedRoute requiredPermission="prescriptions.create">
-                        <PrescriptionBuilderPage />
                       </ProtectedRoute>
                     }
                   />
