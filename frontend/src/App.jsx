@@ -59,7 +59,7 @@ function App() {
                 <Route
                   path="/form-builder"
                   element={
-                    <ProtectedRoute requiredPermission="forms.create">
+                    <ProtectedRoute>
                       <FormBuilderPage />
                     </ProtectedRoute>
                   }
@@ -67,7 +67,7 @@ function App() {
                 <Route
                   path="/form-builder/:templateId"
                   element={
-                    <ProtectedRoute requiredPermission="forms.create">
+                    <ProtectedRoute>
                       <FormBuilderPage />
                     </ProtectedRoute>
                   }
@@ -77,7 +77,7 @@ function App() {
                 <Route
                   path="/prescription-builder"
                   element={
-                    <ProtectedRoute requiredPermission="prescriptions.create">
+                    <ProtectedRoute>
                       <PrescriptionBuilderPage />
                     </ProtectedRoute>
                   }
@@ -85,7 +85,7 @@ function App() {
                 <Route
                   path="/prescription-builder/:templateId"
                   element={
-                    <ProtectedRoute requiredPermission="prescriptions.create">
+                    <ProtectedRoute>
                       <PrescriptionBuilderPage />
                     </ProtectedRoute>
                   }
