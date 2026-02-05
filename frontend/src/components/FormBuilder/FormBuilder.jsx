@@ -61,6 +61,7 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 import { v4 as uuidv4 } from 'uuid';
 
 import useTemplateStore from '../../core/store/useTemplateStore';
+import { defaultTemplates } from '../../data/defaultTemplates';
 import { FIELD_TYPES, FIELD_CATEGORIES, TEMPLATE_TYPES, TEMPLATE_CATEGORIES, GENDER_OPTIONS, VISIT_TYPES } from '../../core/registry/fieldConfigs';
 import FieldPalette from './FieldPalette';
 import PropertyPanel from './PropertyPanel';
@@ -338,9 +339,20 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
 
   // Local state
   const [template, setTemplate] = useState(() => {
-    if (templateId && templates[templateId]) {
-      return JSON.parse(JSON.stringify(templates[templateId]));
+    if (templateId) {
+      // First try to load from store
+      if (templates[templateId]) {
+        return JSON.parse(JSON.stringify(templates[templateId]));
+      }
+
+      // Then try to load from defaultTemplates
+      const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
+      if (defaultTemplate) {
+        return JSON.parse(JSON.stringify(defaultTemplate));
+      }
     }
+
+    // Create new template
     return {
       id: uuidv4(),
       name: 'New Form Template',
