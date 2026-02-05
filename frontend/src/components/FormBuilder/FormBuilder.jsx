@@ -407,14 +407,20 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
 
   // Reload template when templateId changes (e.g., when navigating)
   useEffect(() => {
-    if (templateId && template.sections?.length === 0) {
+    if (templateId) {
+      // Check if we need to load the template
+      const currentTemplate = templates[templateId];
       const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
-      if (defaultTemplate) {
-        setTemplate(JSON.parse(JSON.stringify(defaultTemplate)));
-        console.log('Loaded template from defaultTemplates:', templateId, defaultTemplate);
-      } else if (templates[templateId]) {
-        setTemplate(JSON.parse(JSON.stringify(templates[templateId])));
+      
+      // If template exists in store, use it
+      if (currentTemplate && currentTemplate.sections?.length > 0) {
+        setTemplate(JSON.parse(JSON.stringify(currentTemplate)));
         console.log('Loaded template from store:', templateId);
+      } 
+      // Otherwise try default templates
+      else if (defaultTemplate) {
+        setTemplate(JSON.parse(JSON.stringify(defaultTemplate)));
+        console.log('Loaded template from defaultTemplates:', templateId);
       }
     }
   }, [templateId, templates]);
