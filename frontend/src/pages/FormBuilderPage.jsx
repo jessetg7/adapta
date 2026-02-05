@@ -12,10 +12,36 @@ const FormBuilderPage = () => {
   const { templates, fetchDepartmentTemplates } = useTemplateStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [storeHydrated, setStoreHydrated] = useState(false);
+
+  // Wait for Zustand store to hydrate from localStorage
+  useEffect(() => {
+    const unsubscribe = useTemplateStore.persist.getOptions().onRehydrate?.(() => {
+      setStoreHydrated(true);
+    });
+
+    // Also check if already hydrated (fallback)
+    if (Object.keys(templates).length > 0) {
+      setStoreHydrated(true);
+    } else {
+      // Give it a moment to hydrate, then assume it has
+      const timer = setTimeout(() => {
+        setStoreHydrated(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+
+    return () => unsubscribe?.();
+  }, [templates]);
 
   useEffect(() => {
     const initializeTemplate = async () => {
       try {
+        // Wait for store to hydrate
+        if (!storeHydrated) {
+          return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -26,7 +52,7 @@ const FormBuilderPage = () => {
             return;
           }
 
-          // Check if it's in defaultTemplates
+          // Then check if it's in defaultTemplates
           const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
           if (defaultTemplate) {
             // Template exists in default templates, no need to load
@@ -55,7 +81,7 @@ const FormBuilderPage = () => {
     };
 
     initializeTemplate();
-  }, [templateId, templates, fetchDepartmentTemplates]);
+  }, [templateId, templates, storeHydrated, fetchDepartmentTemplates]);
 
   if (loading) {
     return (
