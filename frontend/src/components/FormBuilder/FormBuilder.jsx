@@ -324,6 +324,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
   // Store hooks
   const {
     templates,
+    remoteTemplates,
     addTemplate,
     updateTemplate,
     addSection,
@@ -349,6 +350,12 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
       const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
       if (defaultTemplate) {
         return JSON.parse(JSON.stringify(defaultTemplate));
+      }
+
+      // Finally try remoteTemplates
+      const remoteTemplate = remoteTemplates.find(t => t.id === templateId);
+      if (remoteTemplate) {
+        return JSON.parse(JSON.stringify(remoteTemplate));
       }
     }
 
@@ -411,6 +418,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
       // Check if we need to load the template
       const currentTemplate = templates[templateId];
       const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
+      const remoteTemplate = remoteTemplates.find(t => t.id === templateId);
       
       // If template exists in store, use it
       if (currentTemplate && currentTemplate.sections?.length > 0) {
@@ -422,8 +430,13 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
         setTemplate(JSON.parse(JSON.stringify(defaultTemplate)));
         console.log('Loaded template from defaultTemplates:', templateId);
       }
+      // Finally try remote templates
+      else if (remoteTemplate) {
+        setTemplate(JSON.parse(JSON.stringify(remoteTemplate)));
+        console.log('Loaded template from remoteTemplates:', templateId);
+      }
     }
-  }, [templateId, templates]);
+  }, [templateId, templates, remoteTemplates]);
 
   // ============================================
   // TEMPLATE OPERATIONS

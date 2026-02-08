@@ -9,7 +9,7 @@ import { defaultTemplates } from '../data/defaultTemplates';
 const FormBuilderPage = () => {
   const { templateId } = useParams();
   const navigate = useNavigate();
-  const { templates, fetchDepartmentTemplates } = useTemplateStore();
+  const { templates, remoteTemplates, fetchDepartmentTemplates } = useTemplateStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [storeHydrated, setStoreHydrated] = useState(false);
@@ -34,14 +34,18 @@ const FormBuilderPage = () => {
         setError(null);
 
         if (templateId) {
-          // Try to fetch if we need to, but don't wait for it
-          const allTemplates = Object.values(defaultTemplates);
-          const possibleTemplate = allTemplates.find(t => t.id === templateId);
+          // Check if template already exists locally
+          let foundTemplate = templates[templateId] || 
+                             Object.values(defaultTemplates).find(t => t.id === templateId) || 
+                             remoteTemplates.find(t => t.id === templateId);
           
-          if (possibleTemplate && possibleTemplate.specialty) {
-            fetchDepartmentTemplates(possibleTemplate.specialty).catch(err => 
-              console.error('Error fetching department templates:', err)
-            );
+          if (foundTemplate && foundTemplate.specialty) {
+            // Fetch all templates for that specialty to ensure they're available
+            await fetchDepartmentTemplates(foundTemplate.specialty);
+          } else {
+            // Template not found locally, try to fetch all specialties and templates
+            // This handles cases where user navigates directly to the URL
+            await fetchDepartmentTemplates('');
           }
         }
       } catch (err) {
@@ -51,7 +55,7 @@ const FormBuilderPage = () => {
     };
 
     initializeTemplate();
-  }, [templateId, fetchDepartmentTemplates]);
+  }, [templateId, fetchDepartmentTemplates, templates, remoteTemplates]);
 
   if (loading) {
     return (
