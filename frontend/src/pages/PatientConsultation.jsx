@@ -953,7 +953,10 @@ const PatientConsultation = () => {
                   <Button
                     variant="outlined"
                     startIcon={<SettingsIcon />}
-                    onClick={() => navigate(`/form-builder/${consultationTemplate.id}`)}
+                    onClick={() => {
+                      console.log('[PatientConsultation] Edit button clicked, navigating to:', `/form-builder/${consultationTemplate.id}`);
+                      navigate(`/form-builder/${consultationTemplate.id}`);
+                    }}
                     fullWidth
                     size="small"
                     sx={{ bgcolor: 'white', height: '40px' }}

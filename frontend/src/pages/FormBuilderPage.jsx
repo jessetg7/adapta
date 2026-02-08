@@ -12,12 +12,18 @@ const FormBuilderPage = () => {
   const { templates, remoteTemplates, fetchDepartmentTemplates } = useTemplateStore();
   const [templateLoading, setTemplateLoading] = useState(true);
 
-  console.log('FormBuilderPage - templateId:', templateId, 'templates loaded:', Object.keys(templates).length, 'remoteTemplates:', remoteTemplates?.length);
+  console.log('=== FormBuilderPage MOUNTED ===');
+  console.log('FormBuilderPage - templateId:', templateId);
+  console.log('FormBuilderPage - templates count:', Object.keys(templates).length);
+  console.log('FormBuilderPage - remoteTemplates count:', remoteTemplates?.length);
 
   // Effect to pre-fetch templates when navigating to form builder
   useEffect(() => {
+    console.log('[FormBuilderPage] Effect running for templateId:', templateId);
+    
     const preloadTemplates = async () => {
       if (!templateId) {
+        console.log('[FormBuilderPage] No templateId provided');
         setTemplateLoading(false);
         return;
       }
@@ -58,6 +64,7 @@ const FormBuilderPage = () => {
 
   // Show spinner only briefly while preloading
   if (templateLoading) {
+    console.log('[FormBuilderPage] Still loading, showing spinner');
     return (
       <Box
         sx={{
@@ -73,6 +80,7 @@ const FormBuilderPage = () => {
     );
   }
 
+  console.log('[FormBuilderPage] Loading complete, rendering FormBuilder');
   return (
     <FormBuilder
       key={templateId}
