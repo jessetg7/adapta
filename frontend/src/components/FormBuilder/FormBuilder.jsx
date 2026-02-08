@@ -340,6 +340,8 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
 
   // Local state
   const [template, setTemplate] = useState(() => {
+    // Try to get initial template, but don't rely on remoteTemplates here 
+    // since it may not be available during initialization
     if (templateId) {
       // First try to load from store
       if (templates[templateId]) {
@@ -351,17 +353,11 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
       if (defaultTemplate) {
         return JSON.parse(JSON.stringify(defaultTemplate));
       }
-
-      // Finally try remoteTemplates
-      const remoteTemplate = remoteTemplates.find(t => t.id === templateId);
-      if (remoteTemplate) {
-        return JSON.parse(JSON.stringify(remoteTemplate));
-      }
     }
 
-    // Create new template
+    // Create new empty template - effect will load the real one if available
     return {
-      id: uuidv4(),
+      id: templateId || uuidv4(),
       name: 'New Form Template',
       type: 'consultation',
       category: 'general',
@@ -412,29 +408,55 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
     return section?.fields?.find((f) => f.id === selectedFieldId);
   }, [template.sections, selectedSectionId, selectedFieldId]);
 
-  // Reload template when templateId changes (e.g., when navigating)
+  // Load template when templateId changes or templates/remoteTemplates are updated
   useEffect(() => {
-    if (templateId) {
-      // Check if we need to load the template
-      const currentTemplate = templates[templateId];
-      const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
-      const remoteTemplate = remoteTemplates.find(t => t.id === templateId);
-      
-      // If template exists in store, use it
-      if (currentTemplate && currentTemplate.sections?.length > 0) {
-        setTemplate(JSON.parse(JSON.stringify(currentTemplate)));
-        console.log('Loaded template from store:', templateId);
-      } 
-      // Otherwise try default templates
-      else if (defaultTemplate) {
-        setTemplate(JSON.parse(JSON.stringify(defaultTemplate)));
-        console.log('Loaded template from defaultTemplates:', templateId);
-      }
-      // Finally try remote templates
-      else if (remoteTemplate) {
-        setTemplate(JSON.parse(JSON.stringify(remoteTemplate)));
-        console.log('Loaded template from remoteTemplates:', templateId);
-      }
+    if (!templateId) return;
+
+    // Try each source in priority order
+    const currentTemplate = templates[templateId];
+    const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
+    const remoteTemplate = remoteTemplates.find(t => t.id === templateId);
+    
+    // If template exists in store and has sections, use it
+    if (currentTemplate && currentTemplate.sections?.length > 0) {
+      setTemplate(JSON.parse(JSON.stringify(currentTemplate)));
+      console.log('Loaded template from store:', templateId);
+      return;
+    }
+    
+    // Try default templates
+    if (defaultTemplate && defaultTemplate.sections?.length > 0) {
+      setTemplate(JSON.parse(JSON.stringify(defaultTemplate)));
+      console.log('Loaded template from defaultTemplates:', templateId);
+      return;
+    }
+    
+    // Try remote templates (from backend)
+    if (remoteTemplate && remoteTemplate.sections?.length > 0) {
+      setTemplate(JSON.parse(JSON.stringify(remoteTemplate)));
+      console.log('Loaded template from remoteTemplates:', templateId);
+      return;
+    }
+
+    // If none found, reset to empty template with correct ID
+    if (template.id !== templateId) {
+      setTemplate({
+        id: templateId,
+        name: 'New Form Template',
+        type: 'consultation',
+        category: 'general',
+        specialty: 'General Medicine',
+        genderSpecific: 'all',
+        visitType: 'all',
+        sections: [],
+        version: 1,
+        metadata: {
+          author: 'user',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isActive: true,
+        },
+      });
     }
   }, [templateId, templates, remoteTemplates]);
 

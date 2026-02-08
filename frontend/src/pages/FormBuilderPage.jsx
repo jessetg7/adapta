@@ -75,6 +75,7 @@ const FormBuilderPage = () => {
 
   return (
     <FormBuilder
+      key={templateId}
       templateId={templateId}
       onSave={(template) => {
         console.log('Template saved:', template);
