@@ -412,51 +412,42 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
   useEffect(() => {
     if (!templateId) return;
 
+    console.log(`[FormBuilder] useEffect triggered for templateId: ${templateId}`);
+    console.log(`[FormBuilder] Available templates in store:`, Object.keys(templates).length);
+    console.log(`[FormBuilder] Available remoteTemplates: ${remoteTemplates.length}`);
+
     // Try each source in priority order
-    const currentTemplate = templates[templateId];
-    const defaultTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
-    const remoteTemplate = remoteTemplates.find(t => t.id === templateId);
+    let foundTemplate = null;
     
-    // If template exists in store and has sections, use it
-    if (currentTemplate && currentTemplate.sections?.length > 0) {
-      setTemplate(JSON.parse(JSON.stringify(currentTemplate)));
-      console.log('Loaded template from store:', templateId);
-      return;
+    // 1. Check local store
+    if (templates[templateId]) {
+      foundTemplate = templates[templateId];
+      console.log(`[FormBuilder] Found in store (${templateId})`);
     }
     
-    // Try default templates
-    if (defaultTemplate && defaultTemplate.sections?.length > 0) {
-      setTemplate(JSON.parse(JSON.stringify(defaultTemplate)));
-      console.log('Loaded template from defaultTemplates:', templateId);
-      return;
+    // 2. Check default templates
+    if (!foundTemplate) {
+      foundTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
+      if (foundTemplate) {
+        console.log(`[FormBuilder] Found in defaultTemplates (${templateId})`);
+      }
     }
     
-    // Try remote templates (from backend)
-    if (remoteTemplate && remoteTemplate.sections?.length > 0) {
-      setTemplate(JSON.parse(JSON.stringify(remoteTemplate)));
-      console.log('Loaded template from remoteTemplates:', templateId);
-      return;
+    // 3. Check remote templates (from backend)
+    if (!foundTemplate) {
+      foundTemplate = remoteTemplates.find(t => t.id === templateId);
+      if (foundTemplate) {
+        console.log(`[FormBuilder] Found in remoteTemplates (${templateId})`);
+      }
     }
 
-    // If none found, reset to empty template with correct ID
-    if (template.id !== templateId) {
-      setTemplate({
-        id: templateId,
-        name: 'New Form Template',
-        type: 'consultation',
-        category: 'general',
-        specialty: 'General Medicine',
-        genderSpecific: 'all',
-        visitType: 'all',
-        sections: [],
-        version: 1,
-        metadata: {
-          author: 'user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isActive: true,
-        },
-      });
+    // Load the template if found
+    if (foundTemplate) {
+      setTemplate(JSON.parse(JSON.stringify(foundTemplate)));
+      console.log(`[FormBuilder] Template loaded successfully:`, foundTemplate.name || foundTemplate.id);
+    } else {
+      console.log(`[FormBuilder] Template not found in any source: ${templateId}`);
+      // Don't reset to empty - keep current template or existing state
     }
   }, [templateId, templates, remoteTemplates]);
 

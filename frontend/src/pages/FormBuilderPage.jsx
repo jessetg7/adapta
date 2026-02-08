@@ -11,51 +11,55 @@ const FormBuilderPage = () => {
   const navigate = useNavigate();
   const { templates, remoteTemplates, fetchDepartmentTemplates } = useTemplateStore();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [storeHydrated, setStoreHydrated] = useState(false);
+  const [templateReady, setTemplateReady] = useState(false);
 
-  console.log('FormBuilderPage rendering - templateId:', templateId, 'loading:', loading, 'storeHydrated:', storeHydrated);
+  console.log('FormBuilderPage - templateId:', templateId, 'remoteTemplates count:', remoteTemplates?.length);
 
-  // Wait for Zustand store to hydrate from localStorage
+  // Separate effect to ensure templates are fetched before rendering FormBuilder
   useEffect(() => {
-    // Always mark as hydrated after a short delay
-    const timer = setTimeout(() => {
-      setStoreHydrated(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const initializeTemplate = async () => {
-      try {
-        // Immediately set loading to false to show the page even if store isn't ready
+    const loadTemplate = async () => {
+      if (!templateId) {
         setLoading(false);
-        setError(null);
+        setTemplateReady(true);
+        return;
+      }
 
-        if (templateId) {
-          // Check if template already exists locally
-          let foundTemplate = templates[templateId] || 
-                             Object.values(defaultTemplates).find(t => t.id === templateId) || 
-                             remoteTemplates.find(t => t.id === templateId);
-          
-          if (foundTemplate && foundTemplate.specialty) {
-            // Fetch all templates for that specialty to ensure they're available
-            await fetchDepartmentTemplates(foundTemplate.specialty);
-          } else {
-            // Template not found locally, try to fetch all specialties and templates
-            // This handles cases where user navigates directly to the URL
-            await fetchDepartmentTemplates('');
-          }
+      try {
+        // First check if template is already in store or defaults
+        const inStore = templates[templateId];
+        const inDefaults = Object.values(defaultTemplates).find(t => t.id === templateId);
+        const inRemote = remoteTemplates.find(t => t.id === templateId);
+
+        if (inStore || inDefaults || inRemote) {
+          // Template already available
+          console.log('Template already available:', templateId);
+          setLoading(false);
+          setTemplateReady(true);
+          return;
         }
+
+        // Template not found locally - need to fetch it
+        // Try to extract specialty from templateId (format: template-specialty or specialty-variant)
+        const specialtyMatch = templateId.match(/template-(\w+)|(\w+)/);
+        const specialty = specialtyMatch ? specialtyMatch[1] || specialtyMatch[2] : '';
+
+        console.log('Fetching templates for specialty:', specialty);
+        await fetchDepartmentTemplates(specialty || '');
+
+        // Wait a bit for store to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        setLoading(false);
+        setTemplateReady(true);
       } catch (err) {
-        console.error('Error initializing template:', err);
-        // Don't set error, just log it - let FormBuilder handle missing templates
+        console.error('Error loading template:', err);
+        setLoading(false);
+        setTemplateReady(true);
       }
     };
 
-    initializeTemplate();
-  }, [templateId, fetchDepartmentTemplates, templates, remoteTemplates]);
+    loadTemplate();
+  }, [templateId]);
 
   if (loading) {
     return (
