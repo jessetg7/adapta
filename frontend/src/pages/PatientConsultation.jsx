@@ -955,7 +955,7 @@ const PatientConsultation = () => {
                     startIcon={<SettingsIcon />}
                     onClick={() => {
                       console.log('[PatientConsultation] Edit button clicked, navigating to:', `/form-builder/${consultationTemplate.id}`);
-                      navigate(`/form-builder/${consultationTemplate.id}`);
+                      window.location.href = `/form-builder/${consultationTemplate.id}`;
                     }}
                     fullWidth
                     size="small"

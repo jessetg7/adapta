@@ -1,10 +1,14 @@
 // src/pages/FormBuilderPage.jsx
+console.log('[MODULE LOAD] FormBuilderPage.jsx module is loading...');
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material';
 import FormBuilder from '../components/FormBuilder/FormBuilder';
 import useTemplateStore from '../core/store/useTemplateStore';
 import { defaultTemplates } from '../data/defaultTemplates';
+
+console.log('[MODULE LOAD] FormBuilderPage.jsx imports completed');
 
 const FormBuilderPage = () => {
   const { templateId } = useParams();
