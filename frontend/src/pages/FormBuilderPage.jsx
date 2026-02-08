@@ -28,6 +28,9 @@ const FormBuilderPage = () => {
         const inDefaults = Object.values(defaultTemplates).find(t => t.id === templateId);
         const inRemote = remoteTemplates.find(t => t.id === templateId);
 
+        console.log(`[FormBuilderPage] Checking template: ${templateId}`);
+        console.log(`[FormBuilderPage] Found - store: ${!!inStore}, defaults: ${!!inDefaults}, remote: ${!!inRemote}`);
+
         if (inStore || inDefaults || inRemote) {
           console.log('[FormBuilderPage] Template already cached:', templateId);
           setTemplateLoading(false);
@@ -42,7 +45,7 @@ const FormBuilderPage = () => {
         console.log('[FormBuilderPage] Fetching templates for specialty:', specialty);
         await fetchDepartmentTemplates(specialty || '');
         
-        console.log('[FormBuilderPage] Fetch completed');
+        console.log('[FormBuilderPage] Fetch completed, now rendering FormBuilder');
         setTemplateLoading(false);
       } catch (err) {
         console.error('[FormBuilderPage] Error preloading templates:', err);
@@ -51,7 +54,7 @@ const FormBuilderPage = () => {
     };
 
     preloadTemplates();
-  }, [templateId, templates, remoteTemplates, fetchDepartmentTemplates]);
+  }, [templateId, templates, remoteTemplates]);
 
   // Show spinner only briefly while preloading
   if (templateLoading) {
