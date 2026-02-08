@@ -10,58 +10,51 @@ const FormBuilderPage = () => {
   const { templateId } = useParams();
   const navigate = useNavigate();
   const { templates, remoteTemplates, fetchDepartmentTemplates } = useTemplateStore();
-  const [loading, setLoading] = useState(true);
-  const [templateReady, setTemplateReady] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(true);
 
-  console.log('FormBuilderPage - templateId:', templateId, 'remoteTemplates count:', remoteTemplates?.length);
+  console.log('FormBuilderPage - templateId:', templateId, 'templates loaded:', Object.keys(templates).length, 'remoteTemplates:', remoteTemplates?.length);
 
-  // Separate effect to ensure templates are fetched before rendering FormBuilder
+  // Effect to pre-fetch templates when navigating to form builder
   useEffect(() => {
-    const loadTemplate = async () => {
+    const preloadTemplates = async () => {
       if (!templateId) {
-        setLoading(false);
-        setTemplateReady(true);
+        setTemplateLoading(false);
         return;
       }
 
       try {
-        // First check if template is already in store or defaults
+        // Check if template is already available
         const inStore = templates[templateId];
         const inDefaults = Object.values(defaultTemplates).find(t => t.id === templateId);
         const inRemote = remoteTemplates.find(t => t.id === templateId);
 
         if (inStore || inDefaults || inRemote) {
-          // Template already available
-          console.log('Template already available:', templateId);
-          setLoading(false);
-          setTemplateReady(true);
+          console.log('[FormBuilderPage] Template already cached:', templateId);
+          setTemplateLoading(false);
           return;
         }
 
-        // Template not found locally - need to fetch it
-        // Try to extract specialty from templateId (format: template-specialty or specialty-variant)
+        // Template not found - fetch it
+        console.log('[FormBuilderPage] Template not cached, fetching:', templateId);
         const specialtyMatch = templateId.match(/template-(\w+)|(\w+)/);
         const specialty = specialtyMatch ? specialtyMatch[1] || specialtyMatch[2] : '';
 
-        console.log('Fetching templates for specialty:', specialty);
+        console.log('[FormBuilderPage] Fetching templates for specialty:', specialty);
         await fetchDepartmentTemplates(specialty || '');
-
-        // Wait a bit for store to update
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        setLoading(false);
-        setTemplateReady(true);
+        
+        console.log('[FormBuilderPage] Fetch completed');
+        setTemplateLoading(false);
       } catch (err) {
-        console.error('Error loading template:', err);
-        setLoading(false);
-        setTemplateReady(true);
+        console.error('[FormBuilderPage] Error preloading templates:', err);
+        setTemplateLoading(false);
       }
     };
 
-    loadTemplate();
-  }, [templateId]);
+    preloadTemplates();
+  }, [templateId, templates, remoteTemplates, fetchDepartmentTemplates]);
 
-  if (loading) {
+  // Show spinner only briefly while preloading
+  if (templateLoading) {
     return (
       <Box
         sx={{
