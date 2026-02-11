@@ -1,6 +1,6 @@
 // src/pages/PatientConsultation.jsx
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -64,6 +64,7 @@ import { useAdapta } from '../context/AdaptaContext';
 const PatientConsultation = () => {
   const { patientId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { printPrescription, printReport } = usePDF();
   const { currentUser, clinicInfo } = useAdapta();
 
@@ -166,6 +167,50 @@ const PatientConsultation = () => {
       }
     }
   }, [selectedPatientId, patientHistory, specialties]);
+
+  // Restore state when returning from form builder
+  React.useEffect(() => {
+    // Check sessionStorage first (for window.location navigation)
+    const sessionData = sessionStorage.getItem('formBuilderReturnState');
+    if (sessionData) {
+      try {
+        const parsed = JSON.parse(sessionData);
+        if (parsed.returnState) {
+          const { patientId, activeStep, consultationData, selectedDepartment, selectedTemplateId } = parsed.returnState;
+
+          console.log('[PatientConsultation] Restoring state from sessionStorage:', parsed.returnState);
+
+          // Restore all state
+          if (patientId) setSelectedPatientId(patientId);
+          if (activeStep !== undefined) setActiveStep(activeStep);
+          if (consultationData) setConsultationData(consultationData);
+          if (selectedDepartment) setSelectedDepartment(selectedDepartment);
+          if (selectedTemplateId) setSelectedTemplateId(selectedTemplateId);
+
+          // Clear sessionStorage after restoration
+          sessionStorage.removeItem('formBuilderReturnState');
+        }
+      } catch (error) {
+        console.error('[PatientConsultation] Error restoring from sessionStorage:', error);
+      }
+    }
+    // Fallback to location.state (for React Router navigation)
+    else if (location.state?.returnState) {
+      const { patientId, activeStep, consultationData, selectedDepartment, selectedTemplateId } = location.state.returnState;
+
+      console.log('[PatientConsultation] Restoring state from location.state:', location.state.returnState);
+
+      // Restore all state
+      if (patientId) setSelectedPatientId(patientId);
+      if (activeStep !== undefined) setActiveStep(activeStep);
+      if (consultationData) setConsultationData(consultationData);
+      if (selectedDepartment) setSelectedDepartment(selectedDepartment);
+      if (selectedTemplateId) setSelectedTemplateId(selectedTemplateId);
+
+      // Clear the state so it doesn't restore again on future navigation
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Combined context for rule engine and field renderers
   const evaluationContext = useMemo(() => ({
@@ -953,9 +998,30 @@ const PatientConsultation = () => {
                   <Button
                     variant="outlined"
                     startIcon={<SettingsIcon />}
-                    onClick={() => {
-                      console.log('[PatientConsultation] Edit button clicked, navigating to:', `/form-builder/${consultationTemplate.id}`);
-                      window.location.href = `/form-builder/${consultationTemplate.id}`;
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+
+                      const targetPath = `/form-builder/${consultationTemplate.id}`;
+                      const returnState = {
+                        patientId: selectedPatientId,
+                        activeStep: 2,
+                        consultationData: consultationData,
+                        selectedDepartment: selectedDepartment,
+                        selectedTemplateId: selectedTemplateId
+                      };
+
+                      console.log('[PatientConsultation] Edit button clicked - using sessionStorage approach');
+                      console.log('[PatientConsultation] Saving state:', returnState);
+
+                      // Save state to sessionStorage for restoration after form builder
+                      sessionStorage.setItem('formBuilderReturnState', JSON.stringify({
+                        returnTo: '/consultation',
+                        returnState: returnState
+                      }));
+
+                      // Use window.location for guaranteed navigation
+                      window.location.href = targetPath;
                     }}
                     fullWidth
                     size="small"
