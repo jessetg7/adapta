@@ -343,16 +343,6 @@ const Settings = () => {
                             </Grid>
                         </Paper>
                     </Grid>
-
-                    {/* Info Alert */}
-                    <Grid item xs={12}>
-                        <Alert severity="info" sx={{ borderRadius: 2 }}>
-                            <Typography variant="body2">
-                                <strong>Note:</strong> Changes to doctor and clinic information will be reflected in all future prescriptions and medical reports.
-                                Your settings are saved locally in your browser.
-                            </Typography>
-                        </Alert>
-                    </Grid>
                 </Grid>
             </Container>
 

@@ -333,29 +333,6 @@ const Dashboard = () => {
             </Paper>
           </Grid>
         </Grid>
-
-        {/* LCNC Features Banner */}
-        <Paper sx={{ p: 3, mt: 4, bgcolor: 'background.paper' }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            🚀 True Low-Code / No-Code Features
-          </Typography>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            {[
-              '✅ Zero Hardcoding - Everything is JSON-driven',
-              '✅ Drag & Drop Form Builder',
-              '✅ Visual Rule Engine',
-              '✅ Workflow Designer',
-              '✅ Gender & Age Specific Templates',
-              '✅ Printable Prescriptions',
-              '✅ Real-time Rule Evaluation',
-              '✅ Template Versioning',
-            ].map((feature) => (
-              <Grid item xs={12} sm={6} md={3} key={feature}>
-                <Chip label={feature} variant="outlined" sx={{ width: '100%', justifyContent: 'flex-start' }} />
-              </Grid>
-            ))}
-          </Grid>
-        </Paper>
       </Container>
 
       <BlueprintSelector
