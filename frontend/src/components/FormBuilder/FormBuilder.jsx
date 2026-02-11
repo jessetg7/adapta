@@ -216,7 +216,7 @@ const SortableSection = ({
           display: 'flex',
           alignItems: 'center',
           p: 1.5,
-          bgcolor: isSelected ? 'primary.50' : 'grey.50',
+          bgcolor: isSelected ? 'action.selected' : 'action.hover',
           cursor: 'pointer',
           borderBottom: collapsed ? 0 : 1,
           borderColor: 'divider',
@@ -418,13 +418,13 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
 
     // Try each source in priority order
     let foundTemplate = null;
-    
+
     // 1. Check local store
     if (templates[templateId]) {
       foundTemplate = templates[templateId];
       console.log(`[FormBuilder] Found in store (${templateId})`);
     }
-    
+
     // 2. Check default templates
     if (!foundTemplate) {
       foundTemplate = Object.values(defaultTemplates).find(t => t.id === templateId);
@@ -432,7 +432,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
         console.log(`[FormBuilder] Found in defaultTemplates (${templateId})`);
       }
     }
-    
+
     // 3. Check remote templates (from backend)
     if (!foundTemplate) {
       foundTemplate = remoteTemplates.find(t => t.id === templateId);
@@ -717,7 +717,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
   // RENDER
   // ============================================
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'grey.100' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'background.default' }}>
       {/* Top Toolbar */}
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar>
@@ -854,7 +854,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                   elevation={4}
                   sx={{
                     p: 2,
-                    bgcolor: 'primary.50',
+                    bgcolor: 'action.selected',
                     border: '2px solid',
                     borderColor: 'primary.main',
                     borderRadius: 1,
@@ -941,7 +941,7 @@ const FormBuilder = ({ templateId, onSave, onClose }) => {
                 <Box
                   sx={{
                     p: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'action.hover',
                     borderRadius: 2,
                     border: '1px dashed',
                     borderColor: 'divider',

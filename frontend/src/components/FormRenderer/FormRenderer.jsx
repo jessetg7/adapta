@@ -260,7 +260,7 @@ const FormRenderer = ({
                   display: 'flex',
                   alignItems: 'center',
                   p: 2,
-                  bgcolor: 'grey.50',
+                  bgcolor: 'action.hover',
                   borderBottom: isCollapsed ? 0 : 1,
                   borderColor: 'divider',
                   cursor: section.collapsible ? 'pointer' : 'default',

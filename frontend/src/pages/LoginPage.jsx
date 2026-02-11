@@ -110,7 +110,7 @@ const LoginPage = () => {
             </Button>
           </form>
           {/* Demo Credentials */}
-          <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+          <Box sx={{ mt: 3, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
             <Typography variant="caption" fontWeight={600} display="block" gutterBottom>
               Demo Credentials:
             </Typography>

@@ -87,7 +87,7 @@ const DraggableFieldItem = ({ fieldType, fieldConfig, onAddField, sectionId }) =
           opacity: isDragging ? 0.5 : 1,
           transition: 'all 0.2s ease',
           '&:hover': {
-            bgcolor: 'primary.50',
+            bgcolor: 'action.selected',
             transform: 'translateX(4px)',
           },
         }}
@@ -119,7 +119,7 @@ const FieldPalette = ({ onAddField, selectedSectionId }) => {
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
         Field Types
       </Typography>
-      
+
       {!selectedSectionId && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
           Select a section to add fields, or drag fields onto a section.
@@ -143,7 +143,7 @@ const FieldPalette = ({ onAddField, selectedSectionId }) => {
             sx={{
               minHeight: 40,
               '& .MuiAccordionSummary-content': { my: 0 },
-              bgcolor: 'grey.100',
+              bgcolor: 'action.hover',
               borderRadius: 1,
               mb: 0.5,
             }}

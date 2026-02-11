@@ -41,7 +41,7 @@ const SortableSection = ({ section, isSelected, onSelect, onToggle }) => {
         alignItems: 'center',
         border: isSelected ? '2px solid' : '1px solid',
         borderColor: isSelected ? 'primary.main' : 'divider',
-        bgcolor: isSelected ? 'primary.50' : 'background.paper',
+        bgcolor: isSelected ? 'action.selected' : 'background.paper',
         opacity: section.enabled ? 1 : 0.6,
         transition: 'all 0.2s',
       }}

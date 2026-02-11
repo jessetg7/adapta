@@ -16,13 +16,13 @@ const MainLayout = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar 
-        open={sidebarOpen} 
+      <Sidebar
+        open={sidebarOpen}
         onToggle={handleToggleSidebar}
         drawerWidth={DRAWER_WIDTH}
         drawerWidthCollapsed={DRAWER_WIDTH_COLLAPSED}
       />
-      
+
       <Box
         component="main"
         sx={{
@@ -36,18 +36,18 @@ const MainLayout = ({ children }) => {
               duration: theme.transitions.duration.leavingScreen,
             }),
           // Calculate width based on sidebar state
-          width: sidebarOpen 
-            ? `calc(100% - ${DRAWER_WIDTH}px)` 
+          width: sidebarOpen
+            ? `calc(100% - ${DRAWER_WIDTH}px)`
             : `calc(100% - ${DRAWER_WIDTH_COLLAPSED}px)`,
         }}
       >
         <TopBar onToggleSidebar={handleToggleSidebar} sidebarOpen={sidebarOpen} />
-        
+
         <Box
           sx={{
             flexGrow: 1,
             p: 3,
-            bgcolor: 'grey.50',
+            bgcolor: 'background.default',
             // Ensure content takes up at least the screen height minus the TopBar (approx 64px)
             minHeight: 'calc(100vh - 64px)',
             overflow: 'auto', // Adds scroll to content if needed

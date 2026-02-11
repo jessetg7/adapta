@@ -92,7 +92,7 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
       <Divider />
       {/* User Info */}
       {open && user && (
-        <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
+        <Box sx={{ p: 2, bgcolor: 'background.default' }}>
           <Typography variant="body2" fontWeight={600}>
             {user.name}
           </Typography>

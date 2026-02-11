@@ -55,7 +55,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
             sx={{
               mb: 2,
               p: 1.5,
-              bgcolor: 'grey.50',
+              bgcolor: 'action.hover',
               borderRadius: 1,
               display: 'flex',
               flexWrap: 'wrap',
@@ -93,7 +93,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {vitals.map((vital, i) => (
-                <Typography key={i} variant="body2" sx={{ bgcolor: 'grey.100', px: 1, py: 0.5, borderRadius: 0.5 }}>
+                <Typography key={i} variant="body2" sx={{ bgcolor: 'action.hover', px: 1, py: 0.5, borderRadius: 0.5 }}>
                   {vital}
                 </Typography>
               ))}
@@ -260,7 +260,7 @@ const PrescriptionPreview = ({ template, data, clinicInfo, doctor }) => {
             </Typography>
             <Table size="small" sx={{ border: '1px solid', borderColor: 'divider' }}>
               <TableBody>
-                <TableRow sx={{ bgcolor: 'grey.50' }}>
+                <TableRow sx={{ bgcolor: 'action.hover' }}>
                   {columns.map(col => (
                     <TableCell key={col.id} sx={{ fontWeight: 700, py: 1 }}>
                       {col.header}

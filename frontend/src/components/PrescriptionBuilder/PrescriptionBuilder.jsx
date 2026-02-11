@@ -113,7 +113,7 @@ const SortableSectionItem = ({ section, isSelected, onSelect, onToggle }) => {
         borderRadius: 1,
         cursor: 'pointer',
         opacity: section.enabled ? 1 : 0.5,
-        bgcolor: isSelected ? 'primary.50' : 'background.paper',
+        bgcolor: isSelected ? 'action.selected' : 'background.paper',
       }}
       onClick={onSelect}
     >
@@ -364,7 +364,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
   }), [sampleData, template.clinicInfo, template.doctorInfo]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'grey.100' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'background.default' }}>
       {/* Top Toolbar */}
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar>
@@ -464,7 +464,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
         </Paper>
 
         {/* Center - Live Preview */}
-        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3, bgcolor: 'grey.200' }}>
+        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3, bgcolor: 'background.default' }}>
           <Paper
             sx={{
               maxWidth: 800,
@@ -865,7 +865,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{ bgcolor: 'grey.100', p: 3 }}>
+        <DialogContent dividers sx={{ bgcolor: 'background.default', p: 3 }}>
           <Paper sx={{ maxWidth: 800, mx: 'auto', p: 4 }}>
             <PrescriptionPreview
               template={template}

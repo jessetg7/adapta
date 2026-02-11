@@ -293,7 +293,7 @@ const PrescriptionCreator = ({ visitId, patientId: propPatientId, onClose }) => 
     };
 
     return (
-        <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'grey.100' }}>
+        <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
             {/* Header */}
             <Paper sx={{ p: 2, borderRadius: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -736,7 +736,7 @@ const PrescriptionCreator = ({ visitId, patientId: propPatientId, onClose }) => 
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
-                <DialogContent dividers sx={{ bgcolor: 'grey.100', p: 3 }}>
+                <DialogContent dividers sx={{ bgcolor: 'background.default', p: 3 }}>
                     <Paper sx={{ p: 4 }} id="prescription-print-area">
                         <PrescriptionPreview
                             data={previewData}

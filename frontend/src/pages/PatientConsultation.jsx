@@ -452,7 +452,7 @@ const PatientConsultation = () => {
   }, []);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* App Bar */}
       <AppBar position="static" elevation={1}>
         <Toolbar>
@@ -468,7 +468,7 @@ const PatientConsultation = () => {
               avatar={<Avatar>{selectedPatient.firstName?.[0]}</Avatar>}
               label={`${selectedPatient.firstName} ${selectedPatient.lastName}`}
               color="default"
-              sx={{ bgcolor: 'white' }}
+              sx={{ bgcolor: 'background.paper' }}
             />
           )}
         </Toolbar>
@@ -787,7 +787,7 @@ const PatientConsultation = () => {
 
                     {/* Show Form Data if available */}
                     {selectedHistoryVisit.formData && (
-                      <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                      <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
                         <Typography variant="h6" color="primary" gutterBottom>Clinical Notes</Typography>
                         {/* We use a simple JSON dump for now as re-rendering the whole form is complex in read-only */}
                         {Object.entries(selectedHistoryVisit.formData || {}).map(([key, value]) => {
@@ -805,7 +805,7 @@ const PatientConsultation = () => {
                                 <TableContainer component={Paper} variant="outlined">
                                   <Table size="small">
                                     <TableHead>
-                                      <TableRow sx={{ bgcolor: 'grey.100' }}>
+                                      <TableRow sx={{ bgcolor: 'action.hover' }}>
                                         {headers.map(h => (
                                           <TableCell key={h} sx={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
                                             {h.replace(/([A-Z])/g, ' $1')}
@@ -950,7 +950,7 @@ const PatientConsultation = () => {
             )}
 
             {/* Department Template Selector */}
-            <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.light' }}>
+            <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" color="primary.main" fontWeight={700}>
@@ -967,7 +967,7 @@ const PatientConsultation = () => {
                       value={selectedDepartment}
                       label="Department"
                       onChange={(e) => setSelectedDepartment(e.target.value)}
-                      sx={{ bgcolor: 'white' }}
+                      sx={{ bgcolor: 'background.paper' }}
                     >
                       {specialties.map((s) => (
                         <MenuItem key={s} value={s}>{s}</MenuItem>
@@ -983,7 +983,7 @@ const PatientConsultation = () => {
                         value={selectedTemplateId || consultationTemplate.id}
                         label="Form Template"
                         onChange={(e) => setSelectedTemplateId(e.target.value)}
-                        sx={{ bgcolor: 'white' }}
+                        sx={{ bgcolor: 'background.paper' }}
                       >
                         {remoteTemplates
                           .filter(t => t.specialty === selectedDepartment)
@@ -1025,7 +1025,7 @@ const PatientConsultation = () => {
                     }}
                     fullWidth
                     size="small"
-                    sx={{ bgcolor: 'white', height: '40px' }}
+                    sx={{ bgcolor: 'background.paper', height: '40px' }}
                   >
                     Edit
                   </Button>
@@ -1155,7 +1155,7 @@ const PatientConsultation = () => {
                     <TableContainer component={Paper} variant="outlined">
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ bgcolor: 'grey.50' }}>
+                          <TableRow sx={{ bgcolor: 'action.hover' }}>
                             <TableCell>Medicine</TableCell>
                             <TableCell>Dose</TableCell>
                             <TableCell>Frequency</TableCell>

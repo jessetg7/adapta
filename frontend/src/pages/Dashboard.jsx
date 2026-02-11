@@ -179,7 +179,7 @@ const Dashboard = () => {
               <Button
                 variant="contained"
                 size="large"
-                sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: 'grey.100' } }}
+                sx={{ bgcolor: 'background.paper', color: 'primary.main', '&:hover': { bgcolor: 'action.hover' } }}
                 onClick={() => navigate('/consultation')}
               >
                 Open Patient Module

@@ -85,7 +85,7 @@ const RuleManager = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <AppBar position="static" elevation={1}>
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={() => navigate('/')}>
