@@ -11,14 +11,21 @@ import {
   InputAdornment,
   IconButton,
   CircularProgress,
+  Container,
+  Grid,
 } from '@mui/material';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useAuth } from '../context/AuthContext';
+import { useThemeMode } from '../context/ThemeContext';
 
 const LoginPage = () => {
   const { login } = useAuth();
+  const { mode, toggleTheme } = useThemeMode();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -41,258 +48,276 @@ const LoginPage = () => {
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 2,
         position: 'relative',
         overflow: 'hidden',
-        // Animated mesh gradient background
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%)',
-        backgroundSize: '400% 400%',
-        animation: 'gradientShift 15s ease infinite',
-        '@keyframes gradientShift': {
-          '0%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
-          '100%': { backgroundPosition: '0% 50%' },
-        },
+        bgcolor: 'background.default',
+        transition: 'background-color 0.3s ease',
       }}
     >
-      {/* Floating particles effect */}
-      <Box
+      {/* Theme Toggle Button */}
+      <IconButton
+        onClick={toggleTheme}
         sx={{
           position: 'absolute',
-          width: '100%',
-          height: '100%',
-          '&::before, &::after': {
-            content: '""',
-            position: 'absolute',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(10px)',
-          },
-          '&::before': {
-            width: 300,
-            height: 300,
-            top: '10%',
-            left: '10%',
-            animation: 'float 8s ease-in-out infinite',
-          },
-          '&::after': {
-            width: 200,
-            height: 200,
-            bottom: '15%',
-            right: '15%',
-            animation: 'float 6s ease-in-out infinite reverse',
-          },
-          '@keyframes float': {
-            '0%, 100%': { transform: 'translate(0, 0)' },
-            '50%': { transform: 'translate(30px, -30px)' },
-          },
-        }}
-      />
-
-      <Card
-        sx={{
-          maxWidth: 450,
-          width: '100%',
-          position: 'relative',
-          zIndex: 1,
-          // Glassmorphism effect
-          backgroundColor: 'rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.25)',
-          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-          // Floating animation
-          animation: 'cardFloat 3s ease-in-out infinite',
-          '@keyframes cardFloat': {
-            '0%, 100%': { transform: 'translateY(0px)' },
-            '50%': { transform: 'translateY(-10px)' },
+          top: 20,
+          right: 20,
+          zIndex: 10,
+          bgcolor: (theme) => theme.palette.mode === 'dark'
+            ? 'rgba(255, 255, 255, 0.1)'
+            : 'rgba(0, 0, 0, 0.05)',
+          backdropFilter: 'blur(10px)',
+          '&:hover': {
+            bgcolor: (theme) => theme.palette.mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.15)'
+              : 'rgba(0, 0, 0, 0.1)',
           },
         }}
       >
-        <CardContent sx={{ p: 4 }}>
-          {/* Logo */}
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Box
-              sx={{
-                display: 'inline-flex',
-                p: 2,
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                mb: 2,
-                animation: 'iconGlow 2s ease-in-out infinite',
-                '@keyframes iconGlow': {
-                  '0%, 100%': {
-                    boxShadow: '0 0 20px rgba(99, 102, 241, 0.5)'
-                  },
-                  '50%': {
-                    boxShadow: '0 0 40px rgba(99, 102, 241, 0.8)'
-                  },
-                },
-              }}
-            >
-              <LocalHospitalIcon
-                sx={{ fontSize: 64, color: '#fff' }}
-              />
+        {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+      </IconButton>
+
+      <Container maxWidth="lg" sx={{
+        display: 'flex',
+        alignItems: 'center',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        <Grid container spacing={0} alignItems="center">
+          {/* Left Side - Branding */}
+          <Grid item xs={12} md={6} sx={{
+            display: { xs: 'none', md: 'flex' },
+            flexDirection: 'column',
+            pr: 6,
+          }}>
+            <Box sx={{ mb: 4 }}>
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  p: 2,
+                  borderRadius: 3,
+                  background: (theme) => theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.05)'
+                    : 'rgba(25, 118, 210, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  border: (theme) => theme.palette.mode === 'dark'
+                    ? '1px solid rgba(255, 255, 255, 0.1)'
+                    : '1px solid rgba(25, 118, 210, 0.2)',
+                  mb: 3,
+                }}
+              >
+                <MedicalServicesIcon
+                  sx={{
+                    fontSize: 48,
+                    color: 'primary.main',
+                  }}
+                />
+              </Box>
+
+              <Typography
+                variant="h2"
+                fontWeight={700}
+                sx={{
+                  color: 'text.primary',
+                  mb: 2,
+                }}
+              >
+                ADAPTA
+              </Typography>
+
+              <Typography
+                variant="h5"
+                sx={{
+                  color: 'text.secondary',
+                  mb: 3,
+                  fontWeight: 300,
+                }}
+              >
+                Medical Forms Platform
+              </Typography>
+
             </Box>
-            <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
-              ADAPTA
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              Medical Forms Platform
-            </Typography>
-          </Box>
+          </Grid>
 
-          {/* Error Alert */}
-          {error && (
-            <Alert
-              severity="error"
+          {/* Right Side - Login Form */}
+          <Grid item xs={12} md={6}>
+            <Card
               sx={{
-                mb: 3,
-                backgroundColor: 'rgba(211, 47, 47, 0.15)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(211, 47, 47, 0.3)',
-                color: '#fff',
+                maxWidth: 480,
+                mx: { xs: 2, md: 0 },
+                ml: { md: 'auto' },
+                // Professional glassmorphism with theme awareness
+                backgroundColor: (theme) => theme.palette.mode === 'dark'
+                  ? 'rgba(18, 18, 18, 0.8)'
+                  : 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: (theme) => theme.palette.mode === 'dark'
+                  ? '1px solid rgba(255, 255, 255, 0.1)'
+                  : '1px solid rgba(0, 0, 0, 0.1)',
+                boxShadow: (theme) => theme.palette.mode === 'dark'
+                  ? '0 20px 60px rgba(0, 0, 0, 0.5)'
+                  : '0 20px 60px rgba(0, 0, 0, 0.15)',
+                borderRadius: 3,
               }}
             >
-              {error}
-            </Alert>
-          )}
+              <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
+                {/* Mobile Logo */}
+                <Box sx={{
+                  display: { xs: 'block', md: 'none' },
+                  textAlign: 'center',
+                  mb: 4,
+                }}>
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: 'primary.main',
+                      mb: 2,
+                    }}
+                  >
+                    <LocalHospitalIcon sx={{ fontSize: 40, color: '#fff' }} />
+                  </Box>
+                  <Typography variant="h4" fontWeight={700} gutterBottom>
+                    ADAPTA
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Medical Forms Platform
+                  </Typography>
+                </Box>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Email Address"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  color: '#fff',
-                  '& fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.7)',
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'rgba(255, 255, 255, 0.8)',
-                },
-              }}
-              autoComplete="email"
-            />
+                {/* Welcome Text */}
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h5" fontWeight={600} gutterBottom>
+                    Welcome Back
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Sign in to access your medical dashboard
+                  </Typography>
+                </Box>
 
-            <TextField
-              fullWidth
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              sx={{
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  color: '#fff',
-                  '& fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.7)',
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'rgba(255, 255, 255, 0.8)',
-                },
-              }}
-              autoComplete="current-password"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                      sx={{ color: 'rgba(255, 255, 255, 0.8)' }}
-                    >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+                {/* Error Alert */}
+                {error && (
+                  <Alert
+                    severity="error"
+                    sx={{ mb: 3 }}
+                  >
+                    {error}
+                  </Alert>
+                )}
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={loading}
-              sx={{
-                mb: 2,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: '#fff',
-                fontWeight: 600,
-                py: 1.5,
-                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.4)',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
-                  boxShadow: '0 6px 30px rgba(102, 126, 234, 0.6)',
-                  transform: 'translateY(-2px)',
-                },
-                '&:active': {
-                  transform: 'translateY(0)',
-                },
-              }}
-            >
-              {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
-            </Button>
-          </form>
+                {/* Login Form */}
+                <form onSubmit={handleSubmit}>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    sx={{ mb: 2.5 }}
+                    autoComplete="email"
+                  />
 
-          {/* Demo Credentials */}
-          <Box
-            sx={{
-              mt: 3,
-              p: 2,
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: 2,
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-            }}
-          >
-            <Typography variant="caption" fontWeight={600} display="block" gutterBottom sx={{ color: '#fff' }}>
-              Demo Credentials:
-            </Typography>
-            <Typography variant="caption" display="block" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              Admin: admin@adapta.com / admin123
-            </Typography>
-            <Typography variant="caption" display="block" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              Doctor: doctor@adapta.com / doctor123
-            </Typography>
-            <Typography variant="caption" display="block" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              Nurse: nurse@adapta.com / nurse123
-            </Typography>
-            <Typography variant="caption" display="block" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              Receptionist: receptionist@adapta.com / receptionist123
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    sx={{ mb: 3 }}
+                    autoComplete="current-password"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    disabled={loading}
+                    sx={{
+                      py: 1.5,
+                      textTransform: 'none',
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      boxShadow: 2,
+                      '&:hover': {
+                        boxShadow: 4,
+                        transform: 'translateY(-2px)',
+                      },
+                      transition: 'all 0.3s ease',
+                      '&:active': {
+                        transform: 'translateY(0)',
+                      },
+                    }}
+                  >
+                    {loading ? <CircularProgress size={24} /> : 'Sign In'}
+                  </Button>
+                </form>
+
+                {/* Demo Credentials */}
+                <Box
+                  sx={{
+                    mt: 4,
+                    p: 2.5,
+                    backgroundColor: (theme) => theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.05)'
+                      : 'rgba(25, 118, 210, 0.05)',
+                    borderRadius: 2,
+                    border: (theme) => theme.palette.mode === 'dark'
+                      ? '1px solid rgba(255, 255, 255, 0.1)'
+                      : '1px solid rgba(25, 118, 210, 0.1)',
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    fontWeight={600}
+                    display="block"
+                    gutterBottom
+                    sx={{
+                      color: 'text.primary',
+                      mb: 1.5,
+                    }}
+                  >
+                    Demo Credentials:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    {[
+                      'Admin: admin@adapta.com / admin123',
+                      'Doctor: doctor@adapta.com / doctor123',
+                      'Nurse: nurse@adapta.com / nurse123',
+                      'Receptionist: receptionist@adapta.com / receptionist123',
+                    ].map((cred) => (
+                      <Typography
+                        key={cred}
+                        variant="caption"
+                        sx={{
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {cred}
+                      </Typography>
+                    ))}
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
     </Box>
   );
 };
