@@ -248,24 +248,30 @@ export const getTheme = (mode, customPrimary) => createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backgroundColor: mode === 'dark' ? '#0a0a0a' : undefined,
-          transition: 'box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-          border: mode === 'dark' ? '1px solid #18181b' : undefined,
+          backgroundColor: mode === 'dark' 
+            ? 'rgba(10, 10, 10, 0.6)' 
+            : 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          border: mode === 'dark' 
+            ? '1px solid rgba(255, 255, 255, 0.1)' 
+            : '1px solid rgba(255, 255, 255, 0.18)',
         },
         elevation1: {
           boxShadow: mode === 'dark'
-            ? '0 0 0 1px #18181b, 0 1px 3px 0 rgba(0, 0, 0, 0.8)'
-            : '0 1px 3px rgba(0,0,0,0.12)',
+            ? '0 0 0 1px rgba(255, 255, 255, 0.05), 0 2px 8px 0 rgba(0, 0, 0, 0.4)'
+            : '0 2px 8px rgba(31, 38, 135, 0.15)',
         },
         elevation2: {
           boxShadow: mode === 'dark'
-            ? '0 0 0 1px #27272a, 0 4px 6px -1px rgba(0, 0, 0, 0.9)'
-            : '0 3px 6px rgba(0,0,0,0.16)',
+            ? '0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 12px 0 rgba(0, 0, 0, 0.5)'
+            : '0 4px 12px rgba(31, 38, 135, 0.2)',
         },
         elevation3: {
           boxShadow: mode === 'dark'
-            ? '0 0 0 1px #3f3f46, 0 10px 15px -3px rgba(0, 0, 0, 0.9)'
-            : '0 10px 20px rgba(0,0,0,0.19)',
+            ? '0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 24px 0 rgba(0, 0, 0, 0.6)'
+            : '0 8px 24px rgba(31, 38, 135, 0.25)',
         },
       },
     },
@@ -273,16 +279,24 @@ export const getTheme = (mode, customPrimary) => createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backgroundColor: mode === 'dark' ? '#0a0a0a' : undefined,
-          border: mode === 'dark' ? '1px solid #18181b' : undefined,
+          backgroundColor: mode === 'dark' 
+            ? 'rgba(10, 10, 10, 0.6)' 
+            : 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: mode === 'dark' 
+            ? '1px solid rgba(255, 255, 255, 0.1)' 
+            : '1px solid rgba(255, 255, 255, 0.2)',
           borderRadius: 16,
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
             transform: 'translateY(-4px)',
-            borderColor: mode === 'dark' ? '#27272a' : undefined,
+            borderColor: mode === 'dark' 
+              ? 'rgba(255, 255, 255, 0.15)' 
+              : 'rgba(255, 255, 255, 0.3)',
             boxShadow: mode === 'dark'
-              ? '0 0 0 1px #3f3f46, 0 20px 25px -5px rgba(0, 0, 0, 0.9)'
-              : undefined,
+              ? '0 0 0 1px rgba(255, 255, 255, 0.15), 0 20px 40px -5px rgba(0, 0, 0, 0.7), 0 0 30px rgba(59, 130, 246, 0.2)'
+              : '0 20px 40px rgba(31, 38, 135, 0.3), 0 0 30px rgba(99, 102, 241, 0.15)',
           },
         },
       },

@@ -26,6 +26,7 @@ import RuleManager from './pages/RuleManager';
 import WorkflowManager from './pages/WorkflowManager';
 import CreatePrescriptionPage from './pages/CreatePrescriptionPage';
 import ReportPage from './pages/ReportPage';
+import Settings from './pages/Settings';
 
 // 1. Create a Layout Wrapper to handle the Outlet
 // This allows MainLayout to stay mounted while child routes change
@@ -163,6 +164,15 @@ function App() {
                     element={
                       <ProtectedRoute requiredPermission="reports.view">
                         <ReportPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <Settings />
                       </ProtectedRoute>
                     }
                   />

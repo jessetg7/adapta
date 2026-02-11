@@ -51,6 +51,13 @@ export const navigationConfig = {
       permission: 'workflows.manage',
     },
     {
+      id: 'settings',
+      label: 'Settings',
+      icon: 'SettingsIcon',
+      path: '/settings',
+      permission: null, // Accessible to all
+    },
+    {
       id: 'admin',
       label: 'Admin Panel',
       icon: 'AdminPanelSettingsIcon',

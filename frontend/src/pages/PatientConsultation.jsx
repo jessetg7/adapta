@@ -456,7 +456,17 @@ const PatientConsultation = () => {
       {/* App Bar */}
       <AppBar position="static" elevation={1}>
         <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={() => navigate('/')}>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => {
+              if (activeStep > 0) {
+                setActiveStep(activeStep - 1);
+              } else {
+                navigate('/');
+              }
+            }}
+          >
             <ArrowBackIcon />
           </IconButton>
           <LocalHospitalIcon sx={{ ml: 1, mr: 1 }} />
@@ -919,10 +929,6 @@ const PatientConsultation = () => {
         {/* Step 2: Consultation */}
         {activeStep === 2 && selectedPatient && (
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Consultation
-            </Typography>
-
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">
                 Consultation

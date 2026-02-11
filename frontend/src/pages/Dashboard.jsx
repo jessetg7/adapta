@@ -135,28 +135,50 @@ const Dashboard = () => {
           <Typography variant="body2" sx={{ mr: 2 }}>
             Universal Hospital Framework
           </Typography>
-          <IconButton color="inherit" onClick={() => setShowBranding(true)}>
-            <PaletteIcon />
-          </IconButton>
-          <IconButton color="inherit">
-            <SettingsIcon />
-          </IconButton>
         </Toolbar>
       </AppBar>
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        {/* Welcome Section */}
+        {/* Welcome Section with Glassmorphism */}
         <Paper
           sx={{
             p: 3,
             mb: 4,
+            position: 'relative',
+            overflow: 'hidden',
+            // Glassmorphism effect
             background: (theme) => theme.palette.mode === 'dark'
-              ? 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)'
-              : 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-            color: 'white'
+              ? 'linear-gradient(135deg, rgba(21, 101, 192, 0.3) 0%, rgba(25, 118, 210, 0.3) 100%)'
+              : 'linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(66, 165, 245, 0.15) 100%)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            border: (theme) => theme.palette.mode === 'dark'
+              ? '1px solid rgba(255, 255, 255, 0.1)'
+              : '1px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: (theme) => theme.palette.mode === 'dark'
+              ? '0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.2)'
+              : '0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 0 40px rgba(25, 118, 210, 0.15)',
           }}
         >
-          <Grid container alignItems="center" spacing={3}>
+          {/* Animated background gradient orb */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: -50,
+              right: -50,
+              width: 200,
+              height: 200,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(66, 165, 245, 0.4) 0%, transparent 70%)',
+              filter: 'blur(40px)',
+              animation: 'rotate 10s linear infinite',
+              '@keyframes rotate': {
+                '0%': { transform: 'rotate(0deg)' },
+                '100%': { transform: 'rotate(360deg)' },
+              },
+            }}
+          />
+          <Grid container alignItems="center" spacing={3} sx={{ position: 'relative', zIndex: 1 }}>
             <Grid item xs={12} md={8}>
               <Typography variant="h4" fontWeight={700} gutterBottom>
                 HMS LCNC Framework
