@@ -28,6 +28,7 @@ import {
   Card,
   CardContent,
   CardActions,
+  Avatar,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
@@ -227,24 +228,31 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
 
   // Save workflow
   const handleSave = useCallback(() => {
-    if (!workflow.name?.trim()) {
-      setSnackbar({ open: true, message: 'Workflow name is required', severity: 'error' });
-      return;
-    }
+    try {
+      if (!workflow.name?.trim()) {
+        setSnackbar({ open: true, message: 'Workflow name is required', severity: 'error' });
+        return;
+      }
 
-    if (workflow.steps.length === 0) {
-      setSnackbar({ open: true, message: 'At least one step is required', severity: 'error' });
-      return;
-    }
+      if (workflow.steps.length === 0) {
+        setSnackbar({ open: true, message: 'At least one step is required', severity: 'error' });
+        return;
+      }
 
-    if (workflowId && workflows[workflowId]) {
-      updateWorkflow(workflowId, workflow);
-    } else {
-      addWorkflow(workflow);
-    }
+      console.log('Saving workflow:', workflow); // Debug log
 
-    setSnackbar({ open: true, message: 'Workflow saved successfully!', severity: 'success' });
-    onSave?.(workflow);
+      if (workflowId && workflows[workflowId]) {
+        updateWorkflow(workflowId, workflow);
+      } else {
+        addWorkflow(workflow);
+      }
+
+      setSnackbar({ open: true, message: 'Workflow saved successfully!', severity: 'success' });
+      onSave?.(workflow);
+    } catch (error) {
+      console.error('Error saving workflow:', error);
+      setSnackbar({ open: true, message: `Error saving workflow: ${error.message}`, severity: 'error' });
+    }
   }, [workflow, workflowId, workflows, addWorkflow, updateWorkflow, onSave]);
 
   // Get step name by ID
@@ -253,7 +261,8 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'grey.100' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'background.default' }}>
+
       {/* Top Toolbar */}
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar>
@@ -324,7 +333,8 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
                   cursor: 'pointer',
                   border: selectedStepId === step.id ? '2px solid' : '1px solid',
                   borderColor: selectedStepId === step.id ? 'primary.main' : 'divider',
-                  bgcolor: selectedStepId === step.id ? 'primary.50' : 'background.paper',
+                  bgcolor: selectedStepId === step.id ? 'action.selected' : 'background.paper',
+
                 }}
                 onClick={() => setSelectedStepId(step.id)}
               >
@@ -417,7 +427,8 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
         </Paper>
 
         {/* Center - Visual Canvas */}
-        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3, position: 'relative', bgcolor: 'white' }}>
+        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3, position: 'relative', bgcolor: 'background.default' }}>
+
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" color="primary" fontWeight={700}>Visual Patient Journey</Typography>
             <Chip label="LCNC Workflow Engine Active" color="success" size="small" variant="outlined" />
@@ -428,7 +439,8 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
               minHeight: 600,
               p: 4,
               position: 'relative',
-              background: 'radial-gradient(#e0e0e0 1px, transparent 1px)',
+              background: (theme) => `radial-gradient(${theme.palette.divider} 1px, transparent 1px)`,
+
               backgroundSize: '20px 20px',
               borderRadius: 4,
               border: '1px solid #eee',
@@ -444,7 +456,8 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
                 {index > 0 && (
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <ArrowForwardIcon sx={{ transform: 'rotate(90deg)', color: 'primary.light', fontSize: 30 }} />
-                    <Typography variant="caption" sx={{ mt: -0.5, bgcolor: 'white', px: 1, color: 'text.secondary' }}>
+                    <Typography variant="caption" sx={{ mt: -0.5, bgcolor: 'background.paper', px: 1, color: 'text.secondary', borderRadius: 1 }}>
+
                       {workflow.transitions.find(t => t.toStepId === step.id)?.label || 'Proceed'}
                     </Typography>
                   </Box>
@@ -459,7 +472,8 @@ const WorkflowBuilder = ({ workflowId, onSave, onClose }) => {
                     border: '2px solid',
                     borderColor: step.id === workflow.startStepId ? 'success.main' : (selectedStepId === step.id ? 'primary.main' : '#ddd'),
                     borderRadius: 3,
-                    bgcolor: selectedStepId === step.id ? 'primary.50' : 'white',
+                    bgcolor: selectedStepId === step.id ? 'action.selected' : 'background.paper',
+
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
                     '&:hover': { transform: 'scale(1.05)', boxShadow: 6 }

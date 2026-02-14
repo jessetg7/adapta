@@ -33,6 +33,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { medicalService } from '../../services/medicalService';
 import useTemplateStore from '../../core/store/useTemplateStore';
+import { MEDICATION_ROUTES, MEDICATION_FREQUENCIES } from '../../config/prescriptionConfig';
 
 /**
  * MedicationGrid - Enhanced medication entry component
@@ -52,7 +53,9 @@ const MedicationGrid = ({
   const [drugOptions, setDrugOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { medicationRoutes, frequencies } = useTemplateStore();
+  // Directly use imported constants for options to avoid store persistence issues
+  const routesOptions = MEDICATION_ROUTES.map(r => r.label);
+  const frequencyOptions = MEDICATION_FREQUENCIES.map(f => f.value);
 
   // Sync with external value
   React.useEffect(() => {
@@ -86,15 +89,16 @@ const MedicationGrid = ({
       name: '',
       genericName: '',
       dose: '',
-      route: medicationRoutes[0] || '',
-      frequency: frequencies[0]?.id || '',
+      // Use imported constants for defaults
+      route: MEDICATION_ROUTES[0]?.label || '',
+      frequency: MEDICATION_FREQUENCIES[0]?.value || '',
       duration: '5 days',
       timing: '',
       instructions: '',
       quantity: null,
     };
     updateMedications([...medications, newMed]);
-  }, [medications, updateMedications, medicationRoutes, frequencies]);
+  }, [medications, updateMedications]);
 
   // Update medication
   const updateMedication = useCallback((index, field, value) => {
@@ -128,7 +132,6 @@ const MedicationGrid = ({
       }
     }
 
-    updateMedications(updated);
     updateMedications(updated);
   }, [medications, updateMedications, patientAge, patientWeight, drugOptions, patientAllergies]);
 
@@ -255,30 +258,34 @@ const MedicationGrid = ({
                       />
                     </TableCell>
                     <TableCell>
-                      <Select
-                        size="small"
+                      <Autocomplete
+                        freeSolo
                         fullWidth
+                        size="small"
+                        options={routesOptions}
                         value={med.route}
-                        onChange={(e) => updateMedication(index, 'route', e.target.value)}
+                        onChange={(e, newValue) => updateMedication(index, 'route', newValue || '')}
+                        onInputChange={(e, newValue) => updateMedication(index, 'route', newValue)}
                         disabled={disabled}
-                      >
-                        {medicationRoutes.map(r => (
-                          <MenuItem key={r} value={r}>{r}</MenuItem>
-                        ))}
-                      </Select>
+                        renderInput={(params) => (
+                          <TextField {...params} placeholder="Route" />
+                        )}
+                      />
                     </TableCell>
                     <TableCell>
-                      <Select
-                        size="small"
+                      <Autocomplete
+                        freeSolo
                         fullWidth
+                        size="small"
+                        options={frequencyOptions}
                         value={med.frequency}
-                        onChange={(e) => updateMedication(index, 'frequency', e.target.value)}
+                        onChange={(e, newValue) => updateMedication(index, 'frequency', newValue || '')}
+                        onInputChange={(e, newValue) => updateMedication(index, 'frequency', newValue)}
                         disabled={disabled}
-                      >
-                        {frequencies.map(f => (
-                          <MenuItem key={f.id} value={f.id}>{f.id}</MenuItem>
-                        ))}
-                      </Select>
+                        renderInput={(params) => (
+                          <TextField {...params} placeholder="Freq" />
+                        )}
+                      />
                     </TableCell>
                     <TableCell>
                       <Autocomplete

@@ -23,60 +23,26 @@ export const AdaptaProvider = ({ children }) => {
   const ruleStore = useRuleStore();
   const workflowStore = useWorkflowStore();
 
-  // Load saved data from localStorage
-  const loadSavedDoctor = () => {
-    try {
-      const saved = localStorage.getItem('adaptaDoctor');
-      if (saved) {
-        const data = JSON.parse(saved);
-        return {
-          id: 'doctor-1',
-          role: 'doctor',
-          ...data,
-        };
-      }
-    } catch (error) {
-      console.error('Error loading doctor data:', error);
-    }
-    return {
-      id: 'doctor-1',
-      name: 'Dr. John Smith',
-      role: 'doctor',
-      qualification: 'MBBS, MD',
-      specialization: 'General Medicine',
-      registrationNo: 'MCI-12345',
-    };
-  };
+  // User/Auth state (simplified for demo)
+  const [currentUser, setCurrentUser] = useState({
+    id: 'doctor-1',
+    name: 'Dr. Aiswarya Parthasarathy',
+    role: 'doctor',
+    qualification: 'MBBS, MD',
+    specialization: 'General Medicine',
+    registrationNo: 'MCI-12345',
+  });
 
-  const loadSavedClinic = () => {
-    try {
-      const saved = localStorage.getItem('adaptaClinic');
-      if (saved) {
-        const data = JSON.parse(saved);
-        return {
-          primaryColor: '#1976d2',
-          ...data,
-        };
-      }
-    } catch (error) {
-      console.error('Error loading clinic data:', error);
-    }
-    return {
-      name: 'ADAPTA Medical Center',
-      address: '123 Healthcare Avenue, Medical District',
-      phone: '+1 (555) 123-4567',
-      email: 'info@adapta-medical.com',
-      website: 'www.adapta-medical.com',
-      primaryColor: '#1976d2',
-      registrationNumber: 'HC-2024-001',
-    };
-  };
-
-  // User/Auth state (with localStorage initialization)
-  const [currentUser, setCurrentUser] = useState(loadSavedDoctor());
-
-  // Clinic info (with localStorage initialization)
-  const [clinicInfo, setClinicInfo] = useState(loadSavedClinic());
+  // Clinic info
+  const [clinicInfo, setClinicInfo] = useState({
+    name: 'ADAPTA Medical Center',
+    address: '123 Healthcare Avenue, Medical District',
+    phone: '+1 (555) 123-4567',
+    email: 'info@adapta-medical.com',
+    website: 'www.adapta-medical.com',
+    primaryColor: '#1976d2',
+    registrationNumber: 'HC-2024-001',
+  });
 
   // Initialize engines
   const engines = useMemo(() => {

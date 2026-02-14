@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // TODO: Replace with actual API call
       const response = await mockLogin(email, password);
-      
+
       if (response.success) {
         setUser(response.user);
         localStorage.setItem('adapta-user', JSON.stringify(response.user));
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   };
   const hasPermission = (permission) => {
     if (!user || !user.role) return false;
-    
+
     const rolePermissions = permissionConfig.roles[user.role];
     if (!rolePermissions) return false;
     return rolePermissions.permissions.includes(permission);
@@ -87,7 +87,7 @@ const mockLogin = async (email, password) => {
     },
     'doctor@adapta.com': {
       id: '2',
-      name: 'Dr. John Smith',
+      name: 'Dr. Aiswarya Parthasarathy',
       email: 'doctor@adapta.com',
       role: 'doctor',
       password: 'doctor123',

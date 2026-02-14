@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { templateService } from '../../services/templateService';
 import { configService } from '../../services/configService';
 
+import { MEDICATION_ROUTES, MEDICATION_FREQUENCIES } from '../../config/prescriptionConfig';
+
 const useTemplateStore = create(
   persist(
     immer((set, get) => ({
@@ -13,8 +15,8 @@ const useTemplateStore = create(
       remoteTemplates: [],
       specialties: [],
       vitals: [],
-      medicationRoutes: [],
-      frequencies: [],
+      medicationRoutes: MEDICATION_ROUTES,
+      frequencies: MEDICATION_FREQUENCIES,
       loading: false,
       error: null,
       activeTemplateId: null,
@@ -196,6 +198,58 @@ const useTemplateStore = create(
           state.templates[newId] = cloned;
         });
         return newId;
+      },
+
+      // Patient-specific template cloning
+      cloneTemplateForPatient: (templateId, patientId, patientName) => {
+        const original = get().templates[templateId];
+        if (!original) return null;
+
+        const newId = `patient_${patientId}_${templateId}_${Date.now()}`;
+        set((state) => {
+          const cloned = JSON.parse(JSON.stringify(original));
+          cloned.id = newId;
+          cloned.name = `${original.name} (${patientName})`;
+          cloned.version = 1;
+          cloned.metadata = {
+            ...cloned.metadata,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isSystem: false,
+            patientSpecific: true,
+            patientId: patientId,
+            patientName: patientName,
+            baseTemplateId: templateId, // Reference to original template
+          };
+          // Keep same section and field IDs to maintain data compatibility
+          state.templates[newId] = cloned;
+        });
+        return newId;
+      },
+
+      // Get template for specific patient (returns patient-specific version if exists, else global)
+      getTemplateForPatient: (templateId, patientId) => {
+        const templates = get().templates;
+
+        // Look for patient-specific version
+        const patientTemplate = Object.values(templates).find(
+          t => t.metadata?.baseTemplateId === templateId && t.metadata?.patientId === patientId
+        );
+
+        if (patientTemplate) {
+          return patientTemplate;
+        }
+
+        // Return global template
+        return templates[templateId];
+      },
+
+      // Get all patient-specific templates for a patient
+      getPatientTemplates: (patientId) => {
+        const templates = get().templates;
+        return Object.values(templates).filter(
+          t => t.metadata?.patientSpecific === true && t.metadata?.patientId === patientId
+        );
       },
 
       setActiveTemplate: (id) => {

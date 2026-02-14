@@ -12,14 +12,14 @@ class RuleEngine {
     this.rules = new Map();
     this.evaluationLog = [];
     this.listeners = new Map();
-    
+
     rules.forEach(rule => this.registerRule(rule));
   }
 
   // ============================================
   // RULE MANAGEMENT
   // ============================================
-  
+
   registerRule(rule) {
     this.rules.set(rule.id, rule);
   }
@@ -46,7 +46,7 @@ class RuleEngine {
   // ============================================
   // VALUE EXTRACTION FROM CONTEXT
   // ============================================
-  
+
   getValue(path, context) {
     // Support nested paths: 'patient.gender', 'formData.age', 'visit.type'
     if (path.startsWith('patient.')) {
@@ -64,6 +64,14 @@ class RuleEngine {
     if (path.startsWith('custom.')) {
       return get(context.custom, path.replace('custom.', ''));
     }
+    // Check if the path exists directly in context (e.g., emergencyMode)
+    if (context.hasOwnProperty(path)) {
+      const value = context[path];
+      if (path === 'emergencyMode') {
+        console.log('🚨 RuleEngine getValue - emergencyMode:', value);
+      }
+      return value;
+    }
     // Default to formData
     return get(context.formData, path);
   }
@@ -71,16 +79,16 @@ class RuleEngine {
   // ============================================
   // OPERATOR EVALUATION
   // ============================================
-  
+
   evaluateOperator(operator, fieldValue, conditionValue) {
     const normalizedFieldValue = fieldValue ?? '';
     const normalizedConditionValue = conditionValue ?? '';
 
     const operators = {
       equals: () => normalizedFieldValue === normalizedConditionValue,
-      
+
       notEquals: () => normalizedFieldValue !== normalizedConditionValue,
-      
+
       contains: () => {
         if (Array.isArray(normalizedFieldValue)) {
           return normalizedFieldValue.includes(normalizedConditionValue);
@@ -89,7 +97,7 @@ class RuleEngine {
           .toLowerCase()
           .includes(String(normalizedConditionValue).toLowerCase());
       },
-      
+
       notContains: () => {
         if (Array.isArray(normalizedFieldValue)) {
           return !normalizedFieldValue.includes(normalizedConditionValue);
@@ -98,47 +106,47 @@ class RuleEngine {
           .toLowerCase()
           .includes(String(normalizedConditionValue).toLowerCase());
       },
-      
+
       greaterThan: () => Number(normalizedFieldValue) > Number(normalizedConditionValue),
-      
+
       lessThan: () => Number(normalizedFieldValue) < Number(normalizedConditionValue),
-      
+
       greaterThanOrEqual: () => Number(normalizedFieldValue) >= Number(normalizedConditionValue),
-      
+
       lessThanOrEqual: () => Number(normalizedFieldValue) <= Number(normalizedConditionValue),
-      
+
       isEmpty: () => {
         if (Array.isArray(normalizedFieldValue)) {
           return normalizedFieldValue.length === 0;
         }
-        return normalizedFieldValue === '' || 
-               normalizedFieldValue === null || 
-               normalizedFieldValue === undefined;
+        return normalizedFieldValue === '' ||
+          normalizedFieldValue === null ||
+          normalizedFieldValue === undefined;
       },
-      
+
       isNotEmpty: () => {
         if (Array.isArray(normalizedFieldValue)) {
           return normalizedFieldValue.length > 0;
         }
-        return normalizedFieldValue !== '' && 
-               normalizedFieldValue !== null && 
-               normalizedFieldValue !== undefined;
+        return normalizedFieldValue !== '' &&
+          normalizedFieldValue !== null &&
+          normalizedFieldValue !== undefined;
       },
-      
+
       in: () => {
         if (Array.isArray(normalizedConditionValue)) {
           return normalizedConditionValue.includes(normalizedFieldValue);
         }
         return false;
       },
-      
+
       notIn: () => {
         if (Array.isArray(normalizedConditionValue)) {
           return !normalizedConditionValue.includes(normalizedFieldValue);
         }
         return true;
       },
-      
+
       between: () => {
         if (Array.isArray(normalizedConditionValue) && normalizedConditionValue.length === 2) {
           const num = Number(normalizedFieldValue);
@@ -146,7 +154,7 @@ class RuleEngine {
         }
         return false;
       },
-      
+
       matches: () => {
         try {
           const regex = new RegExp(normalizedConditionValue);
@@ -155,9 +163,9 @@ class RuleEngine {
           return false;
         }
       },
-      
+
       startsWith: () => String(normalizedFieldValue).startsWith(String(normalizedConditionValue)),
-      
+
       endsWith: () => String(normalizedFieldValue).endsWith(String(normalizedConditionValue)),
     };
 
@@ -166,14 +174,14 @@ class RuleEngine {
       console.warn(`Unknown operator: ${operator}`);
       return false;
     }
-    
+
     return operatorFn();
   }
 
   // ============================================
   // CONDITION EVALUATION
   // ============================================
-  
+
   evaluateCondition(condition, context) {
     const fieldValue = this.getValue(condition.field, context);
     let conditionValue = condition.value;
@@ -211,7 +219,7 @@ class RuleEngine {
   // ============================================
   // FORMULA EVALUATION (Safe)
   // ============================================
-  
+
   evaluateFormula(formula, context) {
     let processedFormula = formula;
 
@@ -238,7 +246,7 @@ class RuleEngine {
   // ============================================
   // ACTION EXECUTION
   // ============================================
-  
+
   executeAction(action, context, updateFormData) {
     try {
       switch (action.type) {
@@ -283,7 +291,7 @@ class RuleEngine {
   // ============================================
   // FULL RULE EVALUATION
   // ============================================
-  
+
   evaluateRule(rule, context, updateFormData) {
     const conditionResults = [];
     const actionsExecuted = [];
@@ -294,7 +302,7 @@ class RuleEngine {
     // Build condition results for debugging
     const processConditions = (group, prefix = '') => {
       if (!group.conditions) return;
-      
+
       group.conditions.forEach((item, index) => {
         if (item.conditions) {
           processConditions(item, `${prefix}${index}.`);
@@ -314,7 +322,7 @@ class RuleEngine {
     // Execute actions if conditions matched
     if (matched && rule.enabled && updateFormData) {
       const sortedActions = [...(rule.actions || [])].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
-      
+
       sortedActions.forEach(action => {
         const result = this.executeAction(action, context, updateFormData);
         actionsExecuted.push({
@@ -358,7 +366,7 @@ class RuleEngine {
   // ============================================
   // VISIBILITY EVALUATION (for fields/sections)
   // ============================================
-  
+
   evaluateVisibility(rules, context) {
     let visible = true;
     let enabled = true;
@@ -370,7 +378,7 @@ class RuleEngine {
 
     for (const rule of rules) {
       const matched = this.evaluateConditionGroup(rule.conditions, context);
-      
+
       if (matched) {
         switch (rule.action) {
           case 'show':
@@ -401,7 +409,7 @@ class RuleEngine {
   // ============================================
   // FIELD STATE COMPUTATION
   // ============================================
-  
+
   computeFieldStates(fields, context) {
     const states = new Map();
 
@@ -428,13 +436,13 @@ class RuleEngine {
   // ============================================
   // ALERT/WARNING EXTRACTION
   // ============================================
-  
+
   getActiveAlerts(context) {
     const alerts = [];
 
     for (const rule of this.rules.values()) {
       if (!rule.enabled) continue;
-      
+
       const matched = this.evaluateConditionGroup(rule.conditions, context);
       if (matched) {
         for (const action of (rule.actions || [])) {
@@ -454,7 +462,7 @@ class RuleEngine {
   // ============================================
   // EVENT LISTENERS
   // ============================================
-  
+
   subscribe(ruleId, callback) {
     const key = ruleId;
     if (!this.listeners.has(key)) {
@@ -477,7 +485,7 @@ class RuleEngine {
   // ============================================
   // DEBUGGING & EXPLANATION
   // ============================================
-  
+
   getEvaluationLog() {
     return [...this.evaluationLog];
   }
@@ -499,7 +507,7 @@ class RuleEngine {
       reasons.push(
         `Rule ${rule.id}: Conditions ${matched ? 'MATCHED' : 'NOT MATCHED'} → Action: ${rule.action}`
       );
-      
+
       if (matched) {
         if (rule.action === 'hide') visible = false;
         if (rule.action === 'show') visible = true;
@@ -512,7 +520,7 @@ class RuleEngine {
   // ============================================
   // STATIC BUILDER HELPERS
   // ============================================
-  
+
   static createCondition(field, operator, value) {
     return {
       id: uuidv4(),
@@ -559,7 +567,7 @@ class RuleEngine {
   // ============================================
   // SERIALIZATION
   // ============================================
-  
+
   exportRules() {
     return JSON.stringify(Array.from(this.rules.values()), null, 2);
   }

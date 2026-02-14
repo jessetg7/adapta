@@ -14,7 +14,7 @@ export const configService = {
         await delay(300);
         return {
             data: {
-                routes: MEDICATION_ROUTES.map(r => r.value),
+                routes: MEDICATION_ROUTES,
                 frequencies: MEDICATION_FREQUENCIES
             }
         };

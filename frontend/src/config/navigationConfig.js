@@ -51,11 +51,32 @@ export const navigationConfig = {
       permission: 'workflows.manage',
     },
     {
-      id: 'settings',
-      label: 'Settings',
-      icon: 'SettingsIcon',
-      path: '/settings',
-      permission: null, // Accessible to all
+      id: 'billing',
+      label: 'Billing',
+      icon: 'ReceiptLongIcon',
+      path: '/billing',
+      permission: null,
+    },
+    {
+      id: 'maternal-guard',
+      label: 'Maternal Guard',
+      icon: 'MonitorHeartIcon',
+      path: '/maternal-guard',
+      permission: null,
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: 'AssessmentIcon',
+      path: '/analytics',
+      permission: null,
+    },
+    {
+      id: 'e-prescription',
+      label: 'E-Prescription',
+      icon: 'QrCodeIcon',
+      path: '/e-prescription',
+      permission: null,
     },
     {
       id: 'admin',

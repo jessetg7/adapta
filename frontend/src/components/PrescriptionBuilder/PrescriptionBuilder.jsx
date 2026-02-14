@@ -102,18 +102,27 @@ const SortableSectionItem = ({ section, isSelected, onSelect, onToggle }) => {
     <Paper
       ref={setNodeRef}
       style={style}
-      elevation={isSelected ? 3 : 1}
+      elevation={isSelected ? 4 : 0}
       sx={{
-        p: 1.5,
-        mb: 1,
+        p: 2,
+        mb: 1.5,
         display: 'flex',
         alignItems: 'center',
-        border: isSelected ? '2px solid' : '1px solid',
+        border: '1px solid',
         borderColor: isSelected ? 'primary.main' : 'divider',
-        borderRadius: 1,
-        cursor: 'pointer',
-        opacity: section.enabled ? 1 : 0.5,
-        bgcolor: isSelected ? 'action.selected' : 'background.paper',
+        borderRadius: 2,
+        cursor: 'grab',
+        opacity: section.enabled ? 1 : 0.6,
+        bgcolor: isSelected ? 'primary.50' : 'background.paper',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          borderColor: 'primary.main',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        },
+        '&:active': {
+          cursor: 'grabbing',
+        },
       }}
       onClick={onSelect}
     >
@@ -121,15 +130,25 @@ const SortableSectionItem = ({ section, isSelected, onSelect, onToggle }) => {
         size="small"
         {...attributes}
         {...listeners}
-        sx={{ cursor: 'grab', mr: 1 }}
-        onClick={(e) => e.stopPropagation()}
+        sx={{ mr: 1, color: isSelected ? 'primary.main' : 'text.disabled' }}
       >
         <DragIndicatorIcon fontSize="small" />
       </IconButton>
 
-      <IconComponent fontSize="small" color="primary" sx={{ mr: 1 }} />
+      <Box
+        sx={{
+          mr: 2,
+          p: 1,
+          borderRadius: 1.5,
+          bgcolor: isSelected ? 'primary.main' : 'action.hover',
+          color: isSelected ? 'white' : 'text.secondary',
+          display: 'flex',
+        }}
+      >
+        <IconComponent fontSize="small" />
+      </Box>
 
-      <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 500 }}>
+      <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 600, color: isSelected ? 'primary.dark' : 'text.primary' }}>
         {section.title}
       </Typography>
 
@@ -140,11 +159,16 @@ const SortableSectionItem = ({ section, isSelected, onSelect, onToggle }) => {
             e.stopPropagation();
             onToggle();
           }}
+          sx={{
+            color: section.enabled ? 'success.main' : 'text.disabled',
+            bgcolor: section.enabled ? 'success.50' : 'transparent',
+            '&:hover': { bgcolor: section.enabled ? 'success.100' : 'action.hover' }
+          }}
         >
           {section.enabled ? (
-            <VisibilityIcon fontSize="small" color="primary" />
+            <VisibilityIcon fontSize="small" />
           ) : (
-            <VisibilityOffIcon fontSize="small" color="disabled" />
+            <VisibilityOffIcon fontSize="small" />
           )}
         </IconButton>
       </Tooltip>
@@ -323,7 +347,7 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
   // Sample data for preview
   const sampleData = {
     patient: {
-      name: 'John Smith',
+      name: 'Test Patient',
       age: 35,
       gender: 'Male',
       phone: '+1 (555) 123-4567',
@@ -366,10 +390,35 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'background.default' }}>
       {/* Top Toolbar */}
-      <AppBar position="static" color="default" elevation={1}>
-        <Toolbar>
-          <MedicationIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+      {/* Top Toolbar - Floating Aesthetic */}
+      <AppBar
+        position="sticky"
+        color="default"
+        elevation={0}
+        sx={{
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          backdropFilter: 'blur(8px)',
+          background: 'rgba(255, 255, 255, 0.9)',
+          zIndex: (theme) => theme.zIndex.drawer + 1
+        }}
+      >
+        <Toolbar sx={{ minHeight: '64px' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mr: 2,
+              p: 1,
+              borderRadius: 2,
+              bgcolor: 'primary.50',
+              color: 'primary.main'
+            }}
+          >
+            <MedicationIcon />
+          </Box>
+          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700, color: 'text.primary', letterSpacing: '-0.5px' }}>
             Prescription Builder
           </Typography>
 
@@ -378,65 +427,83 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
             value={template.name}
             onChange={(e) => updateTemplate({ name: e.target.value })}
             placeholder="Template Name"
-            sx={{ mr: 2, width: 250 }}
+            sx={{
+              mr: 2,
+              width: 250,
+              '& .MuiOutlinedInput-root': { bgcolor: 'background.default' }
+            }}
           />
 
-          <Tooltip title="Settings">
-            <IconButton onClick={() => setShowSettings(true)}>
-              <SettingsIcon />
-            </IconButton>
-          </Tooltip>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Settings">
+              <IconButton onClick={() => setShowSettings(true)} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+                <SettingsIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
-          <Tooltip title="Preview">
-            <IconButton onClick={() => setShowPreview(true)}>
-              <PreviewIcon />
-            </IconButton>
-          </Tooltip>
+            <Tooltip title="Preview">
+              <IconButton onClick={() => setShowPreview(true)} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+                <PreviewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
-          <PDFDownloadLink
-            document={<PrescriptionPDF data={pdfData} template={template} />}
-            fileName={`${template.name.replace(/\s+/g, '_')}.pdf`}
-            style={{ textDecoration: 'none' }}
-          >
-            {({ loading }) => (
-              <Button
-                variant="outlined"
-                startIcon={<PrintIcon />}
-                disabled={loading}
-                sx={{ ml: 2 }}
-              >
-                {loading ? 'Preparing...' : 'Download PDF'}
-              </Button>
+            <PDFDownloadLink
+              document={<PrescriptionPDF data={pdfData} template={template} />}
+              fileName={`${template.name.replace(/\s+/g, '_')}.pdf`}
+              style={{ textDecoration: 'none' }}
+            >
+              {({ loading }) => (
+                <Button
+                  variant="outlined"
+                  startIcon={<PrintIcon />}
+                  disabled={loading}
+                  sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+                >
+                  {loading ? 'Preparing...' : 'Export PDF'}
+                </Button>
+              )}
+            </PDFDownloadLink>
+
+            <Button
+              variant="contained"
+              startIcon={<SaveIcon />}
+              onClick={handleSave}
+              sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, boxShadow: '0 4px 14px 0 rgba(0,118,255,0.39)' }}
+            >
+              Save Template
+            </Button>
+
+            {onClose && (
+              <IconButton onClick={onClose} sx={{ ml: 1, color: 'text.secondary' }}>
+                <CloseIcon />
+              </IconButton>
             )}
-          </PDFDownloadLink>
-
-          <Button
-            variant="contained"
-            startIcon={<SaveIcon />}
-            onClick={handleSave}
-            sx={{ ml: 2 }}
-          >
-            Save
-          </Button>
-
-          {onClose && (
-            <IconButton onClick={onClose} sx={{ ml: 1 }}>
-              <CloseIcon />
-            </IconButton>
-          )}
+          </Box>
         </Toolbar>
       </AppBar>
 
       {/* Main Content */}
-      <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden', bgcolor: 'background.default' }}>
         {/* Left Panel - Section List */}
-        <Paper sx={{ width: 300, flexShrink: 0, borderRadius: 0, overflow: 'auto', p: 2 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            Prescription Sections
+        <Paper
+          elevation={0}
+          sx={{
+            width: 320,
+            flexShrink: 0,
+            borderRadius: 0,
+            overflow: 'auto',
+            p: 3,
+            borderRight: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.paper'
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: 'text.primary' }}>
+            Sections
           </Typography>
 
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-            Drag to reorder. Click eye icon to show/hide sections.
+          <Typography variant="body2" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
+            Drag to reorder sections.
           </Typography>
 
           <DndContext
@@ -464,32 +531,76 @@ const PrescriptionBuilder = ({ templateId, onSave, onClose }) => {
         </Paper>
 
         {/* Center - Live Preview */}
-        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3, bgcolor: 'background.default' }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflow: 'auto',
+            p: 4,
+            bgcolor: 'background.default',
+            backgroundImage: 'radial-gradient(#e2e8f0 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'start'
+          }}
+        >
           <Paper
+            elevation={3}
             sx={{
-              maxWidth: 800,
+              width: '210mm', // A4 width
+              minHeight: '297mm', // A4 height
               mx: 'auto',
-              minHeight: '100%',
-              p: 4,
-              boxShadow: 3,
+              p: 0, // Let internal padding handle it, or simulate margins
+              bgcolor: 'white',
+              position: 'relative',
+              mb: 4,
+              transition: 'transform 0.3s ease',
+              transformOrigin: 'top center',
+              /* Better Paper Look */
+              boxShadow: '0 0.5px 0 1px rgba(255, 255, 255, 0.23) inset, 0 1px 0 0 rgba(255, 255, 255, 0.66) inset, 0 4px 16px rgba(0, 0, 0, 0.12)',
+              overflow: 'hidden'
             }}
           >
-            <PrescriptionPreview
-              template={template}
-              data={sampleData}
-              clinicInfo={template.clinicInfo}
-              doctor={template.doctorInfo}
-            />
+            <Box sx={{ p: '20mm' }}> {/* Simulate Print Margins on Screen */}
+              <PrescriptionPreview
+                template={template}
+                data={sampleData}
+                clinicInfo={template.clinicInfo}
+                doctor={template.doctorInfo}
+              />
+            </Box>
           </Paper>
         </Box>
 
         {/* Right Panel - Section Properties */}
-        <Paper sx={{ width: 320, flexShrink: 0, borderRadius: 0, overflow: 'auto', p: 2 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            width: 320,
+            flexShrink: 0,
+            borderRadius: 0,
+            overflow: 'auto',
+            p: 3,
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.paper'
+          }}
+        >
           {selectedSection ? (
             <Box>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Section Properties
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'primary.50', color: 'primary.main', mr: 2 }}>
+                  <SettingsIcon fontSize="small" />
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px' }}>
+                    PROPERTIES
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Edit Section
+                  </Typography>
+                </Box>
+              </Box>
 
               <TextField
                 fullWidth

@@ -13,6 +13,7 @@ import {
   Typography,
   Tooltip,
   Avatar,
+  alpha,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BuildIcon from '@mui/icons-material/Build';
@@ -22,16 +23,17 @@ import ArticleIcon from '@mui/icons-material/Article';
 import RuleIcon from '@mui/icons-material/Rule';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import SettingsIcon from '@mui/icons-material/Settings';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import QrCodeIcon from '@mui/icons-material/QrCode';
 import { useAuth } from '../context/AuthContext';
-import { useAdapta } from '../context/AdaptaContext';
 import { navigationConfig } from '../config/navigationConfig';
 
 const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { hasPermission } = useAuth();
-  const { currentUser } = useAdapta(); // Use currentUser from AdaptaContext
+  const { user, hasPermission } = useAuth();
 
   // Icon mapping
   const iconMap = {
@@ -43,7 +45,10 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
     RuleIcon,
     AccountTreeIcon,
     AdminPanelSettingsIcon,
-    SettingsIcon,
+    ReceiptLongIcon,
+    MonitorHeartIcon,
+    AssessmentIcon,
+    QrCodeIcon,
   };
 
   // Filter menu items based on permissions
@@ -75,33 +80,14 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
               duration: theme.transitions.duration.enteringScreen,
             }),
           overflowX: 'hidden',
-          // Glassmorphism effect
-          backgroundColor: (theme) => theme.palette.mode === 'dark'
-            ? 'rgba(10, 10, 10, 0.8)'
-            : 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          borderRight: (theme) => theme.palette.mode === 'dark'
-            ? '1px solid rgba(255, 255, 255, 0.1)'
-            : '1px solid rgba(0, 0, 0, 0.08)',
-          // Gradient overlay
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '200px',
-            background: (theme) => theme.palette.mode === 'dark'
-              ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%)'
-              : 'linear-gradient(180deg, rgba(25, 118, 210, 0.05) 0%, transparent 100%)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          },
+          borderRight: '1px dashed',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          boxShadow: 'none',
         },
       }}
     >
-      {/* Logo Section with enhanced styling */}
+      {/* Logo Section */}
       <Box
         sx={{
           p: 2,
@@ -109,190 +95,89 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
           alignItems: 'center',
           justifyContent: open ? 'flex-start' : 'center',
           minHeight: 64,
-          position: 'relative',
-          zIndex: 1,
+          mb: 1
         }}
       >
         <Box
           sx={{
+            width: 40,
+            height: 40,
+            borderRadius: 3,
+            bgcolor: 'primary.main', // Solid Medical Teal
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 40,
-            height: 40,
-            borderRadius: '10px',
-            background: (theme) => theme.palette.mode === 'dark'
-              ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-              : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+            boxShadow: '0 4px 12px rgba(0, 128, 128, 0.3)',
+            flexShrink: 0,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+              boxShadow: '0 6px 16px rgba(0, 128, 128, 0.4)',
+            }
           }}
         >
-          <LocalHospitalIcon sx={{ color: '#fff', fontSize: 24 }} />
+          <LocalHospitalIcon sx={{ color: 'white' }} />
         </Box>
         {open && (
-          <Typography
-            variant="h6"
-            sx={{
-              ml: 1.5,
-              fontWeight: 700,
-              background: (theme) => theme.palette.mode === 'dark'
-                ? 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
-                : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            ADAPTA
-          </Typography>
+          <Box sx={{ ml: 2, overflow: 'hidden' }}>
+            <Typography variant="h6" noWrap sx={{ fontWeight: 800, letterSpacing: '-0.5px', lineHeight: 1 }}>
+              ADAPTA
+            </Typography>
+            <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
+              Medical Platform
+            </Typography>
+          </Box>
         )}
       </Box>
 
-      <Divider sx={{ opacity: 0.1 }} />
+      <Divider sx={{ mb: 2, mx: 2 }} />
 
-      {/* Enhanced User Info Section */}
-      {open && currentUser && (
-        <Box
-          sx={{
-            p: 2,
-            mx: 1.5,
-            my: 1,
-            borderRadius: 2,
-            position: 'relative',
-            zIndex: 1,
-            // Glassmorphic card
-            background: (theme) => theme.palette.mode === 'dark'
-              ? 'rgba(255, 255, 255, 0.05)'
-              : 'rgba(0, 0, 0, 0.02)',
-            backdropFilter: 'blur(10px)',
-            border: (theme) => theme.palette.mode === 'dark'
-              ? '1px solid rgba(255, 255, 255, 0.1)'
-              : '1px solid rgba(0, 0, 0, 0.05)',
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              background: (theme) => theme.palette.mode === 'dark'
-                ? 'rgba(255, 255, 255, 0.08)'
-                : 'rgba(0, 0, 0, 0.04)',
-              transform: 'translateY(-2px)',
-              boxShadow: (theme) => theme.palette.mode === 'dark'
-                ? '0 4px 12px rgba(0, 0, 0, 0.3)'
-                : '0 4px 12px rgba(0, 0, 0, 0.08)',
-            },
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Avatar
-              sx={{
-                width: 36,
-                height: 36,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-              }}
-            >
-              {currentUser.name?.charAt(0) || 'U'}
-            </Avatar>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                sx={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {currentUser.name}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'text.secondary',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {currentUser.role}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      )}
-
-      <Divider sx={{ opacity: 0.1, my: 1 }} />
-
-      {/* Enhanced Navigation Menu */}
-      <List sx={{ flexGrow: 1, pt: 1, px: 1, position: 'relative', zIndex: 1 }}>
+      {/* Menu Items */}
+      <List sx={{ px: 1 }}>
         {visibleMenuItems.map((item) => {
           const Icon = iconMap[item.icon];
           const active = isActive(item.path);
 
           return (
             <Tooltip
-              key={item.id}
-              title={open ? '' : item.label}
+              key={item.path}
+              title={!open ? item.label : ''}
               placement="right"
-              arrow
             >
               <ListItem disablePadding sx={{ display: 'block', mb: 0.5 }}>
                 <ListItemButton
                   onClick={() => handleNavigation(item.path)}
+                  selected={active}
                   sx={{
                     minHeight: 48,
                     justifyContent: open ? 'initial' : 'center',
                     px: 2.5,
-                    mx: 0.5,
-                    borderRadius: 2,
-                    position: 'relative',
-                    overflow: 'hidden',
-                    // Active state with glassmorphism and glow
-                    bgcolor: active
-                      ? (theme) => theme.palette.mode === 'dark'
-                        ? 'rgba(59, 130, 246, 0.15)'
-                        : 'rgba(25, 118, 210, 0.1)'
-                      : 'transparent',
-                    color: active ? 'primary.main' : 'text.primary',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    // Glowing border for active item
-                    border: active
-                      ? (theme) => theme.palette.mode === 'dark'
-                        ? '1px solid rgba(59, 130, 246, 0.3)'
-                        : '1px solid rgba(25, 118, 210, 0.2)'
-                      : '1px solid transparent',
-                    boxShadow: active
-                      ? (theme) => theme.palette.mode === 'dark'
-                        ? '0 0 20px rgba(59, 130, 246, 0.2)'
-                        : '0 0 20px rgba(25, 118, 210, 0.15)'
-                      : 'none',
-                    '&:hover': {
-                      bgcolor: active
-                        ? (theme) => theme.palette.mode === 'dark'
-                          ? 'rgba(59, 130, 246, 0.2)'
-                          : 'rgba(25, 118, 210, 0.15)'
-                        : (theme) => theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.05)'
-                          : 'rgba(0, 0, 0, 0.04)',
-                      transform: 'translateX(4px)',
-                      borderColor: (theme) => theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.1)'
-                        : 'rgba(0, 0, 0, 0.08)',
+                    borderRadius: 3, // 12px pill shape
+                    mx: 1,
+                    mb: 0.5,
+                    color: active ? 'primary.main' : 'text.secondary',
+                    bgcolor: active ? 'primary.50' : 'transparent',
+                    '&.Mui-selected': {
+                      bgcolor: 'primary.50',
+                      '&:hover': { bgcolor: 'primary.100' },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        left: -4,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 4,
+                        height: 24,
+                        borderRadius: '0 4px 4px 0',
+                        bgcolor: 'primary.main',
+                        display: open ? 'block' : 'none'
+                      }
                     },
-                    // Active indicator bar
-                    '&::before': active ? {
-                      content: '""',
-                      position: 'absolute',
-                      left: 0,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: 3,
-                      height: '60%',
-                      borderRadius: '0 3px 3px 0',
-                      background: (theme) => theme.palette.mode === 'dark'
-                        ? 'linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%)'
-                        : 'linear-gradient(180deg, #1976d2 0%, #1565c0 100%)',
-                      boxShadow: (theme) => theme.palette.mode === 'dark'
-                        ? '0 0 10px rgba(59, 130, 246, 0.5)'
-                        : '0 0 10px rgba(25, 118, 210, 0.3)',
-                    } : {},
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                      transform: 'translateX(4px)',
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 >
                   <ListItemIcon
@@ -300,29 +185,22 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
                       minWidth: 0,
                       mr: open ? 2 : 'auto',
                       justifyContent: 'center',
-                      color: active ? 'primary.main' : 'inherit',
-                      transition: 'all 0.3s ease',
-                      '& svg': {
-                        fontSize: 22,
-                        filter: active
-                          ? (theme) => theme.palette.mode === 'dark'
-                            ? 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))'
-                            : 'drop-shadow(0 0 8px rgba(25, 118, 210, 0.3))'
-                          : 'none',
-                      },
+                      color: active ? 'primary.main' : 'text.secondary',
                     }}
                   >
-                    <Icon />
+                    {Icon ? <Icon /> : <DashboardIcon />}
                   </ListItemIcon>
-                  {open && (
-                    <ListItemText
-                      primary={item.label}
-                      primaryTypographyProps={{
-                        fontSize: 14,
-                        fontWeight: active ? 600 : 500,
-                      }}
-                    />
-                  )}
+
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      opacity: open ? 1 : 0,
+                      '& .MuiTypography-root': {
+                        fontWeight: active ? 700 : 500,
+                        fontSize: '0.9rem'
+                      }
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
             </Tooltip>
@@ -330,29 +208,46 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
         })}
       </List>
 
-      <Divider sx={{ opacity: 0.1 }} />
-
-      {/* Enhanced Footer */}
-      {open && (
+      {/* User Info at Bottom */}
+      <Box sx={{ mt: 'auto', p: 2 }}>
         <Box
           sx={{
-            p: 2,
-            position: 'relative',
-            zIndex: 1,
+            p: open ? 1.5 : 0.5,
+            borderRadius: 3,
+            bgcolor: 'background.default',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: open ? 'flex-start' : 'center',
+            cursor: 'pointer',
+            border: '1px solid',
+            borderColor: 'divider',
+            transition: 'all 0.2s',
+            '&:hover': { borderColor: 'primary.main', bgcolor: 'background.paper', boxShadow: 1 }
           }}
         >
-          <Typography
-            variant="caption"
+          <Avatar
             sx={{
-              color: 'text.secondary',
-              opacity: 0.7,
-              fontWeight: 500,
+              width: 32,
+              height: 32,
+              bgcolor: 'secondary.main',
+              fontSize: '0.875rem'
             }}
           >
-            Version 1.0.0
-          </Typography>
+            {user?.name?.charAt(0) || 'U'}
+          </Avatar>
+
+          {open && (
+            <Box sx={{ ml: 1.5, overflow: 'hidden' }}>
+              <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
+                {user?.name || 'User'}
+              </Typography>
+              <Typography variant="caption" noWrap color="text.secondary">
+                {user?.role || 'Guest'}
+              </Typography>
+            </Box>
+          )}
         </Box>
-      )}
+      </Box>
     </Drawer>
   );
 };

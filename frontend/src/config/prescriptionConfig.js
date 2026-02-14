@@ -24,7 +24,7 @@ export const MEDICATION_FREQUENCIES = [
 ];
 
 export const DEFAULT_VITALS_CONFIG = [
-    { id: 'temperature', label: 'Temperature', unit: '°C' },
+    { id: 'temperature', label: 'Temperature', unit: '°F' },
     { id: 'bloodPressureSystolic', label: 'BP Systolic', unit: 'mmHg' },
     { id: 'bloodPressureDiastolic', label: 'BP Diastolic', unit: 'mmHg' },
     { id: 'heartRate', label: 'Heart Rate', unit: 'bpm' },

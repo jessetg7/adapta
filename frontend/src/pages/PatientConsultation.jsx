@@ -1,6 +1,6 @@
 // src/pages/PatientConsultation.jsx
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -64,7 +64,6 @@ import { useAdapta } from '../context/AdaptaContext';
 const PatientConsultation = () => {
   const { patientId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const { printPrescription, printReport } = usePDF();
   const { currentUser, clinicInfo } = useAdapta();
 
@@ -167,50 +166,6 @@ const PatientConsultation = () => {
       }
     }
   }, [selectedPatientId, patientHistory, specialties]);
-
-  // Restore state when returning from form builder
-  React.useEffect(() => {
-    // Check sessionStorage first (for window.location navigation)
-    const sessionData = sessionStorage.getItem('formBuilderReturnState');
-    if (sessionData) {
-      try {
-        const parsed = JSON.parse(sessionData);
-        if (parsed.returnState) {
-          const { patientId, activeStep, consultationData, selectedDepartment, selectedTemplateId } = parsed.returnState;
-
-          console.log('[PatientConsultation] Restoring state from sessionStorage:', parsed.returnState);
-
-          // Restore all state
-          if (patientId) setSelectedPatientId(patientId);
-          if (activeStep !== undefined) setActiveStep(activeStep);
-          if (consultationData) setConsultationData(consultationData);
-          if (selectedDepartment) setSelectedDepartment(selectedDepartment);
-          if (selectedTemplateId) setSelectedTemplateId(selectedTemplateId);
-
-          // Clear sessionStorage after restoration
-          sessionStorage.removeItem('formBuilderReturnState');
-        }
-      } catch (error) {
-        console.error('[PatientConsultation] Error restoring from sessionStorage:', error);
-      }
-    }
-    // Fallback to location.state (for React Router navigation)
-    else if (location.state?.returnState) {
-      const { patientId, activeStep, consultationData, selectedDepartment, selectedTemplateId } = location.state.returnState;
-
-      console.log('[PatientConsultation] Restoring state from location.state:', location.state.returnState);
-
-      // Restore all state
-      if (patientId) setSelectedPatientId(patientId);
-      if (activeStep !== undefined) setActiveStep(activeStep);
-      if (consultationData) setConsultationData(consultationData);
-      if (selectedDepartment) setSelectedDepartment(selectedDepartment);
-      if (selectedTemplateId) setSelectedTemplateId(selectedTemplateId);
-
-      // Clear the state so it doesn't restore again on future navigation
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state]);
 
   // Combined context for rule engine and field renderers
   const evaluationContext = useMemo(() => ({
@@ -452,21 +407,11 @@ const PatientConsultation = () => {
   }, []);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
       {/* App Bar */}
       <AppBar position="static" elevation={1}>
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={() => {
-              if (activeStep > 0) {
-                setActiveStep(activeStep - 1);
-              } else {
-                navigate('/');
-              }
-            }}
-          >
+          <IconButton edge="start" color="inherit" onClick={() => navigate('/')}>
             <ArrowBackIcon />
           </IconButton>
           <LocalHospitalIcon sx={{ ml: 1, mr: 1 }} />
@@ -478,7 +423,7 @@ const PatientConsultation = () => {
               avatar={<Avatar>{selectedPatient.firstName?.[0]}</Avatar>}
               label={`${selectedPatient.firstName} ${selectedPatient.lastName}`}
               color="default"
-              sx={{ bgcolor: 'background.paper' }}
+              sx={{ bgcolor: 'white' }}
             />
           )}
         </Toolbar>
@@ -797,7 +742,7 @@ const PatientConsultation = () => {
 
                     {/* Show Form Data if available */}
                     {selectedHistoryVisit.formData && (
-                      <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
+                      <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
                         <Typography variant="h6" color="primary" gutterBottom>Clinical Notes</Typography>
                         {/* We use a simple JSON dump for now as re-rendering the whole form is complex in read-only */}
                         {Object.entries(selectedHistoryVisit.formData || {}).map(([key, value]) => {
@@ -815,7 +760,7 @@ const PatientConsultation = () => {
                                 <TableContainer component={Paper} variant="outlined">
                                   <Table size="small">
                                     <TableHead>
-                                      <TableRow sx={{ bgcolor: 'action.hover' }}>
+                                      <TableRow sx={{ bgcolor: 'grey.100' }}>
                                         {headers.map(h => (
                                           <TableCell key={h} sx={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
                                             {h.replace(/([A-Z])/g, ' $1')}
@@ -929,6 +874,10 @@ const PatientConsultation = () => {
         {/* Step 2: Consultation */}
         {activeStep === 2 && selectedPatient && (
           <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Consultation
+            </Typography>
+
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">
                 Consultation
@@ -956,7 +905,7 @@ const PatientConsultation = () => {
             )}
 
             {/* Department Template Selector */}
-            <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
+            <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.light' }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" color="primary.main" fontWeight={700}>
@@ -973,7 +922,7 @@ const PatientConsultation = () => {
                       value={selectedDepartment}
                       label="Department"
                       onChange={(e) => setSelectedDepartment(e.target.value)}
-                      sx={{ bgcolor: 'background.paper' }}
+                      sx={{ bgcolor: 'white' }}
                     >
                       {specialties.map((s) => (
                         <MenuItem key={s} value={s}>{s}</MenuItem>
@@ -989,7 +938,7 @@ const PatientConsultation = () => {
                         value={selectedTemplateId || consultationTemplate.id}
                         label="Form Template"
                         onChange={(e) => setSelectedTemplateId(e.target.value)}
-                        sx={{ bgcolor: 'background.paper' }}
+                        sx={{ bgcolor: 'white' }}
                       >
                         {remoteTemplates
                           .filter(t => t.specialty === selectedDepartment)
@@ -1004,34 +953,13 @@ const PatientConsultation = () => {
                   <Button
                     variant="outlined"
                     startIcon={<SettingsIcon />}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-
-                      const targetPath = `/form-builder/${consultationTemplate.id}`;
-                      const returnState = {
-                        patientId: selectedPatientId,
-                        activeStep: 2,
-                        consultationData: consultationData,
-                        selectedDepartment: selectedDepartment,
-                        selectedTemplateId: selectedTemplateId
-                      };
-
-                      console.log('[PatientConsultation] Edit button clicked - using sessionStorage approach');
-                      console.log('[PatientConsultation] Saving state:', returnState);
-
-                      // Save state to sessionStorage for restoration after form builder
-                      sessionStorage.setItem('formBuilderReturnState', JSON.stringify({
-                        returnTo: '/consultation',
-                        returnState: returnState
-                      }));
-
-                      // Use window.location for guaranteed navigation
-                      window.location.href = targetPath;
+                    onClick={() => {
+                      console.log('[PatientConsultation] Edit button clicked, navigating to:', `/form-builder/${consultationTemplate.id}`);
+                      window.location.href = `/form-builder/${consultationTemplate.id}`;
                     }}
                     fullWidth
                     size="small"
-                    sx={{ bgcolor: 'background.paper', height: '40px' }}
+                    sx={{ bgcolor: 'white', height: '40px' }}
                   >
                     Edit
                   </Button>
@@ -1161,7 +1089,7 @@ const PatientConsultation = () => {
                     <TableContainer component={Paper} variant="outlined">
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ bgcolor: 'action.hover' }}>
+                          <TableRow sx={{ bgcolor: 'grey.50' }}>
                             <TableCell>Medicine</TableCell>
                             <TableCell>Dose</TableCell>
                             <TableCell>Frequency</TableCell>

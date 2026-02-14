@@ -271,8 +271,16 @@ class PDFEngine {
 
   generateCSS(styles) {
     return `
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500;700&display=swap');
       
+      :root {
+        --primary-color: #008080; /* Teal/Hospital Green-Blue */
+        --secondary-color: #2c3e50; /* Dark Slate Blue */
+        --accent-color: #f0fdfa; /* Minty White */
+        --text-color: #333333;
+        --border-color: #d1d5db;
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -280,249 +288,243 @@ class PDFEngine {
       }
       
       body {
-        font-family: 'Inter', sans-serif;
-        font-size: 11pt;
-        line-height: 1.6;
-        color: #1a202c;
+        font-family: 'Roboto', Helvetica, Arial, sans-serif;
+        font-size: 9.5pt;
+        line-height: 1.4;
+        color: var(--text-color);
         background: white;
       }
       
       .prescription {
-        max-width: 850px;
+        max-width: 100%;
         margin: 0 auto;
-        padding: 40px;
+        padding: 15px 25px; /* Reduced padding */
         position: relative;
-        min-height: 1100px;
+        /* min-height removed to allow natural flow */
       }
 
       /* Watermark */
       .prescription::before {
-        content: 'Prescription';
+        content: 'CONFIDENTIAL';
         position: absolute;
-        top: 50%;
+        top: 40%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(-45deg);
-        font-size: 100pt;
-        color: #f7fafc;
+        font-size: 60pt;
+        color: rgba(0, 128, 128, 0.04);
         z-index: -1;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 10px;
+        letter-spacing: 5px;
         pointer-events: none;
       }
       
+      /* Header - Compact & Elegant */
       .header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        padding-bottom: 30px;
-        margin-bottom: 30px;
-        border-bottom: 3px solid ${styles.primaryColor || '#1976d2'};
+        align-items: center; /* Center align items */
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        border-bottom: 3px solid var(--primary-color);
       }
       
       .clinic-info {
-        max-width: 60%;
+        max-width: 65%;
       }
 
       .clinic-info h1 {
-        color: ${styles.primaryColor || '#1976d2'};
-        font-size: 24pt;
+        color: var(--primary-color);
+        font-family: 'Lora', serif;
+        font-size: 22pt;
         font-weight: 700;
-        margin-bottom: 8px;
-        letter-spacing: -1px;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       
       .clinic-info p {
-        font-size: 9.5pt;
-        color: #4a5568;
-        line-height: 1.4;
+        font-size: 8.5pt;
+        color: #555;
+        line-height: 1.3;
       }
       
       .doctor-info {
         text-align: right;
+        min-width: 30%;
       }
       
       .doctor-info h2 {
-        color: #2d3748;
-        font-size: 16pt;
+        color: var(--secondary-color);
+        font-family: 'Lora', serif;
+        font-size: 14pt;
         font-weight: 700;
-        margin-bottom: 4px;
+        margin-bottom: 0px;
       }
 
       .doctor-info p {
-        font-size: 9pt;
-        color: #718096;
+        font-size: 8.5pt;
+        color: #555;
       }
       
+      /* Patient Info - Very Compact Strip */
       .patient-info {
-        background: #f8fafc;
-        padding: 20px 25px;
-        border-radius: 12px;
-        margin-bottom: 30px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        border: 1px solid #e2e8f0;
-      }
-      
-      .info-item {
+        background-color: var(--accent-color);
+        border: 1px solid var(--primary-color);
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 15px; /* Reduced margin */
         display: flex;
-        flex-direction: column;
-      }
-
-      .info-label {
-        font-size: 8pt;
-        text-transform: uppercase;
-        color: #a0aec0;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-      }
-
-      .info-value {
-        font-size: 10.5pt;
-        color: #1a202c;
-        font-weight: 600;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
       }
       
-      .section {
-        margin-bottom: 25px;
-      }
-      
-      .section-title {
-        font-weight: 700;
-        color: ${styles.primaryColor || '#1976d2'};
-        font-size: 11pt;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 15px;
+      .patient-info div {
         display: flex;
         align-items: center;
       }
 
-      .section-title::after {
-        content: '';
-        flex-grow: 1;
-        height: 1px;
-        background: #edf2f7;
-        margin-left: 15px;
+      .patient-info p {
+        margin: 0;
+        font-size: 9.5pt;
+        color: #333;
       }
       
+      .patient-info strong {
+        font-weight: 700;
+        color: var(--secondary-color);
+        text-transform: uppercase;
+        font-size: 8pt;
+        margin-right: 6px;
+      }
+      
+      .section {
+        margin-bottom: 15px;
+        page-break-inside: auto; /* Allow breaking inside sections if needed */
+      }
+
+      .section-title {
+        font-family: 'Lora', serif;
+        font-weight: 700;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--primary-color);
+        background: transparent;
+        font-size: 12pt;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 0;
+        margin-bottom: 8px;
+        width: 100%;
+        display: block;
+      }
+      
+      /* Vitals Grid */
       .vitals-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 20px;
+        background: white;
+        padding: 5px 0;
+        border: none;
       }
       
       .vital-item {
-        padding: 12px;
-        background: #fff;
-        border: 1px solid #edf2f7;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
+        font-size: 9.5pt;
+        border: 1px solid #eee;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: #f9fafb;
       }
-
-      .vital-label { font-size: 8pt; color: #718096; }
-      .vital-value { font-size: 11pt; font-weight: 700; color: #1a202c; }
+      .vital-label { font-weight: 700; color: #555; font-size: 8pt; margin-right: 5px; }
+      .vital-value { font-weight: 700; color: var(--primary-color); font-size: 9.5pt; }
       
-      .rx-container {
-        display: flex;
-        align-items: flex-start;
-      }
-
-      .rx-symbol {
-        font-size: 40pt;
-        font-weight: 800;
-        color: ${styles.primaryColor || '#1976d2'};
-        margin-right: 25px;
-        font-family: 'Times New Roman', serif;
-        opacity: 0.15;
-        line-height: 1;
-      }
-
-      .medications-list {
-        list-style: none;
-        flex-grow: 1;
+      /* Lists and Tables */
+      ul { padding-left: 20px; }
+      li { margin-bottom: 2px; }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+        margin-top: 5px;
+        background: white;
       }
       
-      .medication-item {
-        padding: 12px 0;
-        border-bottom: 1px solid #f7fafc;
+      th {
+        text-align: left;
+        font-weight: 700;
+        color: var(--primary-color);
+        background-color: #e0f2f1; /* Light Teal Background */
+        border: 1px solid var(--primary-color);
+        padding: 6px 8px;
+        font-size: 8.5pt;
+        text-transform: uppercase;
       }
       
-      .med-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 4px;
+      td {
+        padding: 6px 8px;
+        border: 1px solid #e2e8f0;
+        vertical-align: top;
+        color: #333;
       }
+      
+      tr:nth-child(even) { background-color: #f8fafc; }
 
-      .med-name { font-weight: 700; font-size: 11.5pt; }
-      .med-freq { color: ${styles.primaryColor || '#1976d2'}; font-weight: 600; font-size: 10pt; }
-      .med-details { font-size: 9.5pt; color: #718096; }
+      .bordered-table th { border: 1px solid var(--primary-color); }
+      .bordered-table td { border: 1px solid #e2e8f0; }
+
+      tr:last-child td { border-bottom: 1px solid #e2e8f0; }
       
       .footer {
-        margin-top: auto;
-        padding-top: 40px;
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #ccc;
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
       }
 
-      .qr-code {
-        width: 80px;
-        height: 80px;
-        background: #f7fafc;
-        border: 1px solid #edf2f7;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 8pt;
-        color: #cbd5e0;
-        border-radius: 4px;
-      }
-      
-      .signature {
-        text-align: right;
-        min-width: 250px;
-      }
-      
-      .signature-img {
-         max-height: 60px;
-         margin-bottom: 10px;
-         filter: grayscale(1) contrast(1.5);
-      }
-
       .signature-line {
-        border-top: 1px solid #2d3748;
-        padding-top: 8px;
-        font-weight: 700;
-        color: #2d3748;
+        border-top: 1px solid #333;
+        padding-top: 5px;
+        font-weight: 600;
+        font-size: 9pt;
+        text-align: center;
+        min-width: 150px;
+        color: #333;
       }
       
       @media print {
         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .prescription { padding: 0.5in; }
+        .prescription { padding: 0.1in 0.25in; }
       }
     `;
   }
 
   generateHeader(data) {
+    // Default Caduceus Logo (Base64 placeholder)
+    const defaultLogo = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDA4MDgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEyIDJMMiA3bDEwIDUgMTAtNS0xMC01ek0yIDE3bDEwIDUgMTAtNU0yIDEybDEwIDUgMTAtNSIvPjwvc3ZnPg=='; // Simple geometric shape as placeholder
+    const logoSrc = data.clinic.logo || "https://cdn-icons-png.flaticon.com/512/3063/3063176.png"; // Use a public medical icon if no logo
+
     return `
       <div class="header">
-        <div class="clinic-info">
-          ${data.clinic.logo ? `<img src="${data.clinic.logo}" alt="Logo" style="max-height: 60px;">` : ''}
+        <div class="logo" style="margin-right: 15px;">
+           <img src="${logoSrc}" alt="Logo" style="height: 60px; width: auto;">
+        </div>
+        <div class="clinic-info" style="flex-grow: 1;">
           <h1>${data.clinic.name}</h1>
           <p>${data.clinic.address}</p>
-          <p>Phone: ${data.clinic.phone} ${data.clinic.email ? `| Email: ${data.clinic.email}` : ''}</p>
+          <p><strong>Phone:</strong> ${data.clinic.phone} ${data.clinic.email ? `| <strong>Email:</strong> ${data.clinic.email}` : ''}</p>
         </div>
         <div class="doctor-info">
           <h2>${data.doctor.name}</h2>
           <p>${data.doctor.qualification}</p>
-          <p>${data.doctor.specialization}</p>
-          <p>Reg. No: ${data.doctor.registrationNo}</p>
+          <p style="color: var(--primary-color); font-weight: 600;">${data.doctor.specialization}</p>
+          <p>Reg: ${data.doctor.registrationNo}</p>
         </div>
       </div>
-    `;
+  `;
   }
 
   generatePatientInfo(data) {
@@ -533,7 +535,7 @@ class PDFEngine {
         <p><strong>Date:</strong> ${new Date(data.visit.date).toLocaleDateString()}</p>
         <p><strong>Patient ID:</strong> ${data.patient.patientId}</p>
       </div>
-    `;
+  `;
   }
 
   generateVitals(data) {
@@ -547,7 +549,7 @@ class PDFEngine {
           ${vitals.map(v => `<div class="vital-item">${v}</div>`).join('')}
         </div>
       </div>
-    `;
+  `;
   }
 
   generateDiagnosis(data) {
@@ -560,7 +562,7 @@ class PDFEngine {
         <div class="section-title">Diagnosis</div>
         <p>${diagnosisArray.join(', ')}</p>
       </div>
-    `;
+  `;
   }
 
   generateMedications(data) {
@@ -577,7 +579,7 @@ class PDFEngine {
           `).join('')}
         </ul>
       </div>
-    `;
+  `;
   }
 
   generateInvestigations(data) {
@@ -589,7 +591,13 @@ class PDFEngine {
       <div class="section">
         <div class="section-title">Investigations</div>
         <ul class="investigation-list">
-          ${invs.map(inv => `<li>${typeof inv === 'object' ? inv.name : inv}</li>`).join('')}
+          ${invs.map(inv => {
+      let val = inv;
+      if (typeof inv === 'object' && inv !== null) {
+        val = inv.name || inv.label || inv.value || inv.testName || JSON.stringify(inv);
+      }
+      return `<li>${val}</li>`;
+    }).join('')}
         </ul>
       </div>
     `;
@@ -607,22 +615,22 @@ class PDFEngine {
       : this.generateDynamicSections(data);
 
     return `
-      <!DOCTYPE html>
-      <html>
+<!DOCTYPE html>
+<html>
       <head>
         <meta charset="UTF-8">
-        <title>Medical Report - ${data.patient.name}</title>
-        <style>
-          ${this.generateCSS(styles)}
-          .rx-symbol { display: none; }
-          .prescription::before { content: 'REPORT'; } 
-          .section-title { border-bottom: 2px solid #2d3748; padding-bottom: 5px; margin-bottom: 10px; }
-        </style>
+          <title>Medical Report - ${data.patient.name}</title>
+          <style>
+            ${this.generateCSS(styles)}
+            .rx-symbol {display: none; }
+            .prescription::before {content: 'REPORT'; }
+            .section-title {border-bottom: 2px solid #2d3748; padding-bottom: 5px; margin-bottom: 10px; }
+          </style>
       </head>
       <body>
         <div class="prescription">
           ${this.generateHeader(data)}
-          
+
           <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="text-transform: uppercase; letter-spacing: 1px; color: #2d3748;">Medical Consultation Report</h2>
           </div>
@@ -631,7 +639,7 @@ class PDFEngine {
 
           <!-- All Dynamic Tables & History -->
           ${dynamicSections}
-          
+
           <!-- Standard Clinical Data -->
           ${this.generateVitals(data)}
           ${this.generateDiagnosis(data)}
@@ -643,8 +651,8 @@ class PDFEngine {
           ${this.generateFooter(data)}
         </div>
       </body>
-      </html>
-    `;
+    </html>
+`;
   }
 
   // --- TEMPLATE BASED RENDERER ---
@@ -660,31 +668,84 @@ class PDFEngine {
         return value !== undefined && value !== null && value !== '' && (Array.isArray(value) ? value.length > 0 : true);
       });
 
-      if (!hasData) return;
+      if (!hasData) return '';
 
       html += `<div class="section">
         <div class="section-title">${section.title}</div>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 10pt;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
           <tbody>`;
 
       section.fields.forEach((field, index) => {
-        const value = data[field.id];
         if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) return;
 
-        // Determine display value
-        let displayValue = value;
-        if (typeof value === 'object' && value !== null) {
-          displayValue = value.label || value.value || Object.values(value).join(', ');
-        } else if (Array.isArray(value)) {
-          displayValue = value.map(v => typeof v === 'object' ? (v.label || v.value || JSON.stringify(v)) : v).join(', ');
+        // Smart Value Processing
+        let processedValue = value;
+        let isTableData = false;
+
+        if (Array.isArray(value) && value.length > 0) {
+          // Attempt to parse if strings (e.g. from JSON field)
+          if (typeof value[0] === 'string' && value[0].trim().startsWith('{')) {
+            try {
+              processedValue = value.map(v => JSON.parse(v));
+              isTableData = true;
+            } catch (e) {
+              // Fallback: just strings
+            }
+          } else if (typeof value[0] === 'object' && value[0] !== null) {
+            isTableData = true;
+          }
         }
 
-        html += `
-          <tr style="border-bottom: 1px solid #edf2f7; background-color: ${index % 2 === 0 ? '#fff' : '#f8fafc'}">
-            <td style="width: 35%; padding: 8px 10px; font-weight: 600; color: #4a5568; border-right: 1px solid #edf2f7;">${field.label}</td>
-            <td style="padding: 8px 10px; color: #2d3748;">${displayValue}</td>
-          </tr>
-        `;
+        // Check if it's an array of objects (Table Data)
+        if (isTableData && processedValue.length > 0) {
+          // Render as a Table
+          // Clean headers: remove 'id' or empty keys
+          const headers = Object.keys(processedValue[0]).filter(k => k !== 'id' && k !== 'undefined');
+
+          html += `
+            <tr>
+              <td colspan="2" style="padding: 10px 0;">
+                <div style="font-weight: 700; color: var(--secondary-color); margin-bottom: 5px; font-size: 9.5pt; text-transform: uppercase;">${field.label}</div>
+                <table class="bordered-table" style="width: 100%; border-collapse: collapse; font-size: 9pt;">
+                  <thead>
+                    <tr>
+                      ${headers.map(h => `<th style="text-transform: capitalize;">${h.replace(/([A-Z])/g, ' $1').trim()}</th>`).join('')}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${processedValue.map((row, i) => `
+                      <tr>
+                        ${headers.map(h => {
+            let cellVal = row[h];
+            if (typeof cellVal === 'boolean') cellVal = cellVal ? 'Yes' : 'No';
+            return `<td>${cellVal || '-'}</td>`;
+          }).join('')}
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          `;
+        } else {
+          // Render as Key-Value
+          let displayValue = value;
+
+          if (Array.isArray(value)) {
+            displayValue = value.join(', ');
+          } else if (typeof value === 'boolean') {
+            displayValue = value ? 'Yes' : 'No';
+          } else if (typeof value === 'object' && value !== null) {
+            displayValue = value.label || value.value || Object.values(value).join(', ');
+          }
+
+          html += `
+            <tr style="border-bottom: 1px solid #e2e8f0; background-color: ${index % 2 === 0 ? '#fff' : '#fcfcfc'}">
+              <td style="width: 35%; padding: 5px 7px; font-weight: 600; color: #555;">${field.label}</td>
+              <td style="padding: 5px 7px; color: #222;">${displayValue}</td>
+            </tr>
+          `;
+        }
       });
 
       html += `</tbody></table></div>`;
@@ -709,19 +770,19 @@ class PDFEngine {
       }
 
       return `
-        <div class="section" style="border: 1px solid #cbd5e0; margin-bottom: 15px; border-radius: 4px; overflow: hidden;">
-          <div class="section-title" style="background: #e2e8f0; padding: 5px 10px; margin: 0; border-bottom: 1px solid #cbd5e0; font-size: 10pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+        <div class="section" style="border: 1px solid var(--border-color); margin-bottom: 15px; border-radius: 4px; overflow: hidden;">
+          <div class="section-title" style="background: var(--secondary-color); color: white; padding: 6px 10px; margin: 0; border-bottom: 1px solid var(--secondary-color); font-size: 10pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
             ${title}
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 10pt;">
+          <table class="bordered-table" style="width: 100%; border-collapse: collapse; font-size: 9.5pt;">
             <tbody>
               ${rows.map(row => `
-                <tr style="border-bottom: 1px solid #edf2f7;">
-                  <td style="width: 25%; padding: 6px 10px; font-weight: 600; color: #4a5568;">${row[0].k}</td>
-                  <td style="width: 25%; padding: 6px 10px; border-right: 1px solid #edf2f7;">: ${data[row[0].v] || '-'}</td>
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                  <td style="width: 25%; padding: 8px 10px; font-weight: 700; color: var(--secondary-color); background: var(--accent-color);">${row[0].k}</td>
+                  <td style="width: 25%; padding: 8px 10px; border-right: 1px solid var(--border-color);">: ${data[row[0].v] || '-'}</td>
                   
-                  <td style="width: 25%; padding: 6px 10px; font-weight: 600; color: #4a5568;">${row[1] ? row[1].k : ''}</td>
-                  <td style="width: 25%; padding: 6px 10px;">${row[1] ? ': ' + (data[row[1].v] || '-') : ''}</td>
+                  <td style="width: 25%; padding: 8px 10px; font-weight: 700; color: var(--secondary-color); background: var(--accent-color);">${row[1] ? row[1].k : ''}</td>
+                  <td style="width: 25%; padding: 8px 10px;">${row[1] ? ': ' + (data[row[1].v] || '-') : ''}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -731,21 +792,21 @@ class PDFEngine {
     };
 
     return `
-      <!DOCTYPE html>
-      <html>
+<!DOCTYPE html>
+<html>
       <head>
         <meta charset="UTF-8">
-        <title>Semen Analysis - ${data.patient.name}</title>
-        <style>
-          ${this.generateCSS(styles)}
-          .prescription { max-width: 900px; padding: 40px; }
-          .prescription::before { content: 'ANALYSIS'; opacity: 0.05; }
-        </style>
+          <title>Semen Analysis - ${data.patient.name}</title>
+          <style>
+            ${this.generateCSS(styles)}
+            .prescription {max-width: 900px; padding: 30px; }
+            .prescription::before {content: 'ANALYSIS'; opacity: 0.05; }
+          </style>
       </head>
       <body>
         <div class="prescription">
           ${this.generateHeader(data)}
-          
+
           <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #000; padding-bottom: 10px;">
             <h2 style="text-transform: uppercase; font-size: 16pt; letter-spacing: 2px;">Semen Analysis</h2>
           </div>
@@ -801,26 +862,26 @@ class PDFEngine {
 
           <!-- Reference Footer -->
           <div class="section" style="background: #f1f5f9; padding: 10px; font-size: 7.5pt; border: 1px solid #cbd5e0; margin-top: 20px;">
-             <strong>WHO reference values 2021 6th Edition</strong>
-             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 5px;">
-               <div>Volume: >= 1.4 ml</div> <div>Sperm Conc: >= 16 M/ml</div>
-               <div>Total Motility: >= 42%</div> <div>Vitality: >= 54%</div>
-               <div>Normal Forms: >= 4%</div>   <div>pH: >= 7.2</div>
-             </div>
+            <strong>WHO reference values 2021 6th Edition</strong>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 5px;">
+              <div>Volume: >= 1.4 ml</div> <div>Sperm Conc: >= 16 M/ml</div>
+              <div>Total Motility: >= 42%</div> <div>Vitality: >= 54%</div>
+              <div>Normal Forms: >= 4%</div>   <div>pH: >= 7.2</div>
+            </div>
           </div>
 
           <div class="footer" style="margin-top: 40px; display: flex; justify-content: space-between;">
-             <div class="signature">
-                <div class="signature-line">Andrologist</div>
-             </div>
-             <div class="signature">
-                <div class="signature-line">Consultant</div>
-             </div>
+            <div class="signature">
+              <div class="signature-line">Andrologist</div>
+            </div>
+            <div class="signature">
+              <div class="signature-line">Consultant</div>
+            </div>
           </div>
         </div>
       </body>
-      </html>
-    `;
+    </html>
+`;
   }
 
   generateAdvice(data) {
@@ -840,7 +901,7 @@ class PDFEngine {
           ${adviceList.map(adv => `<li>${adv}</li>`).join('')}
         </ul>
       </div>
-    `;
+  `;
   }
 
   generateFollowUp(data) {
@@ -851,7 +912,7 @@ class PDFEngine {
         <div class="section-title">Follow-up</div>
         <p>Please visit on: <strong>${new Date(data.followUp).toLocaleDateString()}</strong></p>
       </div>
-    `;
+  `;
   }
 
   generateFooter(data) {
@@ -866,7 +927,7 @@ class PDFEngine {
           </div>
         </div>
       </div>
-    `;
+  `;
   }
 
   getDefaultStyles() {
