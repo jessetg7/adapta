@@ -16,6 +16,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../context/AuthContext';
+
 const LoginPage = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -23,6 +24,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -33,6 +35,7 @@ const LoginPage = () => {
     }
     setLoading(false);
   };
+
   return (
     <Box
       sx={{
@@ -73,19 +76,21 @@ const LoginPage = () => {
             <LocalHospitalIcon
               sx={{ fontSize: 64, color: 'primary.main', mb: 1 }}
             />
-            <Typography variant="h4" fontWeight={700} gutterBottom>
+            <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: '#334155' }}>
               ADAPTA
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: '#64748b' }}>
               Medical Forms Platform
             </Typography>
           </Box>
+
           {/* Error Alert */}
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}
             </Alert>
           )}
+
           {/* Login Form */}
           <form onSubmit={handleSubmit}>
             <TextField
@@ -97,6 +102,7 @@ const LoginPage = () => {
               required
               sx={{ mb: 2 }}
               autoComplete="email"
+              InputLabelProps={{ sx: { color: '#64748b' } }}
             />
             <TextField
               fullWidth
@@ -107,6 +113,7 @@ const LoginPage = () => {
               required
               sx={{ mb: 3 }}
               autoComplete="current-password"
+              InputLabelProps={{ sx: { color: '#64748b' } }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -131,21 +138,22 @@ const LoginPage = () => {
               {loading ? <CircularProgress size={24} /> : 'Sign In'}
             </Button>
           </form>
+
           {/* Demo Credentials */}
-          <Box sx={{ mt: 3, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
-            <Typography variant="caption" fontWeight={600} display="block" gutterBottom>
+          <Box sx={{ mt: 3, p: 2, bgcolor: '#f1f5f9', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+            <Typography variant="caption" fontWeight={600} display="block" gutterBottom sx={{ color: '#1e293b' }}>
               Demo Credentials:
             </Typography>
-            <Typography variant="caption" display="block">
+            <Typography variant="caption" display="block" sx={{ color: '#334155', mb: 0.5 }}>
               Admin: admin@adapta.com / admin123
             </Typography>
-            <Typography variant="caption" display="block">
+            <Typography variant="caption" display="block" sx={{ color: '#334155', mb: 0.5 }}>
               Doctor: doctor@adapta.com / doctor123
             </Typography>
-            <Typography variant="caption" display="block">
+            <Typography variant="caption" display="block" sx={{ color: '#334155', mb: 0.5 }}>
               Nurse: nurse@adapta.com / nurse123
             </Typography>
-            <Typography variant="caption" display="block">
+            <Typography variant="caption" display="block" sx={{ color: '#334155' }}>
               Receptionist: receptionist@adapta.com / receptionist123
             </Typography>
           </Box>
@@ -154,4 +162,5 @@ const LoginPage = () => {
     </Box>
   );
 };
+
 export default LoginPage;
