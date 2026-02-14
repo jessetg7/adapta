@@ -26,6 +26,11 @@ import RuleManager from './pages/RuleManager';
 import WorkflowManager from './pages/WorkflowManager';
 import CreatePrescriptionPage from './pages/CreatePrescriptionPage';
 import ReportPage from './pages/ReportPage';
+import BillingPage from './pages/BillingPage';
+import MaternalGuard from './pages/MaternalGuard';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import EPrescriptionDemo from './pages/EPrescriptionDemo';
+import AdminPanel from './pages/AdminPanel';
 
 // 1. Create a Layout Wrapper to handle the Outlet
 // This allows MainLayout to stay mounted while child routes change
@@ -163,6 +168,51 @@ function App() {
                     element={
                       <ProtectedRoute requiredPermission="reports.view">
                         <ReportPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/billing"
+                    element={
+                      <ProtectedRoute>
+                        <BillingPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/maternal-guard"
+                    element={
+                      <ProtectedRoute>
+                        <MaternalGuard />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/analytics"
+                    element={
+                      <ProtectedRoute>
+                        <AnalyticsDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/e-prescription"
+                    element={
+                      <ProtectedRoute>
+                        <EPrescriptionDemo />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute requiredPermission="admin.access">
+                        <AdminPanel />
                       </ProtectedRoute>
                     }
                   />

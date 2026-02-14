@@ -62,7 +62,11 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
   };
 
   const isActive = (path) => {
-    return location.pathname === path;
+    // Handle nested routes like /consultation/:patientId
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
@@ -147,7 +151,6 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
               <ListItem disablePadding sx={{ display: 'block', mb: 0.5 }}>
                 <ListItemButton
                   onClick={() => handleNavigation(item.path)}
-                  selected={active}
                   sx={{
                     minHeight: 48,
                     justifyContent: open ? 'initial' : 'center',
@@ -156,25 +159,23 @@ const Sidebar = ({ open, onToggle, drawerWidth, drawerWidthCollapsed }) => {
                     mx: 1,
                     mb: 0.5,
                     color: active ? 'primary.main' : 'text.secondary',
-                    bgcolor: active ? 'primary.50' : 'transparent',
-                    '&.Mui-selected': {
-                      bgcolor: 'primary.50',
-                      '&:hover': { bgcolor: 'primary.100' },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        left: -4,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        width: 4,
-                        height: 24,
-                        borderRadius: '0 4px 4px 0',
-                        bgcolor: 'primary.main',
-                        display: open ? 'block' : 'none'
-                      }
+                    bgcolor: active ? alpha('#008080', 0.1) : 'transparent',
+                    fontWeight: active ? 700 : 500,
+                    position: 'relative',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      left: -4,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: 4,
+                      height: 24,
+                      borderRadius: '0 4px 4px 0',
+                      bgcolor: 'primary.main',
+                      display: active && open ? 'block' : 'none'
                     },
                     '&:hover': {
-                      bgcolor: 'action.hover',
+                      bgcolor: active ? alpha('#008080', 0.15) : 'action.hover',
                       transform: 'translateX(4px)',
                     },
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',

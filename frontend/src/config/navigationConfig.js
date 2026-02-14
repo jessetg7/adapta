@@ -58,13 +58,6 @@ export const navigationConfig = {
       permission: null,
     },
     {
-      id: 'maternal-guard',
-      label: 'Maternal Guard',
-      icon: 'MonitorHeartIcon',
-      path: '/maternal-guard',
-      permission: null,
-    },
-    {
       id: 'analytics',
       label: 'Analytics',
       icon: 'AssessmentIcon',
